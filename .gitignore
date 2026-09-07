@@ -1,0 +1,51 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Build outputs
+.next
+dist
+build
+out
+*.tsbuildinfo
+
+# Turbo
+.turbo
+
+# Environment
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
+!.env.example
+
+# IDE / OS
+.idea
+.vscode
+*.swp
+.DS_Store
+Thumbs.db
+
+# Logs / coverage
+logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+coverage
+.nyc_output
+
+# Prisma
+apps/api/prisma/*.db
+apps/api/prisma/*.db-journal
+
+# Docker
+docker-data/
+
+# Misc
+*.pem
+.vercel
+
+# Cursor / local design artifacts
+.cursor/

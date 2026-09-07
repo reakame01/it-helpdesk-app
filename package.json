@@ -1,0 +1,36 @@
+{
+  "name": "it-helpdesk-app",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter @helpdesk/types build && concurrently -n api,web -c cyan,green \"pnpm --filter api dev\" \"pnpm --filter web dev\"",
+    "dev:turbo": "turbo run build --filter=@helpdesk/types && turbo run dev --filter=api --filter=web",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "db:up": "docker compose up -d postgres",
+    "db:down": "docker compose down",
+    "db:logs": "docker compose logs -f postgres",
+    "db:generate": "pnpm --filter api db:generate",
+    "db:push": "pnpm --filter api db:push",
+    "db:studio": "pnpm --filter api db:studio",
+    "clean": "turbo run clean && rimraf node_modules"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "rimraf": "^6.0.1",
+    "turbo": "^2.4.4",
+    "typescript": "^5.8.2"
+  },
+  "packageManager": "pnpm@10.32.1",
+  "engines": {
+    "node": ">=20"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@prisma/client",
+      "@prisma/engines",
+      "prisma",
+      "bcrypt",
+      "unrs-resolver"
+    ]
+  }
+}

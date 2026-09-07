@@ -1,0 +1,157 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  IT_STAFF
+  IT_LEAD
+  GM
+}
+
+enum TicketCategory {
+  HARDWARE
+  NETWORK
+  SOFTWARE_BUG
+  FEATURE_REQUEST
+  OTHER
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  PENDING_APPROVAL
+  RESOLVED
+  CLOSED
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum TicketType {
+  STANDARD
+  QUICK_TICKET
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         UserRole @default(USER)
+  department   String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  requestedTickets Ticket[]               @relation("TicketRequester")
+  assignments      TicketAssignee[]
+  worklogs         Worklog[]
+  approvalsRequested QuickTicketApproval[] @relation("ApprovalRequester")
+  approvalsDecided   QuickTicketApproval[] @relation("ApprovalDecider")
+  auditLogs        AuditLog[]
+
+  @@map("users")
+}
+
+model Ticket {
+  id          String         @id @default(cuid())
+  title       String
+  description String
+  category    TicketCategory
+  status      TicketStatus   @default(OPEN)
+  priority    TicketPriority @default(MEDIUM)
+  type        TicketType     @default(STANDARD)
+  requesterId String
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  resolvedAt  DateTime?
+
+  requester User             @relation("TicketRequester", fields: [requesterId], references: [id])
+  assignees TicketAssignee[]
+  worklogs  Worklog[]
+  approval  QuickTicketApproval?
+
+  @@index([status])
+  @@index([priority])
+  @@index([requesterId])
+  @@map("tickets")
+}
+
+model TicketAssignee {
+  id         String   @id @default(cuid())
+  ticketId   String
+  userId     String
+  assignedAt DateTime @default(now())
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([ticketId, userId])
+  @@map("ticket_assignees")
+}
+
+model Worklog {
+  id           String   @id @default(cuid())
+  ticketId     String
+  authorId     String
+  note         String
+  minutesSpent Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  author User   @relation(fields: [authorId], references: [id])
+
+  @@index([ticketId])
+  @@map("worklogs")
+}
+
+model QuickTicketApproval {
+  id            String         @id @default(cuid())
+  ticketId      String         @unique
+  requestedById String
+  approvedById  String?
+  status        ApprovalStatus @default(PENDING)
+  reason        String?
+  decidedAt     DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  ticket      Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  requestedBy User   @relation("ApprovalRequester", fields: [requestedById], references: [id])
+  approvedBy  User?  @relation("ApprovalDecider", fields: [approvedById], references: [id])
+
+  @@map("quick_ticket_approvals")
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  action     String
+  entityType String
+  entityId   String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  actor User? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([entityType, entityId])
+  @@index([actorId])
+  @@map("audit_logs")
+}
