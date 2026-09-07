@@ -1,0 +1,175 @@
+{
+  "common": {
+    "language": "Language",
+    "notifications": "Notifications",
+    "required": "Required",
+    "loading": "Loading..."
+  },
+  "brand": {
+    "title": "IT HelpDesk",
+    "subtitle": "Services & Reports"
+  },
+  "nav": {
+    "userPortal": "Report & Track Cases (User Portal)",
+    "itWorkspace": "IT Board & Kanban (IT Workspace)",
+    "quickTicket": "On-site Quick Ticket",
+    "gmDashboard": "Org Overview (Transparency & GM Dashboard)"
+  },
+  "header": {
+    "searchPlaceholder": "Search cases, badge ID, or issues...",
+    "profileName": "Somporn (Accounting)",
+    "switchMode": "Switch Employee ⇄ IT mode"
+  },
+  "portal": {
+    "badge": "Computer & Network Service Center ticket intake",
+    "title": "Report IT usage or equipment issues",
+    "subtitle": "Fill in 3 simple steps. Three IT staff are ready to help and respond quickly.",
+    "hotlineTitle": "Prefer not to type? Call the team now",
+    "hotlineNumbers": "Ext. 101, 102, 103",
+    "steps": {
+      "step1Title": "Requester info",
+      "step1Subtitle": "Check name & phone",
+      "step2Title": "Category",
+      "step2Subtitle": "Select the issue type",
+      "step3Title": "Details",
+      "step3Subtitle": "Symptoms & photos"
+    },
+    "staff": {
+      "title": "On-duty IT staff",
+      "count": "{count} people",
+      "description": "If your PC won't start, the screen is blank, or printing fails, call the matching specialist by extension:",
+      "hours": "Hours: Mon–Fri (08:30 – 17:30)",
+      "member1Name": "Somchai (Team Lead)",
+      "member1Specialty": "Network, Internet & Servers",
+      "member1Ext": "Ext. 101",
+      "member2Name": "Wichai",
+      "member2Specialty": "Computers, Printers & Devices",
+      "member2Ext": "Ext. 102",
+      "member3Name": "Anucha",
+      "member3Specialty": "ERP, Email & Access",
+      "member3Ext": "Ext. 103"
+    },
+    "tips": {
+      "title": "3 quick self-help tips",
+      "intro": "Try these simple steps — you may recover without waiting in queue:",
+      "tip1Title": "App screen frozen or spinning",
+      "tip1Body": "Press F5 once to refresh. If still stuck, press Ctrl + F5.",
+      "tip2Title": "Printer won't print",
+      "tip2Body": "Check paper tray, then power the printer off, wait 10 seconds, and turn it back on.",
+      "tip3Title": "Internet suddenly unavailable",
+      "tip3Body": "Check the blue LAN cable at the back of the PC for a blinking light. On Wi-Fi, toggle Wi-Fi off and on."
+    },
+    "queue": {
+      "title": "Today's IT queue",
+      "doneLabel": "Resolved",
+      "doneCount": "18 cases",
+      "inProgressLabel": "On site",
+      "inProgressCount": "5 cases",
+      "waitingLabel": "Waiting pickup",
+      "waitingCount": "2 cases",
+      "centerValue": "18",
+      "centerLabel": "Done",
+      "avgSpeed": "Average first response: ~ 15 minutes"
+    }
+  },
+  "form": {
+    "step1Heading": "Step 1: Requester information",
+    "step1Hint": "Employee details are prefilled. Edit them if you are reporting for a colleague.",
+    "name": "Full name",
+    "nameHint": "System user name",
+    "department": "Department",
+    "departmentHint": "Select your department",
+    "extension": "Internal extension (desk phone)",
+    "extensionHint": "So IT can call you back",
+    "step2Heading": "Step 2: Choose the issue category",
+    "step2Hint": "Pick the closest match so we can assign the right specialist.",
+    "step3Heading": "Step 3: Describe symptoms & attach screenshots",
+    "step3Hint": "Include on-screen messages so technicians can prepare tools and parts.",
+    "ticketTitle": "Issue title (short and clear)",
+    "ticketTitleHint": "Mention the app and symptom briefly",
+    "ticketTitlePlaceholder": "e.g. Add sales Excel export button or Accounting app shows Error...",
+    "ticketDetail": "Detailed description",
+    "ticketDetailHint": "More detail means faster fixes with fewer follow-up questions.",
+    "ticketDetailPlaceholder": "Describe timing, error text, or for feature requests: purpose, expected result, and departments involved...",
+    "attachmentLabel": "Attach screenshot or device photo",
+    "attachmentRecommended": "Highly recommended",
+    "dropzoneTitle": "Drag an image here or press Ctrl + V to paste",
+    "dropzoneHint": "PNG, JPG up to 10MB (click this area to browse files)",
+    "chooseFile": "Choose image from computer",
+    "readyToSend": "Ready",
+    "attachmentMeta": "1.2 MB • Clear screenshot",
+    "viewFull": "View full",
+    "removeImage": "Remove",
+    "priorityLabel": "Urgency",
+    "priorityNormal": "Normal (within 1 business day)",
+    "priorityNormalHint": "Other work can continue; production not blocked",
+    "priorityUrgent": "Urgent (work is blocked)",
+    "priorityUrgentHint": "Month-end close, urgent billing, or customer service blocked",
+    "submit": "Submit ticket now",
+    "reset": "Clear form",
+    "resetConfirm": "Clear all entered information?",
+    "submitHint": "After submit you will get a Ticket ID and can track status immediately.",
+    "departments": {
+      "account": "Accounting & Finance",
+      "marketing": "Marketing & Sales",
+      "purchasing": "Purchasing & Warehouse",
+      "hr": "Human Resources (HR)",
+      "operations": "Operations & Admin"
+    },
+    "categories": {
+      "software": {
+        "label": "Software bug or system issue",
+        "description": "e.g. ERP freezes, receipt won't print, red Error screen, database won't open"
+      },
+      "hardware": {
+        "label": "Computer and devices",
+        "description": "e.g. PC won't power on, printer jam, dark monitor, broken keyboard/mouse"
+      },
+      "network": {
+        "label": "Internet and network",
+        "description": "e.g. Wi-Fi drops, company site unreachable, loose LAN, VPN fails"
+      },
+      "access": {
+        "label": "Access rights and passwords",
+        "description": "e.g. locked password, email reset, shared folder permission request"
+      },
+      "feature_request": {
+        "label": "New feature / development request",
+        "description": "e.g. new app, new report button, department-specific integrations",
+        "badge": "Dev work"
+      }
+    }
+  },
+  "modal": {
+    "successBadge": "Ticket submitted!",
+    "ticketNumber": "Ticket {ticketId}",
+    "successBody": "IT has been notified. A technician will call Ext. {extension} or visit your desk shortly.",
+    "requester": "Requester:",
+    "category": "Category:",
+    "status": "Current status:",
+    "statusValue": "Dispatching technician",
+    "goTrack": "Go to status tracking",
+    "close": "Close"
+  },
+  "footer": {
+    "title": "IT Helpdesk & equipment support center",
+    "staffLine": "On duty (3): Ext. 101 (Network), Ext. 102 (Hardware), Ext. 103 (Apps & access)",
+    "copyright": "© 2024 IT Helpdesk Operations Department. All rights reserved."
+  },
+  "login": {
+    "title": "Sign in",
+    "subtitle": "Internal IT helpdesk and issue reporting",
+    "email": "Work email",
+    "emailPlaceholder": "name@company.com",
+    "password": "Password",
+    "passwordPlaceholder": "Enter password",
+    "submit": "Sign in",
+    "forgot": "Forgot password?",
+    "mockHint": "Dev mode: mock login is available",
+    "goPortal": "Go to ticket portal"
+  },
+  "mock": {
+    "requesterName": "Somporn Jaideesuk",
+    "extension": "Ext. 204"
+  }
+}
