@@ -12,7 +12,6 @@
   "nav": {
     "userPortal": "Report & Track Cases (User Portal)",
     "itWorkspace": "IT Board & Kanban (IT Workspace)",
-    "quickTicket": "On-site Quick Ticket",
     "gmDashboard": "Org Overview (Transparency & GM Dashboard)"
   },
   "header": {
@@ -171,5 +170,226 @@
   "mock": {
     "requesterName": "Somporn Jaideesuk",
     "extension": "Ext. 204"
+  },
+  "kanban": {
+    "badge": "IT operations hub",
+    "sprint": "Sprint #12 (24 Nov – 8 Dec)",
+    "title": "IT work board",
+    "subtitle": "Central support board across network, apps, and hardware — transparent end to end.",
+    "refresh": "Refresh",
+    "groupView": "Group view",
+    "quickLog": "Quick log",
+    "metrics": {
+      "totalToday": "Tickets today",
+      "totalUnit": "cases",
+      "pendingUser": "Awaiting user confirm",
+      "inProgress": "In progress",
+      "backlog": "Backlog"
+    },
+    "assigneeLabel": "Assignee:",
+    "allAssignees": "Everyone",
+    "multiAssignee": "Multi-assignee",
+    "filterSearch": "Filter by text or #TK...",
+    "filters": "Filters",
+    "categoryLabel": "Category:",
+    "categoryAll": "All",
+    "categories": {
+      "hardware": "Hardware & network",
+      "software": "Apps & bugs",
+      "network": "Network",
+      "access": "Access",
+      "feature": "Development"
+    },
+    "columns": {
+      "backlog": "Backlog / New",
+      "in_progress": "In progress",
+      "pending_user": "Awaiting user test",
+      "resolved": "Resolved / Closed"
+    },
+    "unassigned": "Unassigned",
+    "claim": "Claim ticket",
+    "progress": "Progress",
+    "assignees": {
+      "golf": "Golf",
+      "golfSpecialty": "Network / Hardware",
+      "bank": "Bank",
+      "bankSpecialty": "ERP / Lead",
+      "new": "New",
+      "newSpecialty": "Database / Dev"
+    },
+    "departments": {
+      "account": "Accounting & Finance",
+      "marketing": "Marketing & Sales",
+      "purchasing": "Purchasing & Warehouse",
+      "hr": "Human Resources",
+      "operations": "Operations"
+    },
+    "tickets": {
+      "t106": "4th-floor printer jammed with blinking light",
+      "t107": "Sales Wi-Fi drops often in the afternoon",
+      "t109": "Reset email password for new hire",
+      "t111": "Add sales report export button",
+      "t105": "Meeting-room PC will not power on",
+      "t108": "Purchasing system errors on save",
+      "t103": "Receipt form fixed — waiting user confirm",
+      "t101": "Floor 2 AP adjusted — waiting test",
+      "t098": "Shared folder access granted",
+      "t095": "Accounting PC power supply replaced"
+    },
+    "ages": {
+      "minutes12": "12 min ago",
+      "minutes35": "35 min ago",
+      "hour1": "1 hr ago",
+      "hours3": "3 hr ago",
+      "hours5": "5 hr ago",
+      "hours8": "8 hr ago",
+      "day1": "1 day ago",
+      "days2": "2 days ago",
+      "resolvedToday": "Closed today",
+      "resolvedYesterday": "Closed yesterday"
+    },
+    "quickLogDialog": {
+      "title": "Quick on-site fix log",
+      "badge": "Close immediately",
+      "subtitle": "Log short walk-in fixes completed on the spot for stats and performance tracking.",
+      "department": "Source department",
+      "departmentHint": "Used for frequent-issue reports to department heads",
+      "issue": "What happened",
+      "issueHint": "Quick presets:",
+      "issuePlaceholder": "Describe the symptom, e.g. PC would not start — power cable unplugged",
+      "resolve": "How it was resolved",
+      "resolveHint": "Quick resolve presets:",
+      "resolvePlaceholder": "Describe the fix, e.g. replugged power and verified",
+      "requesterOptional": "Requester name (optional)",
+      "requesterPlaceholder": "e.g. Somporn, desk 204",
+      "cancel": "Cancel",
+      "submit": "Save and close case",
+      "success": "Quick log saved",
+      "presets": {
+        "frozenApp": "App frozen / not responding",
+        "printerJam": "Printer jam / power off",
+        "cableLoose": "Power or LAN cable loose",
+        "wrongKeyboardLang": "Wrong keyboard language at login",
+        "wrongProgram": "Opened with wrong app / file not found",
+        "replug": "Replug / power cycle",
+        "restart": "Restart PC / refresh system",
+        "clearPaper": "Clear paper jam and reprint",
+        "resetPass": "Reset password and guide login",
+        "guideUser": "Walk user through the steps"
+      }
+    },
+    "detail": {
+      "close": "Close ticket detail",
+      "openedBy": "Opened by:",
+      "extension": "Ext.",
+      "currentStatus": "Current status",
+      "descriptionLabel": "Issue details from the requester:",
+      "teamTitle": "IT team on this case (multi-assignees)",
+      "addCollaborator": "+ Add collaborator",
+      "addCollaboratorShort": "Add collaborator",
+      "timelineTitle": "Work history & shared timeline (audit log)",
+      "timelineCount": "{count} entries",
+      "noteLabel": "Add work note / internal IT team message",
+      "notePlaceholder": "Tag teammates e.g. @New @Golf or paste a commit ID...",
+      "attachLog": "Attach log file",
+      "attachCommit": "Add Git commit",
+      "sendNote": "Send note",
+      "transfer": "Transfer",
+      "resolve": "Approve and close case",
+      "resolveSuccess": "Case closed — thank-you message sent and SLA recorded",
+      "reopened": "Reopened {count} time(s)",
+      "role": {
+        "lead": "Lead",
+        "collaborator": "Collaborator"
+      },
+      "roleBadge": {
+        "lead": "Primary owner",
+        "collaborator": "Co-resolver"
+      },
+      "status": {
+        "backlog": "Backlog / New",
+        "in_progress": "In progress",
+        "pending_user": "Awaiting user test & confirm",
+        "resolved": "Resolved / Closed"
+      },
+      "defaults": {
+        "requester": "Requester from source department",
+        "description": "The requester reported this issue as titled. Please investigate and update status.",
+        "timeline": {
+          "opened": {
+            "time": "When opened",
+            "title": "Case opened in the system",
+            "body": "Logged by the user via the portal"
+          },
+          "claimed": {
+            "time": "After claim",
+            "title": "IT claimed the case",
+            "body": "Initial check started and progress updated"
+          }
+        }
+      },
+      "t103": {
+        "requester": "Somporn (Accounting & Finance)",
+        "description": "\"Printing a full tax invoice for a major customer shows a red alert: 403 Forbidden - Cannot trigger Stored Procedure for sequence ID. Billing is urgent — please help.\"",
+        "timeline": {
+          "1": {
+            "time": "09:30",
+            "title": "Somporn (Accounting) opened the case",
+            "body": "Marked urgent — afternoon billing run"
+          },
+          "2": {
+            "time": "10:15",
+            "title": "Bank claimed the case",
+            "body": "Early logs pointed to Stored Procedure permissions"
+          },
+          "3": {
+            "time": "11:00",
+            "title": "Bank added New to the case",
+            "note": "💬 Internal note: \"Please check SQL Trigger on tbl_invoice_runsequence — permissions dropped after server migrate\""
+          },
+          "4": {
+            "time": "14:00",
+            "title": "New fixed SQL Trigger & deployed hotfix",
+            "body": "Patch ID: #GIT-202311-INV98 (Grant EXECUTE to ERP_USER)"
+          },
+          "5": {
+            "time": "14:15",
+            "title": "Status set to \"Awaiting user test\"",
+            "body": "SMS and in-app notice sent to Somporn"
+          },
+          "6": {
+            "time": "15:30",
+            "title": "User reopened the issue",
+            "note": "⚠️ From Somporn: \"Sequence runs, but print hits Vat 7% mismatch on line 4\""
+          },
+          "7": {
+            "time": "16:10 (latest)",
+            "title": "Bank hotfixed rounding & sent back for test",
+            "body": "Waiting on Somporn's second verification (chat ping sent)"
+          }
+        }
+      },
+      "t111": {
+        "requester": "Orn (Accounting & Finance)",
+        "description": "Needs an Export button on the ERP sales dashboard to download Excel for morning exec reports.",
+        "timeline": {
+          "1": {
+            "time": "Yesterday 10:00",
+            "title": "Case opened with export specs",
+            "body": "Needs .xlsx with date-range filters"
+          },
+          "2": {
+            "time": "Yesterday 13:20",
+            "title": "Bank claimed and designed the API",
+            "body": "Added /reports/sales/export endpoint"
+          },
+          "3": {
+            "time": "Today 09:45",
+            "title": "New joined on Export UI",
+            "body": "~65% done — awaiting live data test"
+          }
+        }
+      }
+    }
   }
 }

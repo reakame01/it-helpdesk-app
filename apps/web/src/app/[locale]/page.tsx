@@ -26,7 +26,7 @@ export default function PortalPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-surface">
-      <PortalHeader />
+      <PortalHeader activeNav="userPortal" />
 
       <main className="w-full flex-1 pt-[8.5rem]">
         <section className="mx-auto w-full max-w-container-max px-gutter-desktop py-space-xl">

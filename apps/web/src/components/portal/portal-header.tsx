@@ -11,16 +11,29 @@ import { cn } from "@/lib/utils";
 const profileUrl =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuA_NePHXteXZ9yx7SIbUFiB0Y_Ny-CmxDPgqTJ4X35kPBr_q7zs_4d2-ZRM25dLefYhTZEAu3w8jQKcJAPAACSo8IWJW4wGuO0jvrlOsRd14qtTrsi27hLBJTleGKCG8pt__HLkPT3loKvwnuH72YM4mJBp6qt5bu1tjmNYzbpX-Yyax0yuX63Lmqs0hr-6Nkew0Jn_59RNYBB3y-OunQPWDqAZMZFjonan5266dgGrNL89QkY8Sow";
 
-export function PortalHeader() {
+type PortalHeaderProps = {
+  activeNav?: "userPortal" | "itWorkspace" | "gmDashboard";
+};
+
+export function PortalHeader({
+  activeNav = "userPortal",
+}: PortalHeaderProps) {
   const t = useTranslations();
   const [search, setSearch] = useState("");
 
   const navItems = [
-    { href: "/", label: t("nav.userPortal"), active: true },
-    { href: "#", label: t("nav.itWorkspace"), active: false },
-    { href: "#", label: t("nav.quickTicket"), active: false },
-    { href: "#", label: t("nav.gmDashboard"), active: false },
-  ] as const;
+    { href: "/", key: "userPortal" as const, label: t("nav.userPortal") },
+    {
+      href: "/it",
+      key: "itWorkspace" as const,
+      label: t("nav.itWorkspace"),
+    },
+    {
+      href: "#",
+      key: "gmDashboard" as const,
+      label: t("nav.gmDashboard"),
+    },
+  ];
 
   return (
     <header className="fixed top-0 z-50 w-full bg-surface-container-lowest/95 shadow-[0_1px_8px_rgba(11,28,48,0.06)] backdrop-blur-md">
@@ -83,13 +96,15 @@ export function PortalHeader() {
       <div className="w-full bg-surface-container-lowest shadow-[0_1px_4px_rgba(11,28,48,0.03)]">
         <div className="mx-auto max-w-container-max px-gutter-desktop">
           <nav className="flex items-center gap-space-lg overflow-x-auto">
-            {navItems.map((item) => (
+            {navItems.map((item) => {
+              const active = item.key === activeNav;
+              return (
               <Link
-                key={item.label}
-                aria-current={item.active ? "page" : undefined}
+                key={item.key}
+                aria-current={active ? "page" : undefined}
                 className={cn(
                   "whitespace-nowrap py-space-sm transition-colors",
-                  item.active
+                  active
                     ? "border-b-2 border-primary font-bold text-primary"
                     : "font-title-md text-title-md text-on-surface-variant hover:text-on-surface",
                 )}
@@ -97,7 +112,8 @@ export function PortalHeader() {
               >
                 {item.label}
               </Link>
-            ))}
+              );
+            })}
           </nav>
         </div>
       </div>
