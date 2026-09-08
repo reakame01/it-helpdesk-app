@@ -1,0 +1,959 @@
+{
+  "common": {
+    "language": "Language",
+    "notifications": "Notifications",
+    "required": "Required",
+    "loading": "Loading..."
+  },
+  "brand": {
+    "title": "IT HelpDesk",
+    "subtitle": "Services & Reports"
+  },
+  "nav": {
+    "userPortal": "Report Cases",
+    "itWorkspace": "IT Workspace",
+    "gmDashboard": "IT Overview",
+    "userManagement": "User Management",
+    "dataReferences": "Data References"
+    
+  },
+  "userManagement": {
+    "title": "User Management",
+    "subtitle": "Create and manage Helpdesk login accounts for IT staff. Employees without IT access do not need an account.",
+    "badge": "IT admin · login accounts only",
+    "loginRequired": "Sign in as IT to manage user accounts.",
+    "signInToManage": "IT Sign in",
+    "addUser": "Add user",
+    "searchPlaceholder": "Search name, email, employee ID, extension...",
+    "resultCount": "Showing {count} accounts",
+    "empty": "No accounts match your filters.",
+    "stats": {
+      "total": "All accounts",
+      "active": "Active",
+      "staff": "IT Staff",
+      "lead": "IT Lead"
+    },
+    "filters": {
+      "roleAll": "All roles",
+      "statusAll": "All statuses",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "roles": {
+      "IT_STAFF": "IT Staff",
+      "IT_LEAD": "IT Lead",
+      "GM": "GM"
+    },
+    "table": {
+      "user": "User",
+      "employeeId": "Employee ID",
+      "role": "Role",
+      "status": "Status",
+      "lastSignIn": "Last sign-in",
+      "actions": "Actions"
+    },
+    "actions": {
+      "edit": "Edit",
+      "resetPassword": "Reset password",
+      "deactivate": "Deactivate",
+      "activate": "Activate"
+    },
+    "lastSignIn": {
+      "never": "Never",
+      "minutes12": "12 min ago",
+      "hour1": "1 hr ago",
+      "hours3": "3 hr ago",
+      "yesterday": "Yesterday",
+      "days7": "7 days ago"
+    },
+    "fields": {
+      "nameTh": "Full name (Thai)",
+      "nameEn": "Full name (English)",
+      "email": "Corporate email",
+      "employeeId": "Employee ID",
+      "role": "System role",
+      "jobTitle": "Job title",
+      "extension": "Internal extension",
+      "mobile": "Mobile",
+      "password": "Temporary password",
+      "generatePassword": "Generate",
+      "copyPassword": "Copy",
+      "copied": "Copied",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
+      "activeAccount": "Account is active (can sign in)"
+    },
+    "dialog": {
+      "close": "Close",
+      "cancel": "Cancel",
+      "save": "Save changes",
+      "createTitle": "Add IT user",
+      "createSubtitle": "Provision a login account for Helpdesk IT tools.",
+      "editTitle": "Edit user",
+      "editSubtitle": "Update account details and role.",
+      "createSubmit": "Create account",
+      "createPasswordHint": "Copy this password and send it yourself by email or chat. Ask them to sign in and change the password later from Profile."
+    },
+    "reset": {
+      "title": "Reset password?",
+      "body": "Send a secure reset link to {name} ({email}). Existing sessions will be revoked.",
+      "securityNote": "Passwords are hashed. IT cannot view or set the user’s final password directly.",
+      "confirm": "Send reset link"
+    },
+    "toast": {
+      "createdTitle": "Account created",
+      "createdBody": "Copy the temporary password and send it to the user yourself.",
+      "updatedTitle": "Account updated",
+      "updatedBody": "User details were saved.",
+      "deactivatedTitle": "Account deactivated",
+      "activatedTitle": "Account activated",
+      "statusBody": "Updated status for {name}.",
+      "resetTitle": "Reset link sent",
+      "resetBody": "Mock: password reset emailed to {name}."
+    }
+  },
+  "dataReferences": {
+    "title": "Data References",
+    "subtitle": "Manage dropdown options used across the Helpdesk — without touching the database for everyday changes.",
+    "badge": "IT admin · reference lists",
+    "scopeNote": "Odd one-off data fixes may still need a DB change. This page covers normal add / edit / hide / delete of list options.",
+    "loginRequired": "Sign in as IT to manage reference data.",
+    "signInToManage": "IT Sign in",
+    "catalogsHeading": "Catalogs",
+    "activeCount": "{count} active",
+    "summary": "{active} active · {total} total",
+    "addItem": "Add option",
+    "searchPlaceholder": "Search code or label...",
+    "empty": "No options match your filters.",
+    "confirmDelete": "Delete “{label}”? Forms that still use this code may break until updated.",
+    "filters": {
+      "all": "All statuses",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "catalogs": {
+      "departments": {
+        "name": "Departments",
+        "description": "Department / division options on the ticket form and reports."
+      },
+      "categories": {
+        "name": "Issue categories",
+        "description": "Problem types shown when users report a case."
+      },
+      "skills": {
+        "name": "IT skills",
+        "description": "Specialty tags for IT profiles and future auto-assign."
+      }
+    },
+    "table": {
+      "order": "#",
+      "icon": "Icon",
+      "code": "Code",
+      "labelTh": "Label (TH)",
+      "labelEn": "Label (EN)",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "actions": {
+      "edit": "Edit",
+      "activate": "Activate",
+      "deactivate": "Hide from dropdowns",
+      "delete": "Delete"
+    },
+    "fields": {
+      "code": "Code",
+      "codeHint": "Stable key used in the app (e.g. account, software). Prefer lowercase.",
+      "labelTh": "Label (Thai)",
+      "labelEn": "Label (English)",
+      "sortOrder": "Display order",
+      "icon": "Material icon name",
+      "iconLabel": "<link>Material icon</link> name",
+      "iconHint": "Open the link above, pick an icon, then paste its name (e.g. bug_report, wifi, computer)",
+      "active": "Show in dropdowns"
+    },
+    "dialog": {
+      "close": "Close",
+      "cancel": "Cancel",
+      "save": "Save",
+      "createTitle": "Add option",
+      "editTitle": "Edit option",
+      "createSubmit": "Add option"
+    },
+    "toast": {
+      "createdTitle": "Option added",
+      "createdBody": "It will appear in dropdowns when active.",
+      "updatedTitle": "Option updated",
+      "updatedBody": "Reference data saved.",
+      "deactivatedTitle": "Hidden from dropdowns",
+      "activatedTitle": "Shown in dropdowns",
+      "statusBody": "Updated “{label}”.",
+      "deletedTitle": "Option deleted",
+      "deletedBody": "Removed “{label}” from this catalog."
+    }
+  },
+  "header": {
+    "searchPlaceholder": "Search cases, badge ID, or issues...",
+    "itSignIn": "IT Sign in",
+    "accountMenu": "Account menu",
+    "editProfile": "Edit profile",
+    "logout": "Log out"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "unreadCount": "{count} unread",
+    "allCaughtUp": "You're all caught up",
+    "markAllRead": "Mark all read",
+    "empty": "No notifications yet",
+    "viewBoard": "Open IT board",
+    "times": {
+      "minutes5": "5 min ago",
+      "minutes28": "28 min ago",
+      "hour1": "1 hr ago",
+      "hours3": "3 hr ago",
+      "yesterday": "Yesterday"
+    },
+    "items": {
+      "newTicketTitle": "New ticket opened",
+      "newTicketBody": "{ticketId}: 4th-floor printer jammed — Accounting",
+      "reopenedTitle": "Ticket reopened by user",
+      "reopenedBody": "{ticketId}: Still cannot print after the last fix",
+      "slaRiskTitle": "SLA at risk",
+      "slaRiskBody": "{ticketId}: First response due within 20 minutes",
+      "assignedTitle": "You were assigned",
+      "assignedBody": "{ticketId}: Network drop on Sales floor — claimed to you",
+      "pendingConfirmTitle": "Awaiting user confirm",
+      "pendingConfirmBody": "{ticketId}: Waiting for email confirmation to close"
+    }
+  },
+  "portal": {
+    "badge": "Computer & Network Service Center ticket intake",
+    "title": "Report IT usage or equipment issues",
+    "subtitle": "Fill in 3 simple steps. Three IT staff are ready to help and respond quickly.",
+    "hotlineTitle": "Prefer not to type? Call the team now",
+    "hotlineNumbers": "Ext. 101, 102, 103",
+    "steps": {
+      "step1Title": "Requester info",
+      "step1Subtitle": "Check name & phone",
+      "step2Title": "Category",
+      "step2Subtitle": "Select the issue type",
+      "step3Title": "Details",
+      "step3Subtitle": "Symptoms & photos"
+    },
+    "staff": {
+      "title": "On-duty IT staff",
+      "count": "{count} people",
+      "description": "If your PC won't start, the screen is blank, or printing fails, call the matching specialist by extension:",
+      "hours": "Hours: Mon–Fri (08:30 – 17:30)",
+      "member1Name": "Somchai (Team Lead)",
+      "member1Specialty": "Network, Internet & Servers",
+      "member1Ext": "Ext. 101",
+      "member2Name": "Wichai",
+      "member2Specialty": "Computers, Printers & Devices",
+      "member2Ext": "Ext. 102",
+      "member3Name": "Anucha",
+      "member3Specialty": "ERP, Email & Access",
+      "member3Ext": "Ext. 103"
+    },
+    "tips": {
+      "title": "3 quick self-help tips",
+      "intro": "Try these simple steps — you may recover without waiting in queue:",
+      "tip1Title": "App screen frozen or spinning",
+      "tip1Body": "Press F5 once to refresh. If still stuck, press Ctrl + F5.",
+      "tip2Title": "Printer won't print",
+      "tip2Body": "Check paper tray, then power the printer off, wait 10 seconds, and turn it back on.",
+      "tip3Title": "Internet suddenly unavailable",
+      "tip3Body": "Check the blue LAN cable at the back of the PC for a blinking light. On Wi-Fi, toggle Wi-Fi off and on."
+    },
+    "queue": {
+      "title": "Today's IT queue",
+      "doneLabel": "Resolved",
+      "doneCount": "18 cases",
+      "inProgressLabel": "On site",
+      "inProgressCount": "5 cases",
+      "waitingLabel": "Waiting pickup",
+      "waitingCount": "2 cases",
+      "centerValue": "18",
+      "centerLabel": "Done",
+      "avgSpeed": "Average first response: ~ 15 minutes"
+    }
+  },
+  "form": {
+    "step1Heading": "Step 1: Requester information",
+    "step1Hint": "Employee details are prefilled. Edit them if you are reporting for a colleague.",
+    "name": "Full name",
+    "nameHint": "System user name",
+    "email": "Corporate email",
+    "emailHint": "Used for close/reopen confirmation links",
+    "emailPlaceholder": "name@company.com",
+    "department": "Department",
+    "departmentHint": "Select your department",
+    "extension": "Internal extension (desk phone)",
+    "extensionHint": "So IT can call you back",
+    "step2Heading": "Step 2: Choose the issue category",
+    "step2Hint": "Pick the closest match so we can assign the right specialist.",
+    "step3Heading": "Step 3: Describe symptoms & attach screenshots",
+    "step3Hint": "Include on-screen messages so technicians can prepare tools and parts.",
+    "ticketTitle": "Issue title (short and clear)",
+    "ticketTitleHint": "Mention the app and symptom briefly",
+    "ticketTitlePlaceholder": "e.g. Add sales Excel export button or Accounting app shows Error...",
+    "ticketDetail": "Detailed description",
+    "ticketDetailHint": "More detail means faster fixes with fewer follow-up questions.",
+    "ticketDetailPlaceholder": "Describe timing, error text, or for feature requests: purpose, expected result, and departments involved...",
+    "attachmentLabel": "Attach screenshot or device photo",
+    "attachmentRecommended": "Highly recommended",
+    "dropzoneTitle": "Drag an image here or press Ctrl + V to paste",
+    "dropzoneHint": "PNG, JPG up to 10MB (click this area to browse files)",
+    "chooseFile": "Choose image from computer",
+    "readyToSend": "Ready",
+    "attachmentMeta": "1.2 MB • Clear screenshot",
+    "viewFull": "View full",
+    "removeImage": "Remove",
+    "priorityLabel": "Urgency",
+    "priorityNormal": "Normal (within 1 business day)",
+    "priorityNormalHint": "Other work can continue; production not blocked",
+    "priorityUrgent": "Urgent (work is blocked)",
+    "priorityUrgentHint": "Month-end close, urgent billing, or customer service blocked",
+    "submit": "Submit ticket now",
+    "reset": "Clear form",
+    "resetConfirm": "Clear all entered information?",
+    "submitHint": "After submit you will get a Ticket ID and can track status immediately.",
+    "departments": {
+      "account": "Accounting & Finance",
+      "marketing": "Marketing & Sales",
+      "purchasing": "Purchasing & Warehouse",
+      "hr": "Human Resources (HR)",
+      "operations": "Operations & Admin"
+    },
+    "categories": {
+      "software": {
+        "label": "Software bug or system issue",
+        "description": "e.g. ERP freezes, receipt won't print, red Error screen, database won't open"
+      },
+      "hardware": {
+        "label": "Computer and devices",
+        "description": "e.g. PC won't power on, printer jam, dark monitor, broken keyboard/mouse"
+      },
+      "network": {
+        "label": "Internet and network",
+        "description": "e.g. Wi-Fi drops, company site unreachable, loose LAN, VPN fails"
+      },
+      "access": {
+        "label": "Access rights and passwords",
+        "description": "e.g. locked password, email reset, shared folder permission request"
+      },
+      "feature_request": {
+        "label": "New feature / development request",
+        "description": "e.g. new app, new report button, department-specific integrations",
+        "badge": "Dev work"
+      }
+    }
+  },
+  "modal": {
+    "successBadge": "Ticket submitted!",
+    "ticketNumber": "Ticket {ticketId}",
+    "successBody": "IT has been notified. A technician will call Ext. {extension} or visit your desk shortly.",
+    "requester": "Requester:",
+    "category": "Category:",
+    "status": "Current status:",
+    "statusValue": "Dispatching technician",
+    "goTrack": "Go to status tracking",
+    "close": "Close"
+  },
+  "footer": {
+    "title": "IT Helpdesk & equipment support center",
+    "staffLine": "On duty (3): Ext. 101 (Network), Ext. 102 (Hardware), Ext. 103 (Apps & access)",
+    "copyright": "© 2024 IT Helpdesk Operations Department. All rights reserved."
+  },
+  "login": {
+    "title": "Sign in",
+    "subtitle": "Internal IT helpdesk and issue reporting",
+    "itOnlySubtitle": "IT staff only — manage the board and admin tools",
+    "email": "Work email",
+    "emailPlaceholder": "name@company.com",
+    "password": "Password",
+    "passwordPlaceholder": "Enter password",
+    "submit": "Sign in",
+    "forgot": "Forgot password?",
+    "mockHint": "Dev: it@company.com / it1234",
+    "invalidCredentials": "Invalid email or password",
+    "goPortal": "Go to ticket portal",
+    "closeDialog": "Close"
+  },
+  "profile": {
+    "title": "Profile & personal info",
+    "subtitle": "Manage your personal details, contact channels, and duty status in the helpdesk for IT support staff.",
+    "loginRequired": "Sign in as IT to view and edit your profile.",
+    "signInToEdit": "IT Sign in",
+    "breadcrumbAria": "Breadcrumb",
+    "breadcrumbRoot": "IT system",
+    "breadcrumbAccount": "User account",
+    "breadcrumbCurrent": "IT staff profile",
+    "lastSaved": "Last saved: {when}",
+    "lastSavedTimes": {
+      "yesterday": "Yesterday 16:30"
+    },
+    "changePhoto": "Change profile photo",
+    "uploadPhoto": "Upload new photo",
+    "removePhoto": "Remove photo",
+    "photoHint": "JPG or PNG, up to 5MB",
+    "dutyStatus": "Duty status",
+    "duty": {
+      "available": {
+        "title": "Available",
+        "hint": "Auto-assign can send tickets to you"
+      },
+      "break": {
+        "title": "On break",
+        "hint": "Pause ticket assignment temporarily"
+      },
+      "onsite": {
+        "title": "Busy on-site",
+        "hint": "Working away from the desk"
+      }
+    },
+    "levels": {
+      "level2": "IT Specialist (Level 2)"
+    },
+    "metricsTitle": "This month’s results",
+    "metricsYear": "Year {year}",
+    "metrics": {
+      "closed": "Closed cases",
+      "rating": "Service rating ★",
+      "avgTime": "Avg. time / case"
+    },
+    "slaLabel": "SLA target met",
+    "identityTitle": "Personal identity",
+    "identitySubtitle": "Shown on ticket reports and chat with employees",
+    "nameTh": "Full name (Thai)",
+    "nameThHint": "Include title and official name",
+    "nameEn": "Full name (English)",
+    "nameEnHint": "Match passport or employee badge",
+    "jobTitle": "Job title and department",
+    "systemRole": "System role",
+    "systemRoleHint": "Access is set centrally. Contact an IT Lead to change permissions.",
+    "roles": {
+      "IT_STAFF": "IT Staff Administrator",
+      "IT_LEAD": "IT Lead"
+    },
+    "contactTitle": "Contact & station",
+    "contactSubtitle": "So users and teammates can reach you quickly on site",
+    "email": "Corporate email",
+    "extension": "Desk / internal extension",
+    "mobile": "Mobile (emergency)",
+    "location": "Station / lab location",
+    "skillsTitle": "Specialized skills",
+    "skillsSubtitle": "Tags used for auto-assign matching",
+    "addSkill": "Add skill",
+    "removeSkill": "Remove {skill}",
+    "skillLabels": {
+      "network": "Network & WiFi",
+      "os": "Windows / macOS",
+      "erp": "ERP Support",
+      "hardware": "Hardware & Printer",
+      "cctv": "CCTV",
+      "access": "Access & passwords",
+      "email": "Email / M365"
+    },
+    "securityTitle": "Security & password",
+    "securitySubtitle": "Manage your account password",
+    "changePassword": "Change password",
+    "changePasswordDialogTitle": "Change password",
+    "changePasswordDialogSubtitle": "Enter your current password, then set a new one.",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "newPasswordHint": "At least 8 characters",
+    "confirmNewPassword": "Confirm new password",
+    "changePasswordSubmit": "Update password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "closeDialog": "Close",
+    "changePasswordErrors": {
+      "wrongCurrent": "Current password is incorrect",
+      "mismatch": "New passwords do not match",
+      "tooShort": "New password must be at least 8 characters"
+    },
+    "passwordToastTitle": "Password updated",
+    "passwordToastBody": "Use your new password the next time you sign in.",
+    "cancel": "Cancel",
+    "save": "Save changes",
+    "toastTitle": "Saved successfully",
+    "toastBody": "Your profile and duty status were updated."
+  },
+  "mock": {
+    "requesterName": "Somporn Jaideesuk",
+    "email": "somporn@company.com",
+    "extension": "Ext. 204"
+  },
+  "kanban": {
+    "badge": "IT operations hub",
+    "sprint": "Sprint #12 (24 Nov – 8 Dec)",
+    "title": "IT work board",
+    "subtitle": "Central support board across network, apps, and hardware — transparent end to end.",
+    "refresh": "Refresh",
+    "groupView": "Group view",
+    "quickLog": "Quick log",
+    "metrics": {
+      "totalToday": "Tickets today",
+      "totalUnit": "cases",
+      "pendingUser": "Awaiting user confirm",
+      "inProgress": "In progress",
+      "backlog": "Backlog"
+    },
+    "assigneeLabel": "Assignee:",
+    "allAssignees": "Everyone",
+    "multiAssignee": "Multi-assignee",
+    "filterSearch": "Filter by text or #TK...",
+    "filters": "Filters",
+    "categoryLabel": "Category:",
+    "categoryAll": "All",
+    "categories": {
+      "hardware": "Hardware & network",
+      "software": "Apps & bugs",
+      "network": "Network",
+      "access": "Access",
+      "feature": "Development"
+    },
+    "columns": {
+      "backlog": "Backlog / New",
+      "in_progress": "In progress",
+      "pending_user": "Awaiting user test",
+      "resolved": "Resolved / Closed"
+    },
+    "unassigned": "Unassigned",
+    "claim": "Claim ticket",
+    "progress": "Progress",
+    "assignees": {
+      "golf": "Golf",
+      "golfSpecialty": "Network / Hardware",
+      "bank": "Bank",
+      "bankSpecialty": "ERP / Lead",
+      "new": "New",
+      "newSpecialty": "Database / Dev"
+    },
+    "departments": {
+      "account": "Accounting & Finance",
+      "marketing": "Marketing & Sales",
+      "purchasing": "Purchasing & Warehouse",
+      "hr": "Human Resources",
+      "operations": "Operations"
+    },
+    "tickets": {
+      "t106": "4th-floor printer jammed with blinking light",
+      "t107": "Sales Wi-Fi drops often in the afternoon",
+      "t109": "Reset email password for new hire",
+      "t111": "Add sales report export button",
+      "t105": "Meeting-room PC will not power on",
+      "t108": "Purchasing system errors on save",
+      "t103": "Receipt form fixed — waiting user confirm",
+      "t101": "Floor 2 AP adjusted — waiting test",
+      "t098": "Shared folder access granted",
+      "t095": "Accounting PC power supply replaced"
+    },
+    "ages": {
+      "minutes12": "12 min ago",
+      "minutes35": "35 min ago",
+      "hour1": "1 hr ago",
+      "hours3": "3 hr ago",
+      "hours5": "5 hr ago",
+      "hours8": "8 hr ago",
+      "day1": "1 day ago",
+      "days2": "2 days ago",
+      "resolvedToday": "Closed today",
+      "resolvedYesterday": "Closed yesterday"
+    },
+    "quickLogDialog": {
+      "title": "Quick on-site fix log",
+      "badge": "Close immediately",
+      "subtitle": "Log short walk-in fixes completed on the spot for stats and performance tracking.",
+      "department": "Source department",
+      "departmentHint": "Used for frequent-issue reports to department heads",
+      "issue": "What happened",
+      "issueHint": "Quick presets:",
+      "issuePlaceholder": "Describe the symptom, e.g. PC would not start — power cable unplugged",
+      "resolve": "How it was resolved",
+      "resolveHint": "Quick resolve presets:",
+      "resolvePlaceholder": "Describe the fix, e.g. replugged power and verified",
+      "requesterOptional": "Requester name (optional)",
+      "requesterPlaceholder": "e.g. Somporn, desk 204",
+      "cancel": "Cancel",
+      "submit": "Save and close case",
+      "success": "Quick log saved",
+      "presets": {
+        "frozenApp": "App frozen / not responding",
+        "printerJam": "Printer jam / power off",
+        "cableLoose": "Power or LAN cable loose",
+        "wrongKeyboardLang": "Wrong keyboard language at login",
+        "wrongProgram": "Opened with wrong app / file not found",
+        "replug": "Replug / power cycle",
+        "restart": "Restart PC / refresh system",
+        "clearPaper": "Clear paper jam and reprint",
+        "resetPass": "Reset password and guide login",
+        "guideUser": "Walk user through the steps"
+      }
+    },
+    "detail": {
+      "close": "Close ticket detail",
+      "openedBy": "Opened by:",
+      "extension": "Ext.",
+      "currentStatus": "Current status",
+      "descriptionLabel": "Issue details from the requester:",
+      "teamTitle": "IT team on this case (multi-assignees)",
+      "addCollaborator": "+ Add collaborator",
+      "addCollaboratorShort": "Add collaborator",
+      "timelineTitle": "Work history & shared timeline (audit log)",
+      "timelineCount": "{count} entries",
+      "noteLabel": "Add work note / internal IT team message",
+      "notePlaceholder": "Tag teammates e.g. @New @Golf or paste a commit ID...",
+      "attachLog": "Attach log file",
+      "attachCommit": "Add Git commit",
+      "sendNote": "Send note",
+      "transfer": "Transfer",
+      "resolve": "Approve and close case",
+      "resolveSuccess": "Case closed — thank-you message sent and SLA recorded",
+      "reopened": "Reopened {count} time(s)",
+      "role": {
+        "lead": "Lead",
+        "collaborator": "Collaborator"
+      },
+      "roleBadge": {
+        "lead": "Primary owner",
+        "collaborator": "Co-resolver"
+      },
+      "status": {
+        "backlog": "Backlog / New",
+        "in_progress": "In progress",
+        "pending_user": "Awaiting user test & confirm",
+        "resolved": "Resolved / Closed"
+      },
+      "defaults": {
+        "requester": "Requester from source department",
+        "description": "The requester reported this issue as titled. Please investigate and update status.",
+        "timeline": {
+          "opened": {
+            "time": "When opened",
+            "title": "Case opened in the system",
+            "body": "Logged by the user via the portal"
+          },
+          "claimed": {
+            "time": "After claim",
+            "title": "IT claimed the case",
+            "body": "Initial check started and progress updated"
+          }
+        }
+      },
+      "t103": {
+        "requester": "Somporn (Accounting & Finance)",
+        "description": "\"Printing a full tax invoice for a major customer shows a red alert: 403 Forbidden - Cannot trigger Stored Procedure for sequence ID. Billing is urgent — please help.\"",
+        "timeline": {
+          "1": {
+            "time": "09:30",
+            "title": "Somporn (Accounting) opened the case",
+            "body": "Marked urgent — afternoon billing run"
+          },
+          "2": {
+            "time": "10:15",
+            "title": "Bank claimed the case",
+            "body": "Early logs pointed to Stored Procedure permissions"
+          },
+          "3": {
+            "time": "11:00",
+            "title": "Bank added New to the case",
+            "note": "💬 Internal note: \"Please check SQL Trigger on tbl_invoice_runsequence — permissions dropped after server migrate\""
+          },
+          "4": {
+            "time": "14:00",
+            "title": "New fixed SQL Trigger & deployed hotfix",
+            "body": "Patch ID: #GIT-202311-INV98 (Grant EXECUTE to ERP_USER)"
+          },
+          "5": {
+            "time": "14:15",
+            "title": "Status set to \"Awaiting user test\"",
+            "body": "SMS and in-app notice sent to Somporn"
+          },
+          "6": {
+            "time": "15:30",
+            "title": "User reopened the issue",
+            "note": "⚠️ From Somporn: \"Sequence runs, but print hits Vat 7% mismatch on line 4\""
+          },
+          "7": {
+            "time": "16:10 (latest)",
+            "title": "Bank hotfixed rounding & sent back for test",
+            "body": "Waiting on Somporn's second verification (chat ping sent)"
+          }
+        }
+      },
+      "t111": {
+        "requester": "Orn (Accounting & Finance)",
+        "description": "Needs an Export button on the ERP sales dashboard to download Excel for morning exec reports.",
+        "timeline": {
+          "1": {
+            "time": "Yesterday 10:00",
+            "title": "Case opened with export specs",
+            "body": "Needs .xlsx with date-range filters"
+          },
+          "2": {
+            "time": "Yesterday 13:20",
+            "title": "Bank claimed and designed the API",
+            "body": "Added /reports/sales/export endpoint"
+          },
+          "3": {
+            "time": "Today 09:45",
+            "title": "New joined on Export UI",
+            "body": "~65% done — awaiting live data test"
+          }
+        }
+      }
+    }
+  },
+  "dashboard": {
+    "badge": "Executive performance report",
+    "realtimeHint": "• Based on work cycles and closed ticket history",
+    "title": "IT department performance overview by work cycle",
+    "subtitle": "SLA and ticket history — switch work cycle / month / year; the system aggregates for you",
+    "exportExcel": "Excel (.xlsx)",
+    "exportPdf": "Summary PDF",
+    "filters": {
+      "workCycle": "Work cycle",
+      "cycleCurrent": "Current cycle (#12)",
+      "cyclePrevious": "Previous cycle (#11)",
+      "department": "Requester department",
+      "assignee": "IT assignee",
+      "allDepartments": "All departments",
+      "allAssignees": "Everyone",
+      "apply": "Apply filters",
+      "reset": "Reset"
+    },
+    "kpis": {
+      "resolved": "Successfully resolved cases",
+      "successRate": "Success rate {rate}% (target > 95%)",
+      "trendUp": "+{pct}% vs prior cycle",
+      "portal": "Portal",
+      "quickTicket": "Quick Ticket",
+      "firstResponse": "Avg. first response",
+      "minutes": "min",
+      "fasterThanSla": "Faster than SLA",
+      "firstResponseHint": "From open to IT claim",
+      "resolution": "Avg. time to close",
+      "hours": "hrs",
+      "mttrStable": "MTTR stable",
+      "resolutionHint": "Until user confirms close",
+      "csat": "Overall satisfaction",
+      "csatMax": "5.0",
+      "csatExcellent": "Excellent band",
+      "csatRespondents": "From {count} respondents"
+    },
+    "delivery": {
+      "title": "Feature delivery status this work cycle",
+      "subtitle": "Track feature/dev work for the selected cycle — not the live board",
+      "cycleChip": "Work cycle #{n}",
+      "deliveryChip": "{pct}% delivered",
+      "onSchedule": "On schedule",
+      "offSchedule": "Behind",
+      "delivered": "Features delivered",
+      "inProgress": "In development",
+      "uat": "Awaiting user test (UAT)",
+      "carryover": "Backlog / carryover",
+      "items": "items",
+      "deliveredFooter": "Closed & confirmed this cycle",
+      "uatFooter": "Waiting on user confirm",
+      "carryoverFooter": "Will carry if still open at close",
+      "inProgress1": "Tax report export",
+      "inProgress2": "Folder ACL tweak",
+      "inProgress3": "Floor 2 AP upgrade",
+      "titleAggregate": "Delivery summary for selected range",
+      "subtitleAggregate": "Rolled up across work cycles — use the breakdown table above to drill in"
+    },
+    "staffSection": {
+      "title": "Individual performance this cycle",
+      "badge": "Selected cycle",
+      "ext": "Ext. {n}",
+      "stars": "stars",
+      "scope": "Primary scope",
+      "resolved": "Resolved",
+      "successRate": "Success rate",
+      "workload": "Share of team load"
+    },
+    "staff": {
+      "golf": "Golf",
+      "golfRole": "Network / Hardware",
+      "golfScope": "LAN, Wi-Fi, printers, and on-site devices",
+      "golfFooterLeft": "Avg first response 14 min",
+      "golfFooterRight": "Parts ready",
+      "bank": "Bank",
+      "bankRole": "ERP / Team lead",
+      "bankScope": "ERP, access control, cross-team coordination",
+      "bankFooterLeft": "Leads multi-assignee cases",
+      "bankFooterRight": "2 hotfixes",
+      "new": "New",
+      "newRole": "Database / Dev",
+      "newScope": "SQL, APIs, small features, patches",
+      "newFooterLeft": "Stable deploys",
+      "newFooterRight": "DB uptime 99.9%"
+    },
+    "departments": {
+      "account": "Accounting & Finance",
+      "marketing": "Marketing & Sales",
+      "purchasing": "Purchasing & Warehouse",
+      "hr": "Human Resources",
+      "operations": "Operations"
+    },
+    "categories": {
+      "software": "Apps & bugs",
+      "hardware": "Hardware",
+      "access": "Access",
+      "network": "Network",
+      "feature": "Development"
+    },
+    "analytics": {
+      "categoryTitle": "Cases by category",
+      "totalCases": "Total cases",
+      "insightTitle": "Executive insight",
+      "deptTitle": "Case density by department",
+      "slaLabel": "SLA standard for this work cycle",
+      "slaPass": "{pct}% pass",
+      "grade": "Grade {grade}"
+    },
+    "insight": {
+      "current": "Software/ERP is still the largest share — pair Bank + New on Stored Procedure permission cases that often reopen.",
+      "month": "This month spans 2 cycles — review the higher-carryover cycle alongside older Origin Cycle cases",
+      "year": "Software/ERP stays dominant for the year — compare carryover per cycle in the table above"
+    },
+    "history": {
+      "title": "Ticket History",
+      "subtitle": "Closed-case evidence for cycle review — not the live board",
+      "searchPlaceholder": "Search ticket code or requester...",
+      "print": "Print",
+      "originCycle": "Carried from cycle #{n}",
+      "showing": "Showing {from}–{to} of {total}",
+      "cols": {
+        "when": "Reported",
+        "code": "Ticket",
+        "requester": "Requester & dept",
+        "problem": "Issue",
+        "assignee": "IT assignee",
+        "duration": "Time spent",
+        "status": "Status",
+        "note": "Resolution note"
+      },
+      "status": {
+        "closed": "Closed",
+        "in_development": "In development",
+        "pending_claim": "Vendor claim"
+      },
+      "rows": {
+        "h1": {
+          "date": "8 Dec 2024",
+          "time": "09:12",
+          "requester": "Somporn",
+          "title": "Tax invoice 403 error",
+          "detail": "Full invoice print returned 403 Forbidden",
+          "duration": "6.5 hrs",
+          "note": "Grant EXECUTE + VAT rounding hotfix — user confirmed"
+        },
+        "h2": {
+          "date": "7 Dec 2024",
+          "time": "14:40",
+          "requester": "Manee",
+          "title": "Sales Wi-Fi drops",
+          "detail": "Afternoon signal drops in bursts",
+          "duration": "2.1 hrs",
+          "note": "AP channel retune and verified"
+        },
+        "h3": {
+          "date": "5 Dec 2024",
+          "time": "10:05",
+          "requester": "Orn",
+          "title": "Sales report Excel export",
+          "detail": "Needs export button on ERP dashboard",
+          "duration": "Cycle #12",
+          "note": "UI + API in progress (~65%)"
+        },
+        "h4": {
+          "date": "4 Dec 2024",
+          "time": "11:20",
+          "requester": "Piya",
+          "title": "Reset new-hire email password",
+          "detail": "Could not sign in on day one",
+          "duration": "25 min",
+          "note": "Reset and guided login — closed"
+        },
+        "h5": {
+          "date": "3 Dec 2024",
+          "time": "16:00",
+          "requester": "Jeera",
+          "title": "Cracked laptop screen",
+          "detail": "Dropped; touchscreen unusable",
+          "duration": "Awaiting claim",
+          "note": "Sent to service center — warranty pending"
+        },
+        "h6": {
+          "date": "28 Nov 2024",
+          "time": "09:50",
+          "requester": "Wittaya",
+          "title": "Floor 3 switch reboot loop",
+          "detail": "Whole floor offline in the morning",
+          "duration": "4.2 hrs",
+          "note": "PSU replaced — closed after user confirm"
+        }
+      }
+    },
+    "toast": {
+      "excel": "Excel export simulated",
+      "pdf": "Executive PDF simulated",
+      "print": "Print command simulated",
+      "excelRange": "Excel export simulated for: {range}",
+      "pdfRange": "PDF simulated for: {range}"
+    },
+    "range": {
+      "modeLabel": "Report range",
+      "modes": {
+        "cycle": "Work cycle",
+        "month": "Month",
+        "year": "Year"
+      },
+      "modeHints": {
+        "cycle": "IT operations unit — one 2-week work cycle at a time",
+        "month": "System rolls up ~2 work cycles in the selected month — no manual multi-export",
+        "year": "System rolls up every work cycle in the year — one export covers all"
+      },
+      "monthLabel": "Month",
+      "yearLabel": "Year",
+      "months": {
+        "2024-12": "December 2024",
+        "2024-11": "November 2024",
+        "2024-10": "October 2024"
+      },
+      "years": {
+        "2023": "Year 2023",
+        "2024": "Year 2024"
+      },
+      "viewing": "Viewing: {range}",
+      "cyclesIncluded": "Covers {count} work cycles",
+      "breakdownTitle": "Breakdown by work cycle",
+      "breakdownSubtitle": "Inside {range} — spot which cycle slipped without merging files",
+      "breakdownCols": {
+        "cycle": "Work cycle",
+        "dates": "Date range",
+        "resolved": "Closed",
+        "success": "Success rate",
+        "carryover": "Carryover out",
+        "sla": "SLA"
+      },
+      "cycleRanges": {
+        "c12": "24 Nov – 8 Dec 2024",
+        "c11": "10–23 Nov 2024",
+        "c10": "27 Oct – 9 Nov 2024",
+        "c9": "13–26 Oct 2024",
+        "c8": "29 Sep – 12 Oct 2024",
+        "c7": "15–28 Sep 2024"
+      },
+      "summary": {
+        "monthDec": "December 2024",
+        "monthNov": "November 2024",
+        "monthOct": "October 2024",
+        "year2024": "Year 2024",
+        "year2023": "Year 2023"
+      }
+    }
+  }
+}

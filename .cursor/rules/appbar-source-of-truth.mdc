@@ -1,0 +1,13 @@
+---
+description: Keep the current shared AppBar; ignore app bars in design HTML refs
+alwaysApply: true
+---
+
+# AppBar Source of Truth
+
+When implementing pages from `.cursor/design-html/*` design references:
+
+- **Always keep the current shared app bar** (`PortalHeader` / shared header component).
+- **Ignore** any header/nav markup in the design HTML files.
+- Only use the design ref for page content below the app bar (body, boards, dialogs, side panels, etc.).
+- Wire new pages into the existing app bar nav links instead of cloning a new header from the mock.

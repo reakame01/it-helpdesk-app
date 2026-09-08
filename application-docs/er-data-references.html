@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ER Diagram — Data References (IT Helpdesk)</title>
+  <script type="module">
+    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: "base",
+      themeVariables: {
+        primaryColor: "#e8f0fe",
+        primaryTextColor: "#1a2332",
+        primaryBorderColor: "#3b6ea5",
+        lineColor: "#5a6a7a",
+        secondaryColor: "#f4f7fa",
+        tertiaryColor: "#fff8e7",
+        fontFamily: "IBM Plex Sans Thai, Segoe UI, sans-serif",
+      },
+      er: { layoutDirection: "TB" },
+    });
+  </script>
+  <style>
+    :root {
+      --ink: #1a2332;
+      --muted: #5a6a7a;
+      --line: #d0d8e0;
+      --bg: #f2f5f8;
+      --paper: #ffffff;
+      --accent: #2f5f8f;
+      --accent-soft: #e8f0fe;
+      --warn: #8a6d1d;
+      --warn-bg: #fff8e7;
+      --ok: #1f6b4a;
+      --ok-bg: #e8f6ef;
+      --radius: 10px;
+      --font: "IBM Plex Sans Thai", "Segoe UI", system-ui, sans-serif;
+      --mono: "IBM Plex Mono", Consolas, monospace;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--font);
+      color: var(--ink);
+      background:
+        radial-gradient(ellipse 80% 50% at 10% -10%, #dce8f5 0%, transparent 55%),
+        radial-gradient(ellipse 60% 40% at 100% 0%, #e8efe6 0%, transparent 45%),
+        var(--bg);
+      line-height: 1.55;
+    }
+
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2.5rem 1.25rem 4rem;
+    }
+
+    header.doc-head {
+      margin-bottom: 2rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid var(--line);
+    }
+
+    header.doc-head p.kicker {
+      margin: 0 0 0.35rem;
+      font-size: 0.8rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    h1 {
+      margin: 0 0 0.5rem;
+      font-size: clamp(1.45rem, 2.5vw, 1.85rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    header.doc-head .lead {
+      margin: 0;
+      max-width: 42rem;
+      color: var(--muted);
+      font-size: 0.98rem;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1rem;
+      margin-top: 1rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .meta span {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 0.2rem 0.75rem;
+    }
+
+    section {
+      margin-top: 2rem;
+    }
+
+    h2 {
+      margin: 0 0 0.75rem;
+      font-size: 1.15rem;
+      font-weight: 700;
+    }
+
+    h3 {
+      margin: 1.25rem 0 0.5rem;
+      font-size: 0.95rem;
+      font-weight: 650;
+      color: var(--accent);
+    }
+
+    p, li { font-size: 0.95rem; color: var(--ink); }
+    .muted { color: var(--muted); }
+
+    .panel {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.35rem;
+      box-shadow: 0 1px 0 rgba(26, 35, 50, 0.04);
+    }
+
+    .diagram {
+      overflow-x: auto;
+      background: #fafcfe;
+    }
+
+    .diagram .mermaid {
+      display: flex;
+      justify-content: center;
+      min-height: 320px;
+    }
+
+    .callout {
+      border-radius: var(--radius);
+      padding: 0.9rem 1.1rem;
+      border: 1px solid var(--line);
+      margin: 0.75rem 0 0;
+      font-size: 0.9rem;
+    }
+    .callout.warn { background: var(--warn-bg); border-color: #e6d7a8; color: var(--warn); }
+    .callout.ok { background: var(--ok-bg); border-color: #b8e0cc; color: var(--ok); }
+    .callout strong { color: inherit; }
+
+    table.fields {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      margin-top: 0.5rem;
+    }
+    table.fields th,
+    table.fields td {
+      text-align: left;
+      padding: 0.45rem 0.6rem;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+    table.fields th {
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 650;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    table.fields code {
+      font-family: var(--mono);
+      font-size: 0.82em;
+      background: #eef2f6;
+      padding: 0.1em 0.35em;
+      border-radius: 4px;
+    }
+    table.fields .pk { color: #9a3412; font-weight: 650; }
+    table.fields .fk { color: #1d4ed8; font-weight: 650; }
+    table.fields .uq { color: #6b21a8; }
+
+    .grid-2 {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: 1fr;
+    }
+    @media (min-width: 800px) {
+      .grid-2 { grid-template-columns: 1fr 1fr; }
+    }
+
+    ul.rels {
+      margin: 0.4rem 0 0;
+      padding-left: 1.2rem;
+    }
+    ul.rels li { margin-bottom: 0.35rem; }
+
+    footer {
+      margin-top: 2.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--line);
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="wrap">
+    <header class="doc-head">
+      <p class="kicker">Application docs · Data model</p>
+      <h1>ER Diagram — Data References</h1>
+      <p class="lead">
+        โมเดลพื้นฐานสำหรับหน้า Data References (แผนก / ประเภทปัญหา / ทักษะ IT)
+        และจุดเชื่อมต่อไปยัง Ticket กับ User ซึ่งหน้าอื่นจะอ้างอิงค่าเดียวกันแทน hard-code / enum
+      </p>
+      <div class="meta">
+        <span>Scope: foundation first</span>
+        <span>UI catalogs: departments · categories · skills</span>
+        <span>Target DB: PostgreSQL + Prisma</span>
+      </div>
+    </header>
+
+    <section>
+      <h2>1. ภาพรวมความสัมพันธ์</h2>
+      <div class="panel diagram">
+        <pre class="mermaid">
+erDiagram
+  REFERENCE_CATALOG ||--o{ REFERENCE_ITEM : contains
+  REFERENCE_ITEM ||--o{ TICKET : categorized_as
+  REFERENCE_ITEM ||--o{ TICKET_REQUESTER_SNAPSHOT : department_of
+  USER ||--o{ USER_SKILL : has
+  REFERENCE_ITEM ||--o{ USER_SKILL : skill_of
+  USER ||--o{ TICKET : acts_on
+  TICKET ||--|| TICKET_REQUESTER_SNAPSHOT : embeds
+
+  REFERENCE_CATALOG {
+    string id PK
+    string code UK
+    string name_th
+    string name_en
+    datetime created_at
+    datetime updated_at
+  }
+
+  REFERENCE_ITEM {
+    string id PK
+    string catalog_id FK
+    string code UK
+    string label_th
+    string label_en
+    string icon
+    boolean is_active
+    int sort_order
+    datetime created_at
+    datetime updated_at
+  }
+
+  USER_SKILL {
+    string id PK
+    string user_id FK
+    string skill_item_id FK
+    datetime assigned_at
+  }
+
+  USER {
+    string id PK
+    string email UK
+    string password_hash
+    string name
+    string role
+    boolean is_active
+  }
+
+  TICKET {
+    string id PK
+    string title
+    string description
+    string category_item_id FK
+    string status
+    string priority
+    string type
+  }
+
+  TICKET_REQUESTER_SNAPSHOT {
+    string ticket_id PK
+    string name
+    string email
+    string department_item_id FK
+    string extension
+  }
+        </pre>
+      </div>
+      <p class="callout ok">
+        <strong>หลักการ:</strong> ค่าที่ IT จัดการใน Data References เก็บเป็น
+        <code>REFERENCE_CATALOG</code> + <code>REFERENCE_ITEM</code> เดียว
+        แล้วหน้าอื่นชี้ด้วย FK — ไม่ copy ข้อความ label ลงตารางธุรกิจโดยตรง
+        (ยกเว้น snapshot ผู้แจ้งบน Ticket ที่เก็บชื่อ/อีเมล/แผนก ณ เวลาแจ้ง)
+      </p>
+    </section>
+
+    <section>
+      <h2>2. ตารางหลักของ Data References</h2>
+      <div class="grid-2">
+        <div class="panel">
+          <h3>REFERENCE_CATALOG</h3>
+          <p class="muted">ชุด master ของแต่ละ dropdown / catalog ในหน้า References</p>
+          <table class="fields">
+            <thead>
+              <tr><th>Column</th><th>Notes</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code class="pk">id</code></td><td>PK (cuid)</td></tr>
+              <tr><td><code class="uq">code</code></td><td>UK — <code>departments</code> | <code>categories</code> | <code>skills</code></td></tr>
+              <tr><td><code>name_th</code> / <code>name_en</code></td><td>ชื่อแสดง catalog</td></tr>
+              <tr><td><code>created_at</code> / <code>updated_at</code></td><td>audit timestamps</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="panel">
+          <h3>REFERENCE_ITEM</h3>
+          <p class="muted">รายการใน catalog — ตรงกับแถวในตาราง UI ปัจจุบัน</p>
+          <table class="fields">
+            <thead>
+              <tr><th>Column</th><th>Notes</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code class="pk">id</code></td><td>PK (cuid)</td></tr>
+              <tr><td><code class="fk">catalog_id</code></td><td>FK → REFERENCE_CATALOG</td></tr>
+              <tr><td><code class="uq">code</code></td><td>UK คู่กับ catalog (เช่น <code>account</code>, <code>hardware</code>)</td></tr>
+              <tr><td><code>label_th</code> / <code>label_en</code></td><td>ข้อความแสดงผล TH/EN</td></tr>
+              <tr><td><code>icon</code></td><td>nullable — Material icon (categories / skills)</td></tr>
+              <tr><td><code>is_active</code></td><td>ซ่อนจาก dropdown แต่ยังอ้างอิงประวัติได้</td></tr>
+              <tr><td><code>sort_order</code></td><td>ลำดับใน UI</td></tr>
+            </tbody>
+          </table>
+          <p class="callout warn" style="margin-top:0.85rem">
+            <strong>Constraint แนะนำ:</strong>
+            <code>UNIQUE (catalog_id, code)</code> และ index
+            <code>(catalog_id, is_active, sort_order)</code> สำหรับ list API
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>3. จุดเชื่อมกับโดเมนอื่น (foundation consumers)</h2>
+      <div class="panel">
+        <ul class="rels">
+          <li>
+            <strong>Ticket.category_item_id</strong> →
+            <code>REFERENCE_ITEM</code> ที่อยู่ใน catalog <code>categories</code>
+            <span class="muted">— แทน enum <code>TicketCategory</code> ใน Prisma ปัจจุบัน</span>
+          </li>
+          <li>
+            <strong>Ticket requester department</strong> →
+            <code>REFERENCE_ITEM</code> catalog <code>departments</code>
+            <span class="muted">— เก็บบน snapshot ผู้แจ้ง (guest ไม่ต้อง login) ไม่บังคับผูก User.department</span>
+          </li>
+          <li>
+            <strong>USER_SKILL</strong> (M:N) →
+            User ↔ <code>REFERENCE_ITEM</code> catalog <code>skills</code>
+            <span class="muted">— รองรับการจับคู่ทักษะกับผู้รับผิดชอบภายหลัง</span>
+          </li>
+        </ul>
+        <p class="callout warn">
+          <strong>หมายเหตุเทียบ schema ปัจจุบัน:</strong>
+          <code>apps/api/prisma/schema.prisma</code> ยังใช้
+          <code>Ticket.category</code> เป็น enum และ
+          <code>User.department</code> เป็น string —
+          เอกสารนี้คือเป้าหมายเมื่อต่อ API Data References ก่อน แล้วค่อย migrate consumer
+        </p>
+      </div>
+    </section>
+
+    <section>
+      <h2>4. Seed catalogs (ตรงกับ UI)</h2>
+      <div class="panel">
+        <table class="fields">
+          <thead>
+            <tr>
+              <th>catalog.code</th>
+              <th>ใช้ที่ไหน</th>
+              <th>ฟิลด์พิเศษของ item</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>departments</code></td>
+              <td>ฟอร์มแจ้งเคส (แผนก), filter/รายงาน</td>
+              <td>ไม่มี icon</td>
+            </tr>
+            <tr>
+              <td><code>categories</code></td>
+              <td>ฟอร์มแจ้งเคส (ประเภทปัญหา), การ์ดบนกระดาน</td>
+              <td><code>icon</code> (Material)</td>
+            </tr>
+            <tr>
+              <td><code>skills</code></td>
+              <td>โปรไฟล์ / ความเชี่ยวชาญ IT staff</td>
+              <td><code>icon</code> (Material)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2>5. API surface ที่เสนอ (ขั้นถัดไป)</h2>
+      <div class="panel">
+        <table class="fields">
+          <thead>
+            <tr><th>Method</th><th>Path</th><th>Auth</th><th>หน้าที่</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>GET</code></td>
+              <td><code>/references/catalogs</code></td>
+              <td>IT session</td>
+              <td>รายการ catalog + จำนวน item</td>
+            </tr>
+            <tr>
+              <td><code>GET</code></td>
+              <td><code>/references/:catalogCode/items</code></td>
+              <td>IT / หรือ public read active</td>
+              <td>list items (query: <code>activeOnly</code>)</td>
+            </tr>
+            <tr>
+              <td><code>POST</code></td>
+              <td><code>/references/:catalogCode/items</code></td>
+              <td>IT session</td>
+              <td>สร้าง item</td>
+            </tr>
+            <tr>
+              <td><code>PATCH</code></td>
+              <td><code>/references/items/:id</code></td>
+              <td>IT session</td>
+              <td>แก้ label / icon / sort / active</td>
+            </tr>
+            <tr>
+              <td><code>DELETE</code></td>
+              <td><code>/references/items/:id</code></td>
+              <td>IT session</td>
+              <td>soft-delete หรือปฏิเสธถ้ายังถูกอ้างอิง</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="muted" style="margin:0.75rem 0 0;font-size:0.88rem">
+          Guest ฟอร์มแจ้งเคสควรอ่านได้เฉพาะ item ที่ <code>is_active = true</code>
+          (endpoint read คู่ขนานหรือ query flag) — CRUD เต็มรูปแบบเฉพาะ IT ตาม ADR 0002
+        </p>
+      </div>
+    </section>
+
+    <footer>
+      ไฟล์นี้สรุปเป้าหมาย ER สำหรับเริ่มต่อ API หน้า Data References —
+      ยังไม่แก้ Prisma schema จนกว่าจะยืนยันโมเดลนี้แล้วค่อย implement
+    </footer>
+  </div>
+</body>
+</html>

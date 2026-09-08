@@ -48,4 +48,5 @@ docker-data/
 .vercel
 
 # Cursor / local design artifacts
-.cursor/
+.cursor/prompts/
+.cursor/design-html/
