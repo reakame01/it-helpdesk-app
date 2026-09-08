@@ -577,13 +577,34 @@ function ReferenceEditorDialog({
               onChange={(v) => update("sortOrder", Number(v) || 0)}
             />
             {showIcon ? (
-              <Field
-                id="ref-icon"
-                hint={t("fields.iconHint")}
-                label={t("fields.icon")}
-                value={form.icon ?? ""}
-                onChange={(v) => update("icon", v)}
-              />
+              <div className="flex flex-col gap-space-2xs">
+                <label
+                  className="font-label-md text-label-md text-on-surface"
+                  htmlFor="ref-icon"
+                >
+                  {t.rich("fields.iconLabel", {
+                    link: (chunks) => (
+                      <a
+                        className="font-semibold text-primary underline-offset-2 hover:underline"
+                        href="https://fonts.google.com/icons"
+                        rel="noopener noreferrer"
+                        target="_blank"
+                      >
+                        {chunks}
+                      </a>
+                    ),
+                  })}
+                </label>
+                <input
+                  className="h-12 w-full rounded-lg bg-surface-container-low px-space-md font-body-md text-body-md text-on-surface outline-none ring-2 ring-transparent focus:bg-surface-container-lowest focus:ring-primary"
+                  id="ref-icon"
+                  value={form.icon ?? ""}
+                  onChange={(e) => update("icon", e.target.value)}
+                />
+                <span className="text-[12px] font-body-sm text-on-surface-variant">
+                  {t("fields.iconHint")}
+                </span>
+              </div>
             ) : null}
             {mode === "edit" ? (
               <label className="flex items-center gap-space-sm rounded-lg bg-surface-container-low p-space-md">

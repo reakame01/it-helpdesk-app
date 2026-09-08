@@ -166,7 +166,8 @@
       "labelEn": "ชื่อแสดง (English)",
       "sortOrder": "ลำดับการแสดง",
       "icon": "ชื่อ Material icon",
-      "iconHint": "เช่น bug_report, wifi, computer",
+      "iconLabel": "ชื่อ <link>Material icon</link>",
+      "iconHint": "คลิกลิงก์ด้านบน เลือกไอคอน แล้ววางชื่อ เช่น bug_report, wifi, computer",
       "active": "แสดงใน Dropdown"
     },
     "dialog": {

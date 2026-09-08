@@ -167,7 +167,8 @@
       "labelEn": "Label (English)",
       "sortOrder": "Display order",
       "icon": "Material icon name",
-      "iconHint": "e.g. bug_report, wifi, computer",
+      "iconLabel": "<link>Material icon</link> name",
+      "iconHint": "Open the link above, pick an icon, then paste its name (e.g. bug_report, wifi, computer)",
       "active": "Show in dropdowns"
     },
     "dialog": {
