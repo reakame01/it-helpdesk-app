@@ -16,6 +16,7 @@ The IT kanban is labeled by Work Cycle (e.g. “รอบงานที่ 12�
 4. Cards that are **not** Closed Tickets are **Carryover** into the next Work Cycle.
 5. **Carryover Tag** shows only the **Origin Cycle** (first cycle the card entered). Do **not** accumulate one tag per carryover; comparing origin to the current cycle already shows how many cycles it has lingered.
 6. On **Reopen**, the live board card belongs to the **cycle when reopen occurs**. Ticket History still keeps prior cycle membership / origin so we know where the case came from before reopen.
+7. GM reporting uses **Report Range**: Work Cycle, calendar **month**, or calendar **year**. Month/year aggregate Ticket History across included cycles and support **one export** for that range, plus an optional per-cycle breakdown — GM does not manually merge cycle exports.
 
 ## Consequences
 

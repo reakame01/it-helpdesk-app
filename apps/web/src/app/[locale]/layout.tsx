@@ -2,6 +2,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { Noto_Sans, Noto_Sans_Thai } from "next/font/google";
+import { ItAuthProvider } from "@/components/auth/it-auth-context";
 import { routing } from "@/i18n/routing";
 import "../globals.css";
 
@@ -47,7 +48,7 @@ export default async function LocaleLayout({
         className={`${notoSans.variable} ${notoSansThai.variable} bg-surface font-body-md text-body-md text-on-surface antialiased`}
       >
         <NextIntlClientProvider messages={messages}>
-          {children}
+          <ItAuthProvider>{children}</ItAuthProvider>
         </NextIntlClientProvider>
       </body>
     </html>

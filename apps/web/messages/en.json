@@ -10,14 +10,27 @@
     "subtitle": "Services & Reports"
   },
   "nav": {
-    "userPortal": "Report & Track Cases (User Portal)",
-    "itWorkspace": "IT Board & Kanban (IT Workspace)",
-    "gmDashboard": "Org Overview (Transparency & GM Dashboard)"
+    "userPortal": "Report Cases",
+    "itWorkspace": "IT Workspace",
+    "gmDashboard": "IT Overview",
+    "userManagement": "User Management",
+    "dataReferences": "Data References"
+    
+  },
+  "userManagement": {
+    "title": "User Management",
+    "subtitle": "Content coming soon."
+  },
+  "dataReferences": {
+    "title": "Data References",
+    "subtitle": "Content coming soon."
   },
   "header": {
     "searchPlaceholder": "Search cases, badge ID, or issues...",
-    "profileName": "Somporn (Accounting)",
-    "switchMode": "Switch Employee ⇄ IT mode"
+    "itSignIn": "IT Sign in",
+    "accountMenu": "Account menu",
+    "editProfile": "Edit profile",
+    "logout": "Log out"
   },
   "portal": {
     "badge": "Computer & Network Service Center ticket intake",
@@ -158,14 +171,17 @@
   "login": {
     "title": "Sign in",
     "subtitle": "Internal IT helpdesk and issue reporting",
+    "itOnlySubtitle": "IT staff only — manage the board and admin tools",
     "email": "Work email",
     "emailPlaceholder": "name@company.com",
     "password": "Password",
     "passwordPlaceholder": "Enter password",
     "submit": "Sign in",
     "forgot": "Forgot password?",
-    "mockHint": "Dev mode: mock login is available",
-    "goPortal": "Go to ticket portal"
+    "mockHint": "Dev: it@company.com / it1234",
+    "invalidCredentials": "Invalid email or password",
+    "goPortal": "Go to ticket portal",
+    "closeDialog": "Close"
   },
   "mock": {
     "requesterName": "Somporn Jaideesuk",
@@ -389,6 +405,257 @@
             "body": "~65% done — awaiting live data test"
           }
         }
+      }
+    }
+  },
+  "dashboard": {
+    "badge": "Executive performance report",
+    "realtimeHint": "• Based on work cycles and closed ticket history",
+    "title": "IT department performance overview by work cycle",
+    "subtitle": "SLA and ticket history — switch work cycle / month / year; the system aggregates for you",
+    "exportExcel": "Excel (.xlsx)",
+    "exportPdf": "Summary PDF",
+    "filters": {
+      "workCycle": "Work cycle",
+      "cycleCurrent": "Current cycle (#12)",
+      "cyclePrevious": "Previous cycle (#11)",
+      "department": "Requester department",
+      "assignee": "IT assignee",
+      "allDepartments": "All departments",
+      "allAssignees": "Everyone",
+      "apply": "Apply filters",
+      "reset": "Reset"
+    },
+    "kpis": {
+      "resolved": "Successfully resolved cases",
+      "successRate": "Success rate {rate}% (target > 95%)",
+      "trendUp": "+{pct}% vs prior cycle",
+      "portal": "Portal",
+      "quickTicket": "Quick Ticket",
+      "firstResponse": "Avg. first response",
+      "minutes": "min",
+      "fasterThanSla": "Faster than SLA",
+      "firstResponseHint": "From open to IT claim",
+      "resolution": "Avg. time to close",
+      "hours": "hrs",
+      "mttrStable": "MTTR stable",
+      "resolutionHint": "Until user confirms close",
+      "csat": "Overall satisfaction",
+      "csatMax": "5.0",
+      "csatExcellent": "Excellent band",
+      "csatRespondents": "From {count} respondents"
+    },
+    "delivery": {
+      "title": "Feature delivery status this work cycle",
+      "subtitle": "Track feature/dev work for the selected cycle — not the live board",
+      "cycleChip": "Work cycle #{n}",
+      "deliveryChip": "{pct}% delivered",
+      "onSchedule": "On schedule",
+      "offSchedule": "Behind",
+      "delivered": "Features delivered",
+      "inProgress": "In development",
+      "uat": "Awaiting user test (UAT)",
+      "carryover": "Backlog / carryover",
+      "items": "items",
+      "deliveredFooter": "Closed & confirmed this cycle",
+      "uatFooter": "Waiting on user confirm",
+      "carryoverFooter": "Will carry if still open at close",
+      "inProgress1": "Tax report export",
+      "inProgress2": "Folder ACL tweak",
+      "inProgress3": "Floor 2 AP upgrade",
+      "titleAggregate": "Delivery summary for selected range",
+      "subtitleAggregate": "Rolled up across work cycles — use the breakdown table above to drill in"
+    },
+    "staffSection": {
+      "title": "Individual performance this cycle",
+      "badge": "Selected cycle",
+      "ext": "Ext. {n}",
+      "stars": "stars",
+      "scope": "Primary scope",
+      "resolved": "Resolved",
+      "successRate": "Success rate",
+      "workload": "Share of team load"
+    },
+    "staff": {
+      "golf": "Golf",
+      "golfRole": "Network / Hardware",
+      "golfScope": "LAN, Wi-Fi, printers, and on-site devices",
+      "golfFooterLeft": "Avg first response 14 min",
+      "golfFooterRight": "Parts ready",
+      "bank": "Bank",
+      "bankRole": "ERP / Team lead",
+      "bankScope": "ERP, access control, cross-team coordination",
+      "bankFooterLeft": "Leads multi-assignee cases",
+      "bankFooterRight": "2 hotfixes",
+      "new": "New",
+      "newRole": "Database / Dev",
+      "newScope": "SQL, APIs, small features, patches",
+      "newFooterLeft": "Stable deploys",
+      "newFooterRight": "DB uptime 99.9%"
+    },
+    "departments": {
+      "account": "Accounting & Finance",
+      "marketing": "Marketing & Sales",
+      "purchasing": "Purchasing & Warehouse",
+      "hr": "Human Resources",
+      "operations": "Operations"
+    },
+    "categories": {
+      "software": "Apps & bugs",
+      "hardware": "Hardware",
+      "access": "Access",
+      "network": "Network",
+      "feature": "Development"
+    },
+    "analytics": {
+      "categoryTitle": "Cases by category",
+      "totalCases": "Total cases",
+      "insightTitle": "Executive insight",
+      "deptTitle": "Case density by department",
+      "slaLabel": "SLA standard for this work cycle",
+      "slaPass": "{pct}% pass",
+      "grade": "Grade {grade}"
+    },
+    "insight": {
+      "current": "Software/ERP is still the largest share — pair Bank + New on Stored Procedure permission cases that often reopen.",
+      "month": "This month spans 2 cycles — review the higher-carryover cycle alongside older Origin Cycle cases",
+      "year": "Software/ERP stays dominant for the year — compare carryover per cycle in the table above"
+    },
+    "history": {
+      "title": "Ticket History",
+      "subtitle": "Closed-case evidence for cycle review — not the live board",
+      "searchPlaceholder": "Search ticket code or requester...",
+      "print": "Print",
+      "originCycle": "Carried from cycle #{n}",
+      "showing": "Showing {from}–{to} of {total}",
+      "cols": {
+        "when": "Reported",
+        "code": "Ticket",
+        "requester": "Requester & dept",
+        "problem": "Issue",
+        "assignee": "IT assignee",
+        "duration": "Time spent",
+        "status": "Status",
+        "note": "Resolution note"
+      },
+      "status": {
+        "closed": "Closed",
+        "in_development": "In development",
+        "pending_claim": "Vendor claim"
+      },
+      "rows": {
+        "h1": {
+          "date": "8 Dec 2024",
+          "time": "09:12",
+          "requester": "Somporn",
+          "title": "Tax invoice 403 error",
+          "detail": "Full invoice print returned 403 Forbidden",
+          "duration": "6.5 hrs",
+          "note": "Grant EXECUTE + VAT rounding hotfix — user confirmed"
+        },
+        "h2": {
+          "date": "7 Dec 2024",
+          "time": "14:40",
+          "requester": "Manee",
+          "title": "Sales Wi-Fi drops",
+          "detail": "Afternoon signal drops in bursts",
+          "duration": "2.1 hrs",
+          "note": "AP channel retune and verified"
+        },
+        "h3": {
+          "date": "5 Dec 2024",
+          "time": "10:05",
+          "requester": "Orn",
+          "title": "Sales report Excel export",
+          "detail": "Needs export button on ERP dashboard",
+          "duration": "Cycle #12",
+          "note": "UI + API in progress (~65%)"
+        },
+        "h4": {
+          "date": "4 Dec 2024",
+          "time": "11:20",
+          "requester": "Piya",
+          "title": "Reset new-hire email password",
+          "detail": "Could not sign in on day one",
+          "duration": "25 min",
+          "note": "Reset and guided login — closed"
+        },
+        "h5": {
+          "date": "3 Dec 2024",
+          "time": "16:00",
+          "requester": "Jeera",
+          "title": "Cracked laptop screen",
+          "detail": "Dropped; touchscreen unusable",
+          "duration": "Awaiting claim",
+          "note": "Sent to service center — warranty pending"
+        },
+        "h6": {
+          "date": "28 Nov 2024",
+          "time": "09:50",
+          "requester": "Wittaya",
+          "title": "Floor 3 switch reboot loop",
+          "detail": "Whole floor offline in the morning",
+          "duration": "4.2 hrs",
+          "note": "PSU replaced — closed after user confirm"
+        }
+      }
+    },
+    "toast": {
+      "excel": "Excel export simulated",
+      "pdf": "Executive PDF simulated",
+      "print": "Print command simulated",
+      "excelRange": "Excel export simulated for: {range}",
+      "pdfRange": "PDF simulated for: {range}"
+    },
+    "range": {
+      "modeLabel": "Report range",
+      "modes": {
+        "cycle": "Work cycle",
+        "month": "Month",
+        "year": "Year"
+      },
+      "modeHints": {
+        "cycle": "IT operations unit — one 2-week work cycle at a time",
+        "month": "System rolls up ~2 work cycles in the selected month — no manual multi-export",
+        "year": "System rolls up every work cycle in the year — one export covers all"
+      },
+      "monthLabel": "Month",
+      "yearLabel": "Year",
+      "months": {
+        "2024-12": "December 2024",
+        "2024-11": "November 2024",
+        "2024-10": "October 2024"
+      },
+      "years": {
+        "2023": "Year 2023",
+        "2024": "Year 2024"
+      },
+      "viewing": "Viewing: {range}",
+      "cyclesIncluded": "Covers {count} work cycles",
+      "breakdownTitle": "Breakdown by work cycle",
+      "breakdownSubtitle": "Inside {range} — spot which cycle slipped without merging files",
+      "breakdownCols": {
+        "cycle": "Work cycle",
+        "dates": "Date range",
+        "resolved": "Closed",
+        "success": "Success rate",
+        "carryover": "Carryover out",
+        "sla": "SLA"
+      },
+      "cycleRanges": {
+        "c12": "24 Nov – 8 Dec 2024",
+        "c11": "10–23 Nov 2024",
+        "c10": "27 Oct – 9 Nov 2024",
+        "c9": "13–26 Oct 2024",
+        "c8": "29 Sep – 12 Oct 2024",
+        "c7": "15–28 Sep 2024"
+      },
+      "summary": {
+        "monthDec": "December 2024",
+        "monthNov": "November 2024",
+        "monthOct": "October 2024",
+        "year2024": "Year 2024",
+        "year2023": "Year 2023"
       }
     }
   }

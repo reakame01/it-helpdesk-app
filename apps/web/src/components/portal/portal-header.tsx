@@ -2,38 +2,73 @@
 
 import { useTranslations } from "next-intl";
 import { useState } from "react";
+import { useItAuth } from "@/components/auth/it-auth-context";
+import { ItSessionControls } from "@/components/auth/it-session-controls";
 import { BrandLogo } from "@/components/shared/brand-logo";
 import { LanguageSwitcher } from "@/components/shared/language-switcher";
 import { MaterialIcon } from "@/components/shared/material-icon";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
-const profileUrl =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuA_NePHXteXZ9yx7SIbUFiB0Y_Ny-CmxDPgqTJ4X35kPBr_q7zs_4d2-ZRM25dLefYhTZEAu3w8jQKcJAPAACSo8IWJW4wGuO0jvrlOsRd14qtTrsi27hLBJTleGKCG8pt__HLkPT3loKvwnuH72YM4mJBp6qt5bu1tjmNYzbpX-Yyax0yuX63Lmqs0hr-6Nkew0Jn_59RNYBB3y-OunQPWDqAZMZFjonan5266dgGrNL89QkY8Sow";
+type ItAdminRole = "IT_STAFF" | "IT_LEAD";
+
+type NavKey =
+  | "userPortal"
+  | "itWorkspace"
+  | "userManagement"
+  | "dataReferences"
+  | "gmDashboard";
+
+type NavItem = {
+  href: string;
+  key: NavKey;
+  label: string;
+  /** When set, only signed-in IT roles see the item. */
+  roles?: readonly ItAdminRole[];
+};
 
 type PortalHeaderProps = {
-  activeNav?: "userPortal" | "itWorkspace" | "gmDashboard";
+  activeNav?: NavKey;
 };
 
 export function PortalHeader({
   activeNav = "userPortal",
 }: PortalHeaderProps) {
   const t = useTranslations();
+  const { isAuthenticated, user } = useItAuth();
   const [search, setSearch] = useState("");
 
-  const navItems = [
-    { href: "/", key: "userPortal" as const, label: t("nav.userPortal") },
+  const navItems: NavItem[] = [
+    { href: "/", key: "userPortal", label: t("nav.userPortal") },
     {
       href: "/it",
-      key: "itWorkspace" as const,
+      key: "itWorkspace",
       label: t("nav.itWorkspace"),
     },
     {
-      href: "#",
-      key: "gmDashboard" as const,
+      href: "/gm",
+      key: "gmDashboard",
       label: t("nav.gmDashboard"),
     },
+    {
+      href: "/users",
+      key: "userManagement",
+      label: t("nav.userManagement"),
+      roles: ["IT_STAFF", "IT_LEAD"],
+    },
+    {
+      href: "/references",
+      key: "dataReferences",
+      label: t("nav.dataReferences"),
+      roles: ["IT_STAFF", "IT_LEAD"],
+    },
   ];
+
+  const visibleNavItems = navItems.filter((item) => {
+    if (!item.roles?.length) return true;
+    if (!isAuthenticated || !user) return false;
+    return item.roles.includes(user.role);
+  });
 
   return (
     <header className="fixed top-0 z-50 w-full bg-surface-container-lowest/95 shadow-[0_1px_8px_rgba(11,28,48,0.06)] backdrop-blur-md">
@@ -59,59 +94,42 @@ export function PortalHeader({
         <div className="flex shrink-0 items-center gap-space-md">
           <LanguageSwitcher />
 
-          <button
-            aria-label={t("common.notifications")}
-            className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-surface-container-low text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface"
-            type="button"
-          >
-            <MaterialIcon className="text-[22px]" name="notifications" />
-            <span className="absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-error px-1 font-label-md text-[10px] font-bold text-on-error">
-              3
-            </span>
-          </button>
-
-          <div className="flex items-center gap-space-xs pl-space-xs">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              alt="Profile"
-              className="h-8 w-8 rounded-full object-cover"
-              src={profileUrl}
-            />
-            <div className="hidden flex-col text-left lg:flex">
-              <span className="font-label-lg text-label-lg leading-tight text-on-surface">
-                {t("header.profileName")}
+          {isAuthenticated ? (
+            <button
+              aria-label={t("common.notifications")}
+              className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-surface-container-low text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface"
+              type="button"
+            >
+              <MaterialIcon className="text-[22px]" name="notifications" />
+              <span className="absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-error px-1 font-label-md text-[10px] font-bold text-on-error">
+                3
               </span>
-              <button
-                className="flex cursor-pointer items-center gap-1 font-label-md text-label-md font-semibold text-primary hover:underline"
-                type="button"
-              >
-                {t("header.switchMode")}
-                <MaterialIcon className="text-[14px]" name="swap_horiz" />
-              </button>
-            </div>
-          </div>
+            </button>
+          ) : null}
+
+          <ItSessionControls />
         </div>
       </div>
 
       <div className="w-full bg-surface-container-lowest shadow-[0_1px_4px_rgba(11,28,48,0.03)]">
         <div className="mx-auto max-w-container-max px-gutter-desktop">
           <nav className="flex items-center gap-space-lg overflow-x-auto">
-            {navItems.map((item) => {
+            {visibleNavItems.map((item) => {
               const active = item.key === activeNav;
               return (
-              <Link
-                key={item.key}
-                aria-current={active ? "page" : undefined}
-                className={cn(
-                  "whitespace-nowrap py-space-sm transition-colors",
-                  active
-                    ? "border-b-2 border-primary font-bold text-primary"
-                    : "font-title-md text-title-md text-on-surface-variant hover:text-on-surface",
-                )}
-                href={item.href}
-              >
-                {item.label}
-              </Link>
+                <Link
+                  key={item.key}
+                  aria-current={active ? "page" : undefined}
+                  className={cn(
+                    "whitespace-nowrap py-space-sm transition-colors",
+                    active
+                      ? "border-b-2 border-primary font-bold text-primary"
+                      : "font-title-md text-title-md text-on-surface-variant hover:text-on-surface",
+                  )}
+                  href={item.href}
+                >
+                  {item.label}
+                </Link>
               );
             })}
           </nav>
