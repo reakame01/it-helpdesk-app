@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { ItLoginDialog } from "@/components/auth/it-login-dialog";
 import { useItAuth } from "@/components/auth/it-auth-context";
 import { MaterialIcon } from "@/components/shared/material-icon";
+import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
 export function ItSessionControls() {
@@ -100,15 +101,15 @@ export function ItSessionControls() {
           onMouseEnter={openMenu}
           onMouseLeave={scheduleCloseMenu}
         >
-          <button
+          <Link
             className="flex w-full items-center gap-2 px-3 py-2.5 text-left font-label-md text-label-md text-on-surface transition-colors hover:bg-surface-container"
+            href="/profile"
             role="menuitem"
-            type="button"
             onClick={() => setMenuOpen(false)}
           >
             <MaterialIcon className="text-[18px]" name="manage_accounts" />
             {t("editProfile")}
-          </button>
+          </Link>
           <button
             className="flex w-full items-center gap-2 px-3 py-2.5 text-left font-label-md text-label-md text-error transition-colors hover:bg-surface-container"
             role="menuitem"

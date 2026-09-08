@@ -31,6 +31,33 @@
     "editProfile": "แก้ไขโปรไฟล์",
     "logout": "ออกจากระบบ"
   },
+  "notifications": {
+    "title": "การแจ้งเตือน",
+    "unreadCount": "ยังไม่อ่าน {count} รายการ",
+    "allCaughtUp": "อ่านครบแล้ว",
+    "markAllRead": "อ่านทั้งหมด",
+    "empty": "ยังไม่มีการแจ้งเตือน",
+    "viewBoard": "เปิดกระดานงาน IT",
+    "times": {
+      "minutes5": "5 นาทีที่แล้ว",
+      "minutes28": "28 นาทีที่แล้ว",
+      "hour1": "1 ชม. ที่แล้ว",
+      "hours3": "3 ชม. ที่แล้ว",
+      "yesterday": "เมื่อวาน"
+    },
+    "items": {
+      "newTicketTitle": "มีเคสใหม่เข้ามา",
+      "newTicketBody": "{ticketId}: ปริ้นเตอร์ชั้น 4 ติดกระดาษ — ฝ่ายบัญชี",
+      "reopenedTitle": "ผู้ใช้เปิดเคสใหม่",
+      "reopenedBody": "{ticketId}: หลังซ่อมแล้วยังพิมพ์ไม่ได้",
+      "slaRiskTitle": "เสี่ยงพลาด SLA",
+      "slaRiskBody": "{ticketId}: ต้องตอบกลับครั้งแรกภายใน 20 นาที",
+      "assignedTitle": "มอบหมายงานให้คุณ",
+      "assignedBody": "{ticketId}: Wi-Fi ฝ่ายขายหลุดบ่อย — มอบหมายให้คุณ",
+      "pendingConfirmTitle": "รอผู้ใช้ยืนยันปิดเคส",
+      "pendingConfirmBody": "{ticketId}: รอการยืนยันทางอีเมลเพื่อปิดเคส"
+    }
+  },
   "portal": {
     "badge": "ระบบรับแจ้งปัญหาศูนย์บริการคอมพิวเตอร์และเครือข่าย",
     "title": "แจ้งปัญหาการใช้งานหรืออุปกรณ์ IT",
@@ -181,6 +208,106 @@
     "invalidCredentials": "อีเมลหรือรหัสผ่านไม่ถูกต้อง",
     "goPortal": "ไปหน้าแจ้งปัญหา",
     "closeDialog": "ปิด"
+  },
+  "profile": {
+    "title": "โปรไฟล์และข้อมูลส่วนตัว",
+    "subtitle": "จัดการข้อมูลส่วนตัว ช่องทางติดต่อ และสถานะการรับงานในระบบ Helpdesk สำหรับเจ้าหน้าที่ฝ่ายสนับสนุนเทคโนโลยี",
+    "loginRequired": "เข้าสู่ระบบ IT เพื่อดูและแก้ไขโปรไฟล์",
+    "signInToEdit": "IT Sign in",
+    "breadcrumbAria": "เส้นทางหน้า",
+    "breadcrumbRoot": "ระบบไอที",
+    "breadcrumbAccount": "บัญชีผู้ใช้งาน",
+    "breadcrumbCurrent": "โปรไฟล์เจ้าหน้าที่ IT",
+    "lastSaved": "บันทึกล่าสุด: {when}",
+    "lastSavedTimes": {
+      "yesterday": "เมื่อวานนี้ 16:30 น."
+    },
+    "changePhoto": "เปลี่ยนรูปถ่ายโปรไฟล์",
+    "uploadPhoto": "อัปโหลดรูปใหม่",
+    "removePhoto": "ลบรูปภาพ",
+    "photoHint": "รองรับ JPG, PNG สูงสุด 5MB",
+    "dutyStatus": "สถานะพร้อมรับงาน (Duty Status)",
+    "duty": {
+      "available": {
+        "title": "พร้อมรับเคส (Available)",
+        "hint": "ระบบจะจ่ายตั๋วงานให้อัตโนมัติ"
+      },
+      "break": {
+        "title": "พักเบรก (On Break)",
+        "hint": "หยุดจ่ายเคสชั่วคราว"
+      },
+      "onsite": {
+        "title": "ติดหน้างาน (Busy On-site)",
+        "hint": "ปฏิบัติหน้าที่นอกสถานที่"
+      }
+    },
+    "levels": {
+      "level2": "IT Specialist (Level 2)"
+    },
+    "metricsTitle": "สรุปผลงานเดือนนี้",
+    "metricsYear": "ประจำปี {year}",
+    "metrics": {
+      "closed": "เคสที่ปิดได้",
+      "rating": "คะแนนบริการ ★",
+      "avgTime": "เวลาเฉลี่ย/เคส"
+    },
+    "slaLabel": "บรรลุเป้าหมาย SLA (Service Level)",
+    "identityTitle": "ข้อมูลระบุตัวตน (Personal Identity)",
+    "identitySubtitle": "ข้อมูลประจำตัวที่แสดงในรายงานตั๋วงานและระบบแชตกับพนักงาน",
+    "nameTh": "ชื่อ-นามสกุล (ภาษาไทย)",
+    "nameThHint": "ระบุคำนำหน้าและชื่อ-นามสกุลทางการ",
+    "nameEn": "ชื่อ-นามสกุล (English)",
+    "nameEnHint": "ตรงตามหนังสือเดินทางหรือบัตรพนักงาน",
+    "jobTitle": "ตำแหน่งงานและแผนก",
+    "systemRole": "ระดับสิทธิ์ในระบบ (System Role)",
+    "systemRoleHint": "สิทธิ์การเข้าถึงถูกกำหนดโดยส่วนกลาง หากต้องการขยายสิทธิ์กรุณาติดต่อ IT Lead",
+    "roles": {
+      "IT_STAFF": "เจ้าหน้าที่ IT ประจำ (IT Staff Administrator)",
+      "IT_LEAD": "หัวหน้าทีม IT (IT Lead)"
+    },
+    "contactTitle": "ช่องทางติดต่อและพื้นที่ประจำการ",
+    "contactSubtitle": "ข้อมูลเพื่อให้ผู้ใช้งานและทีมสามารถประสานงานหน้างานได้อย่างรวดเร็ว",
+    "email": "อีเมลบริษัท (Corporate Email)",
+    "extension": "เบอร์โทรโต๊ะทำงาน / เบอร์ภายใน",
+    "mobile": "เบอร์มือถือสายตรง (กรณีฉุกเฉิน)",
+    "location": "จุดประจำการ / ห้องปฏิบัติการ",
+    "skillsTitle": "ความเชี่ยวชาญพิเศษ (Specialized Skills)",
+    "skillsSubtitle": "แท็กความถนัดใช้สำหรับให้ระบบ Auto-Assign จัดสรรเคสตรงตามความสามารถ",
+    "addSkill": "เพิ่มทักษะ",
+    "removeSkill": "ลบแท็ก {skill}",
+    "skillLabels": {
+      "network": "Network & WiFi",
+      "os": "Windows / macOS",
+      "erp": "ERP Support",
+      "hardware": "Hardware & Printer",
+      "cctv": "CCTV",
+      "access": "สิทธิ์และรหัสผ่าน",
+      "email": "อีเมล / M365"
+    },
+    "securityTitle": "ความปลอดภัยและรหัสผ่าน (Security & Password)",
+    "securitySubtitle": "จัดการรหัสผ่านบัญชีของคุณ",
+    "changePassword": "เปลี่ยนรหัสผ่านส่วนตัว",
+    "changePasswordDialogTitle": "เปลี่ยนรหัสผ่าน",
+    "changePasswordDialogSubtitle": "กรอกรหัสผ่านปัจจุบัน แล้วตั้งรหัสผ่านใหม่",
+    "currentPassword": "รหัสผ่านปัจจุบัน",
+    "newPassword": "รหัสผ่านใหม่",
+    "newPasswordHint": "อย่างน้อย 8 ตัวอักษร",
+    "confirmNewPassword": "ยืนยันรหัสผ่านใหม่",
+    "changePasswordSubmit": "อัปเดตรหัสผ่าน",
+    "showPassword": "แสดงรหัสผ่าน",
+    "hidePassword": "ซ่อนรหัสผ่าน",
+    "closeDialog": "ปิด",
+    "changePasswordErrors": {
+      "wrongCurrent": "รหัสผ่านปัจจุบันไม่ถูกต้อง",
+      "mismatch": "รหัสผ่านใหม่ทั้งสองช่องไม่ตรงกัน",
+      "tooShort": "รหัสผ่านใหม่ต้องมีอย่างน้อย 8 ตัวอักษร"
+    },
+    "passwordToastTitle": "อัปเดตรหัสผ่านแล้ว",
+    "passwordToastBody": "ครั้งถัดไปให้ใช้รหัสผ่านใหม่ในการเข้าสู่ระบบ",
+    "cancel": "ยกเลิก",
+    "save": "บันทึกการเปลี่ยนแปลง",
+    "toastTitle": "บันทึกข้อมูลสำเร็จ",
+    "toastBody": "ระบบอัปเดตโปรไฟล์และสถานะการทำงานของคุณเรียบร้อยแล้ว"
   },
   "mock": {
     "requesterName": "สมพร ใจดีสุข",

@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useItAuth } from "@/components/auth/it-auth-context";
 import { ItSessionControls } from "@/components/auth/it-session-controls";
+import { NotificationMenu } from "@/components/portal/notification-menu";
 import { BrandLogo } from "@/components/shared/brand-logo";
 import { LanguageSwitcher } from "@/components/shared/language-switcher";
 import { MaterialIcon } from "@/components/shared/material-icon";
@@ -94,18 +95,7 @@ export function PortalHeader({
         <div className="flex shrink-0 items-center gap-space-md">
           <LanguageSwitcher />
 
-          {isAuthenticated ? (
-            <button
-              aria-label={t("common.notifications")}
-              className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-surface-container-low text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface"
-              type="button"
-            >
-              <MaterialIcon className="text-[22px]" name="notifications" />
-              <span className="absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-error px-1 font-label-md text-[10px] font-bold text-on-error">
-                3
-              </span>
-            </button>
-          ) : null}
+          {isAuthenticated ? <NotificationMenu /> : null}
 
           <ItSessionControls />
         </div>

@@ -32,6 +32,33 @@
     "editProfile": "Edit profile",
     "logout": "Log out"
   },
+  "notifications": {
+    "title": "Notifications",
+    "unreadCount": "{count} unread",
+    "allCaughtUp": "You're all caught up",
+    "markAllRead": "Mark all read",
+    "empty": "No notifications yet",
+    "viewBoard": "Open IT board",
+    "times": {
+      "minutes5": "5 min ago",
+      "minutes28": "28 min ago",
+      "hour1": "1 hr ago",
+      "hours3": "3 hr ago",
+      "yesterday": "Yesterday"
+    },
+    "items": {
+      "newTicketTitle": "New ticket opened",
+      "newTicketBody": "{ticketId}: 4th-floor printer jammed — Accounting",
+      "reopenedTitle": "Ticket reopened by user",
+      "reopenedBody": "{ticketId}: Still cannot print after the last fix",
+      "slaRiskTitle": "SLA at risk",
+      "slaRiskBody": "{ticketId}: First response due within 20 minutes",
+      "assignedTitle": "You were assigned",
+      "assignedBody": "{ticketId}: Network drop on Sales floor — claimed to you",
+      "pendingConfirmTitle": "Awaiting user confirm",
+      "pendingConfirmBody": "{ticketId}: Waiting for email confirmation to close"
+    }
+  },
   "portal": {
     "badge": "Computer & Network Service Center ticket intake",
     "title": "Report IT usage or equipment issues",
@@ -182,6 +209,106 @@
     "invalidCredentials": "Invalid email or password",
     "goPortal": "Go to ticket portal",
     "closeDialog": "Close"
+  },
+  "profile": {
+    "title": "Profile & personal info",
+    "subtitle": "Manage your personal details, contact channels, and duty status in the helpdesk for IT support staff.",
+    "loginRequired": "Sign in as IT to view and edit your profile.",
+    "signInToEdit": "IT Sign in",
+    "breadcrumbAria": "Breadcrumb",
+    "breadcrumbRoot": "IT system",
+    "breadcrumbAccount": "User account",
+    "breadcrumbCurrent": "IT staff profile",
+    "lastSaved": "Last saved: {when}",
+    "lastSavedTimes": {
+      "yesterday": "Yesterday 16:30"
+    },
+    "changePhoto": "Change profile photo",
+    "uploadPhoto": "Upload new photo",
+    "removePhoto": "Remove photo",
+    "photoHint": "JPG or PNG, up to 5MB",
+    "dutyStatus": "Duty status",
+    "duty": {
+      "available": {
+        "title": "Available",
+        "hint": "Auto-assign can send tickets to you"
+      },
+      "break": {
+        "title": "On break",
+        "hint": "Pause ticket assignment temporarily"
+      },
+      "onsite": {
+        "title": "Busy on-site",
+        "hint": "Working away from the desk"
+      }
+    },
+    "levels": {
+      "level2": "IT Specialist (Level 2)"
+    },
+    "metricsTitle": "This month’s results",
+    "metricsYear": "Year {year}",
+    "metrics": {
+      "closed": "Closed cases",
+      "rating": "Service rating ★",
+      "avgTime": "Avg. time / case"
+    },
+    "slaLabel": "SLA target met",
+    "identityTitle": "Personal identity",
+    "identitySubtitle": "Shown on ticket reports and chat with employees",
+    "nameTh": "Full name (Thai)",
+    "nameThHint": "Include title and official name",
+    "nameEn": "Full name (English)",
+    "nameEnHint": "Match passport or employee badge",
+    "jobTitle": "Job title and department",
+    "systemRole": "System role",
+    "systemRoleHint": "Access is set centrally. Contact an IT Lead to change permissions.",
+    "roles": {
+      "IT_STAFF": "IT Staff Administrator",
+      "IT_LEAD": "IT Lead"
+    },
+    "contactTitle": "Contact & station",
+    "contactSubtitle": "So users and teammates can reach you quickly on site",
+    "email": "Corporate email",
+    "extension": "Desk / internal extension",
+    "mobile": "Mobile (emergency)",
+    "location": "Station / lab location",
+    "skillsTitle": "Specialized skills",
+    "skillsSubtitle": "Tags used for auto-assign matching",
+    "addSkill": "Add skill",
+    "removeSkill": "Remove {skill}",
+    "skillLabels": {
+      "network": "Network & WiFi",
+      "os": "Windows / macOS",
+      "erp": "ERP Support",
+      "hardware": "Hardware & Printer",
+      "cctv": "CCTV",
+      "access": "Access & passwords",
+      "email": "Email / M365"
+    },
+    "securityTitle": "Security & password",
+    "securitySubtitle": "Manage your account password",
+    "changePassword": "Change password",
+    "changePasswordDialogTitle": "Change password",
+    "changePasswordDialogSubtitle": "Enter your current password, then set a new one.",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "newPasswordHint": "At least 8 characters",
+    "confirmNewPassword": "Confirm new password",
+    "changePasswordSubmit": "Update password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "closeDialog": "Close",
+    "changePasswordErrors": {
+      "wrongCurrent": "Current password is incorrect",
+      "mismatch": "New passwords do not match",
+      "tooShort": "New password must be at least 8 characters"
+    },
+    "passwordToastTitle": "Password updated",
+    "passwordToastBody": "Use your new password the next time you sign in.",
+    "cancel": "Cancel",
+    "save": "Save changes",
+    "toastTitle": "Saved successfully",
+    "toastBody": "Your profile and duty status were updated."
   },
   "mock": {
     "requesterName": "Somporn Jaideesuk",
