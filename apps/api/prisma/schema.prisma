@@ -10,7 +10,7 @@ datasource db {
 enum UserRole {
   USER
   IT_STAFF
-  IT_LEAD
+  SUPERVISOR
   GM
 }
 
@@ -49,15 +49,24 @@ enum ApprovalStatus {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
+  id           String    @id @default(cuid())
+  email        String    @unique
   passwordHash String
   name         String
-  role         UserRole @default(USER)
+  nameTh       String?
+  nameEn       String?
+  role         UserRole  @default(USER)
+  employeeId   String?   @unique
+  jobTitle     String?
+  extension    String?
+  mobile       String?
+  avatarUrl    String?
   department   String?
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  isActive     Boolean   @default(true)
+  lastSignInAt DateTime?
+  deletedAt    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   requestedTickets Ticket[]               @relation("TicketRequester")
   assignments      TicketAssignee[]
@@ -66,6 +75,7 @@ model User {
   approvalsDecided   QuickTicketApproval[] @relation("ApprovalDecider")
   auditLogs        AuditLog[]
 
+  @@index([role, isActive])
   @@map("users")
 }
 
@@ -154,4 +164,36 @@ model AuditLog {
   @@index([entityType, entityId])
   @@index([actorId])
   @@map("audit_logs")
+}
+
+model ReferenceCatalog {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  nameTh    String   @map("name_th")
+  nameEn    String   @map("name_en")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  items ReferenceItem[]
+
+  @@map("reference_catalogs")
+}
+
+model ReferenceItem {
+  id        String   @id @default(cuid())
+  catalogId String   @map("catalog_id")
+  code      String
+  labelTh   String   @map("label_th")
+  labelEn   String   @map("label_en")
+  icon      String?
+  isActive  Boolean  @default(true) @map("is_active")
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  catalog ReferenceCatalog @relation(fields: [catalogId], references: [id], onDelete: Cascade)
+
+  @@unique([catalogId, code])
+  @@index([catalogId, isActive, sortOrder])
+  @@map("reference_items")
 }

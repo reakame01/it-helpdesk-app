@@ -54,6 +54,18 @@ One-time link emailed to the requester’s **required corporate email**. Valid f
 Requester marks the case still unresolved **before** it becomes a Closed Ticket (via email token). Unlimited while open; requires reason and may attach evidence. The live card belongs to the **Work Cycle in which reopen happened**. After user close → no reopen; open a new ticket instead.
 _Avoid_: Treating reopen as silent continue of the old closed cycle on the board; allowing reopen after Closed Ticket
 
+### Roles (login accounts)
+
+Hierarchy (highest → lowest): **GM** → **Supervisor** → **IT Staff**.
+
+| Role | Meaning |
+|------|---------|
+| **GM** | General Manager — oversight / IT Overview |
+| **Supervisor** | IT supervisor — leads the IT team |
+| **IT Staff** | Day-to-day IT operators on the board |
+
+Accounts are provisioned in User Management. Guests (no login) are not assigned these roles.
+
 ### Roles (board)
 
 **Assignee**:

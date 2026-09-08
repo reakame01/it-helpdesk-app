@@ -27,11 +27,16 @@
     "searchPlaceholder": "Search name, email, employee ID, extension...",
     "resultCount": "Showing {count} accounts",
     "empty": "No accounts match your filters.",
+    "loading": "Loading users...",
+    "loadError": "Could not load users.",
+    "retry": "Try again",
+    "saving": "Saving...",
+    "actionError": "Action failed: {message}",
     "stats": {
       "total": "All accounts",
       "active": "Active",
       "staff": "IT Staff",
-      "lead": "IT Lead"
+      "supervisor": "Supervisor"
     },
     "filters": {
       "roleAll": "All roles",
@@ -41,7 +46,7 @@
     },
     "roles": {
       "IT_STAFF": "IT Staff",
-      "IT_LEAD": "IT Lead",
+      "SUPERVISOR": "Supervisor",
       "GM": "GM"
     },
     "table": {
@@ -56,15 +61,15 @@
       "edit": "Edit",
       "resetPassword": "Reset password",
       "deactivate": "Deactivate",
-      "activate": "Activate"
+      "activate": "Activate",
+      "delete": "Delete"
     },
     "lastSignIn": {
       "never": "Never",
-      "minutes12": "12 min ago",
-      "hour1": "1 hr ago",
-      "hours3": "3 hr ago",
-      "yesterday": "Yesterday",
-      "days7": "7 days ago"
+      "justNow": "Just now",
+      "minutes": "{count} min ago",
+      "hours": "{count} hr ago",
+      "days": "{count} days ago"
     },
     "fields": {
       "nameTh": "Full name (Thai)",
@@ -96,9 +101,18 @@
     },
     "reset": {
       "title": "Reset password?",
-      "body": "Send a secure reset link to {name} ({email}). Existing sessions will be revoked.",
-      "securityNote": "Passwords are hashed. IT cannot view or set the user’s final password directly.",
-      "confirm": "Send reset link"
+      "body": "Generate a new temporary password for {name} ({email}).",
+      "securityNote": "Copy the temporary password and send it yourself. The user should change it after signing in.",
+      "confirm": "Generate temporary password",
+      "resultTitle": "Temporary password ready",
+      "resultBody": "Copy and send this password to {name}.",
+      "done": "Done"
+    },
+    "delete": {
+      "title": "Delete account?",
+      "body": "Remove {name} ({email}) from User Management. Ticket history linked to this account is kept.",
+      "securityNote": "This is a soft delete — the account can no longer sign in, but related records remain intact.",
+      "confirm": "Delete account"
     },
     "toast": {
       "createdTitle": "Account created",
@@ -108,8 +122,10 @@
       "deactivatedTitle": "Account deactivated",
       "activatedTitle": "Account activated",
       "statusBody": "Updated status for {name}.",
-      "resetTitle": "Reset link sent",
-      "resetBody": "Mock: password reset emailed to {name}."
+      "resetTitle": "Password reset",
+      "resetBody": "Temporary password created for {name}.",
+      "deletedTitle": "Account deleted",
+      "deletedBody": "Removed {name} from User Management (history kept)."
     }
   },
   "dataReferences": {
@@ -125,6 +141,11 @@
     "addItem": "Add option",
     "searchPlaceholder": "Search code or label...",
     "empty": "No options match your filters.",
+    "loading": "Loading reference data...",
+    "loadError": "Could not load reference data.",
+    "retry": "Try again",
+    "saving": "Saving...",
+    "actionError": "Action failed: {message}",
     "confirmDelete": "Delete “{label}”? Forms that still use this code may break until updated.",
     "filters": {
       "all": "All statuses",
@@ -373,6 +394,7 @@
     "password": "Password",
     "passwordPlaceholder": "Enter password",
     "submit": "Sign in",
+    "submitting": "Signing in...",
     "forgot": "Forgot password?",
     "mockHint": "Dev: it@company.com / it1234",
     "invalidCredentials": "Invalid email or password",
@@ -430,10 +452,11 @@
     "nameEnHint": "Match passport or employee badge",
     "jobTitle": "Job title and department",
     "systemRole": "System role",
-    "systemRoleHint": "Access is set centrally. Contact an IT Lead to change permissions.",
+    "systemRoleHint": "Access is set centrally. Contact a Supervisor to change permissions.",
     "roles": {
       "IT_STAFF": "IT Staff Administrator",
-      "IT_LEAD": "IT Lead"
+      "SUPERVISOR": "Supervisor",
+      "GM": "GM"
     },
     "contactTitle": "Contact & station",
     "contactSubtitle": "So users and teammates can reach you quickly on site",

@@ -19,15 +19,18 @@ export function ItLoginForm({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const ok = login(email, password);
+    setSubmitting(true);
+    setError(false);
+    const ok = await login(email, password);
+    setSubmitting(false);
     if (!ok) {
       setError(true);
       return;
     }
-    setError(false);
     onSuccess?.();
   }
 
@@ -81,11 +84,12 @@ export function ItLoginForm({
       </div>
 
       <button
-        className="flex h-12 w-full items-center justify-center gap-space-xs rounded-xl bg-primary font-label-md text-label-md font-bold text-on-primary shadow-sm transition-colors hover:bg-primary-container"
+        className="flex h-12 w-full items-center justify-center gap-space-xs rounded-xl bg-primary font-label-md text-label-md font-bold text-on-primary shadow-sm transition-colors hover:bg-primary-container disabled:opacity-60"
+        disabled={submitting}
         type="submit"
       >
         <MaterialIcon className="text-[20px]" name="login" />
-        <span>{t("submit")}</span>
+        <span>{submitting ? t("submitting") : t("submit")}</span>
       </button>
 
       {error ? (

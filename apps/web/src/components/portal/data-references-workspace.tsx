@@ -1,38 +1,80 @@
 "use client";
 
-import { useEffect, useId, useMemo, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
+import type { ReferenceCatalogDto, ReferenceItemDto } from "@helpdesk/types";
 import { ItLoginDialog } from "@/components/auth/it-login-dialog";
 import { useItAuth } from "@/components/auth/it-auth-context";
 import { MaterialIcon } from "@/components/shared/material-icon";
 import {
-  createEmptyReferenceItem,
-  initialReferenceItems,
-  referenceCatalogs,
-  type ReferenceCatalogId,
-  type ReferenceItem,
-} from "@/lib/mock/references";
+  createReferenceItem,
+  deleteReferenceItem,
+  fetchReferenceCatalogs,
+  fetchReferenceItems,
+  getApiErrorMessage,
+  updateReferenceItem,
+} from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 type ToastState = { title: string; body: string } | null;
 type EditorMode = "create" | "edit";
+type StatusFilter = "all" | "active" | "inactive";
+
+type EditorForm = {
+  code: string;
+  labelTh: string;
+  labelEn: string;
+  isActive: boolean;
+  sortOrder: number;
+  icon?: string;
+};
+
+const CATALOG_ICONS: Record<string, string> = {
+  departments: "corporate_fare",
+  categories: "category",
+  skills: "psychology",
+};
+
+const CATALOG_ORDER = ["departments", "categories", "skills"] as const;
+
+function catalogIcon(code: string) {
+  return CATALOG_ICONS[code] ?? "dataset";
+}
+
+function emptyForm(catalogCode: string, nextOrder: number): EditorForm {
+  return {
+    code: "",
+    labelTh: "",
+    labelEn: "",
+    isActive: true,
+    sortOrder: nextOrder,
+    icon:
+      catalogCode === "categories"
+        ? "category"
+        : catalogCode === "skills"
+          ? "psychology"
+          : undefined,
+  };
+}
 
 export function DataReferencesWorkspace() {
   const t = useTranslations("dataReferences");
   const { isAuthenticated } = useItAuth();
   const [loginOpen, setLoginOpen] = useState(false);
-  const [catalogId, setCatalogId] =
-    useState<ReferenceCatalogId>("departments");
-  const [itemsByCatalog, setItemsByCatalog] = useState(initialReferenceItems);
+  const [catalogs, setCatalogs] = useState<ReferenceCatalogDto[]>([]);
+  const [catalogCode, setCatalogCode] = useState<string>("departments");
+  const [items, setItems] = useState<ReferenceItemDto[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
   const [query, setQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">(
-    "all",
-  );
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [editorOpen, setEditorOpen] = useState(false);
   const [editorMode, setEditorMode] = useState<EditorMode>("create");
-  const [editingItem, setEditingItem] = useState<ReferenceItem | null>(null);
+  const [editingItem, setEditingItem] = useState<ReferenceItemDto | null>(null);
   const [toast, setToast] = useState<ToastState>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!toast) return;
@@ -40,8 +82,76 @@ export function DataReferencesWorkspace() {
     return () => window.clearTimeout(timer);
   }, [toast]);
 
-  const items = itemsByCatalog[catalogId];
-  const showIcon = catalogId === "categories" || catalogId === "skills";
+  const loadCatalogs = useCallback(async () => {
+    const rows = await fetchReferenceCatalogs();
+    const ordered = [...rows].sort((a, b) => {
+      const ai = CATALOG_ORDER.indexOf(
+        a.code as (typeof CATALOG_ORDER)[number],
+      );
+      const bi = CATALOG_ORDER.indexOf(
+        b.code as (typeof CATALOG_ORDER)[number],
+      );
+      return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
+    });
+    setCatalogs(ordered);
+    return ordered;
+  }, []);
+
+  const loadItems = useCallback(async (code: string) => {
+    const rows = await fetchReferenceItems(code);
+    setItems(rows);
+    return rows;
+  }, []);
+
+  const refreshCatalogs = useCallback(async () => {
+    if (!isAuthenticated) return;
+    setLoading(true);
+    setLoadError(null);
+    try {
+      const nextCatalogs = await loadCatalogs();
+      const selected =
+        nextCatalogs.find((c) => c.code === catalogCode)?.code ??
+        nextCatalogs[0]?.code;
+      if (selected && selected !== catalogCode) {
+        setCatalogCode(selected);
+      }
+    } catch (error) {
+      setLoadError(getApiErrorMessage(error));
+    } finally {
+      setLoading(false);
+    }
+  }, [isAuthenticated, loadCatalogs, catalogCode]);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setCatalogs([]);
+      setItems([]);
+      setLoadError(null);
+      return;
+    }
+    void refreshCatalogs();
+  }, [isAuthenticated]); // eslint-disable-line react-hooks/exhaustive-deps -- initial catalogs when signed in
+
+  useEffect(() => {
+    if (!isAuthenticated || !catalogCode) return;
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      setLoadError(null);
+      try {
+        await loadItems(catalogCode);
+      } catch (error) {
+        if (!cancelled) setLoadError(getApiErrorMessage(error));
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [catalogCode, isAuthenticated, loadItems]);
+
+  const showIcon = catalogCode === "categories" || catalogCode === "skills";
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -85,72 +195,114 @@ export function DataReferencesWorkspace() {
   function openCreate() {
     setEditorMode("create");
     setEditingItem(null);
+    setActionError(null);
     setEditorOpen(true);
   }
 
-  function openEdit(item: ReferenceItem) {
+  function openEdit(item: ReferenceItemDto) {
     setEditorMode("edit");
     setEditingItem(item);
+    setActionError(null);
     setEditorOpen(true);
   }
 
-  function saveItem(payload: Omit<ReferenceItem, "id"> & { id?: string }) {
-    setItemsByCatalog((prev) => {
-      const list = prev[catalogId];
+  async function saveItem(payload: EditorForm & { id?: string }) {
+    setBusy(true);
+    setActionError(null);
+    try {
       if (editorMode === "create") {
-        return {
-          ...prev,
-          [catalogId]: [
-            ...list,
-            { ...payload, id: `${catalogId}-${Date.now()}` },
-          ],
-        };
+        await createReferenceItem(catalogCode, {
+          code: payload.code,
+          labelTh: payload.labelTh,
+          labelEn: payload.labelEn,
+          icon: showIcon ? payload.icon ?? null : null,
+          isActive: true,
+          sortOrder: payload.sortOrder,
+        });
+        setToast({
+          title: t("toast.createdTitle"),
+          body: t("toast.createdBody"),
+        });
+      } else if (payload.id) {
+        await updateReferenceItem(payload.id, {
+          code: payload.code,
+          labelTh: payload.labelTh,
+          labelEn: payload.labelEn,
+          icon: showIcon ? payload.icon ?? null : null,
+          isActive: payload.isActive,
+          sortOrder: payload.sortOrder,
+        });
+        setToast({
+          title: t("toast.updatedTitle"),
+          body: t("toast.updatedBody"),
+        });
       }
-      return {
-        ...prev,
-        [catalogId]: list.map((item) =>
-          item.id === payload.id ? { ...item, ...payload, id: item.id } : item,
-        ),
-      };
-    });
-    setEditorOpen(false);
-    setToast({
-      title:
-        editorMode === "create"
-          ? t("toast.createdTitle")
-          : t("toast.updatedTitle"),
-      body:
-        editorMode === "create"
-          ? t("toast.createdBody")
-          : t("toast.updatedBody"),
-    });
+      setEditorOpen(false);
+      await Promise.all([loadCatalogs(), loadItems(catalogCode)]);
+    } catch (error) {
+      setActionError(getApiErrorMessage(error));
+    } finally {
+      setBusy(false);
+    }
   }
 
-  function toggleActive(item: ReferenceItem) {
-    setItemsByCatalog((prev) => ({
-      ...prev,
-      [catalogId]: prev[catalogId].map((row) =>
-        row.id === item.id ? { ...row, isActive: !row.isActive } : row,
-      ),
-    }));
-    setToast({
-      title: item.isActive
-        ? t("toast.deactivatedTitle")
-        : t("toast.activatedTitle"),
-      body: t("toast.statusBody", { label: item.labelTh }),
-    });
+  async function toggleActive(item: ReferenceItemDto) {
+    setBusy(true);
+    setActionError(null);
+    try {
+      await updateReferenceItem(item.id, { isActive: !item.isActive });
+      setToast({
+        title: item.isActive
+          ? t("toast.deactivatedTitle")
+          : t("toast.activatedTitle"),
+        body: t("toast.statusBody", { label: item.labelTh }),
+      });
+      await Promise.all([loadCatalogs(), loadItems(catalogCode)]);
+    } catch (error) {
+      setActionError(getApiErrorMessage(error));
+    } finally {
+      setBusy(false);
+    }
   }
 
-  function removeItem(item: ReferenceItem) {
+  async function removeItem(item: ReferenceItemDto) {
     if (!window.confirm(t("confirmDelete", { label: item.labelTh }))) return;
-    setItemsByCatalog((prev) => ({
-      ...prev,
-      [catalogId]: prev[catalogId].filter((row) => row.id !== item.id),
-    }));
-    setToast({
-      title: t("toast.deletedTitle"),
-      body: t("toast.deletedBody", { label: item.labelTh }),
-    });
+    setBusy(true);
+    setActionError(null);
+    try {
+      await deleteReferenceItem(item.id);
+      setToast({
+        title: t("toast.deletedTitle"),
+        body: t("toast.deletedBody", { label: item.labelTh }),
+      });
+      await Promise.all([loadCatalogs(), loadItems(catalogCode)]);
+    } catch (error) {
+      setActionError(getApiErrorMessage(error));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function catalogName(code: string) {
+    if (
+      code === "departments" ||
+      code === "categories" ||
+      code === "skills"
+    ) {
+      return t(`catalogs.${code}.name`);
+    }
+    return code;
+  }
+
+  function catalogDescription(code: string) {
+    if (
+      code === "departments" ||
+      code === "categories" ||
+      code === "skills"
+    ) {
+      return t(`catalogs.${code}.description`);
+    }
+    return "";
   }
 
   return (
@@ -174,16 +326,34 @@ export function DataReferencesWorkspace() {
         </div>
       </section>
 
+      {loadError ? (
+        <div className="flex flex-col items-start gap-space-sm rounded-xl bg-error-container/40 p-space-lg text-error">
+          <p className="font-body-md text-body-md">
+            {t("loadError")} {loadError}
+          </p>
+          <button
+            className="rounded-lg bg-primary px-space-md py-2 font-label-md text-label-md font-bold text-on-primary"
+            type="button"
+            onClick={() => void refreshCatalogs()}
+          >
+            {t("retry")}
+          </button>
+        </div>
+      ) : null}
+
+      {actionError ? (
+        <div className="rounded-xl bg-error-container/40 px-space-md py-space-sm font-body-sm text-body-sm text-error">
+          {t("actionError", { message: actionError })}
+        </div>
+      ) : null}
+
       <div className="grid grid-cols-1 items-start gap-space-lg lg:grid-cols-12">
         <aside className="flex flex-col gap-space-xs rounded-xl bg-surface-container-lowest p-space-sm shadow-sm lg:col-span-3">
           <p className="px-space-sm py-space-xs font-label-sm text-label-sm font-semibold text-on-surface-variant">
             {t("catalogsHeading")}
           </p>
-          {referenceCatalogs.map((catalog) => {
-            const count = itemsByCatalog[catalog.id].filter(
-              (item) => item.isActive,
-            ).length;
-            const selected = catalog.id === catalogId;
+          {catalogs.map((catalog) => {
+            const selected = catalog.code === catalogCode;
             return (
               <button
                 key={catalog.id}
@@ -195,15 +365,19 @@ export function DataReferencesWorkspace() {
                 )}
                 type="button"
                 onClick={() => {
-                  setCatalogId(catalog.id);
+                  setCatalogCode(catalog.code);
                   setQuery("");
                   setStatusFilter("all");
+                  setActionError(null);
                 }}
               >
-                <MaterialIcon className="text-[22px]" name={catalog.icon} />
+                <MaterialIcon
+                  className="text-[22px]"
+                  name={catalogIcon(catalog.code)}
+                />
                 <span className="min-w-0 flex-1">
                   <span className="block font-label-md text-label-md font-semibold">
-                    {t(`catalogs.${catalog.id}.name`)}
+                    {catalogName(catalog.code)}
                   </span>
                   <span
                     className={cn(
@@ -211,7 +385,12 @@ export function DataReferencesWorkspace() {
                       selected ? "text-on-primary/80" : "text-on-surface-variant",
                     )}
                   >
-                    {t("activeCount", { count })}
+                    {t("activeCount", {
+                      count:
+                        catalog.code === catalogCode
+                          ? activeCount
+                          : catalog.itemCount,
+                    })}
                   </span>
                 </span>
               </button>
@@ -223,20 +402,23 @@ export function DataReferencesWorkspace() {
           <div className="flex flex-col gap-space-sm lg:flex-row lg:items-start lg:justify-between">
             <div>
               <h2 className="font-headline-sm text-headline-sm font-semibold text-primary">
-                {t(`catalogs.${catalogId}.name`)}
+                {catalogName(catalogCode)}
               </h2>
               <p className="mt-1 font-body-sm text-body-sm text-on-surface-variant">
-                {t(`catalogs.${catalogId}.description`)}
+                {catalogDescription(catalogCode)}
               </p>
               <p className="mt-space-2xs font-label-sm text-label-sm text-outline">
-                {t("summary", {
-                  active: activeCount,
-                  total: items.length,
-                })}
+                {loading
+                  ? t("loading")
+                  : t("summary", {
+                      active: activeCount,
+                      total: items.length,
+                    })}
               </p>
             </div>
             <button
-              className="flex h-11 shrink-0 items-center justify-center gap-space-xs rounded-lg bg-primary px-space-md font-label-md text-label-md font-bold text-on-primary shadow-sm hover:bg-primary-container"
+              className="flex h-11 shrink-0 items-center justify-center gap-space-xs rounded-lg bg-primary px-space-md font-label-md text-label-md font-bold text-on-primary shadow-sm hover:bg-primary-container disabled:opacity-60"
+              disabled={busy || loading}
               type="button"
               onClick={openCreate}
             >
@@ -263,7 +445,7 @@ export function DataReferencesWorkspace() {
               className="h-11 rounded-lg bg-surface-container-low px-space-md font-label-md text-label-md text-on-surface outline-none focus:ring-2 focus:ring-primary"
               value={statusFilter}
               onChange={(e) =>
-                setStatusFilter(e.target.value as "all" | "active" | "inactive")
+                setStatusFilter(e.target.value as StatusFilter)
               }
             >
               <option value="all">{t("filters.all")}</option>
@@ -302,7 +484,16 @@ export function DataReferencesWorkspace() {
                 </tr>
               </thead>
               <tbody>
-                {filtered.length === 0 ? (
+                {loading && items.length === 0 ? (
+                  <tr>
+                    <td
+                      className="px-space-md py-space-xl text-center font-body-sm text-body-sm text-on-surface-variant"
+                      colSpan={showIcon ? 7 : 6}
+                    >
+                      {t("loading")}
+                    </td>
+                  </tr>
+                ) : filtered.length === 0 ? (
                   <tr>
                     <td
                       className="px-space-md py-space-xl text-center font-body-sm text-body-sm text-on-surface-variant"
@@ -362,25 +553,30 @@ export function DataReferencesWorkspace() {
                       <td className="px-space-md py-space-sm">
                         <div className="flex items-center justify-end gap-1">
                           <IconAction
+                            disabled={busy}
                             label={t("actions.edit")}
                             name="edit"
                             onClick={() => openEdit(item)}
                           />
                           <IconAction
                             danger={item.isActive}
+                            disabled={busy}
                             label={
                               item.isActive
                                 ? t("actions.deactivate")
                                 : t("actions.activate")
                             }
-                            name={item.isActive ? "visibility_off" : "visibility"}
-                            onClick={() => toggleActive(item)}
+                            name={
+                              item.isActive ? "visibility_off" : "visibility"
+                            }
+                            onClick={() => void toggleActive(item)}
                           />
                           <IconAction
                             danger
+                            disabled={busy}
                             label={t("actions.delete")}
                             name="delete"
-                            onClick={() => removeItem(item)}
+                            onClick={() => void removeItem(item)}
                           />
                         </div>
                       </td>
@@ -394,15 +590,21 @@ export function DataReferencesWorkspace() {
       </div>
 
       <ReferenceEditorDialog
-        key={`${catalogId}-${editorMode}-${editingItem?.id ?? "new"}-${editorOpen}`}
-        catalogId={catalogId}
+        key={`${catalogCode}-${editorMode}-${editingItem?.id ?? "new"}-${editorOpen}`}
+        busy={busy}
+        catalogCode={catalogCode}
+        catalogLabel={catalogName(catalogCode)}
+        item={editingItem}
         mode={editorMode}
-        nextOrder={items.length + 1}
+        nextOrder={
+          items.reduce((max, row) => Math.max(max, row.sortOrder), 0) + 1
+        }
         open={editorOpen}
         showIcon={showIcon}
-        item={editingItem}
-        onClose={() => setEditorOpen(false)}
-        onSave={saveItem}
+        onClose={() => {
+          if (!busy) setEditorOpen(false);
+        }}
+        onSave={(payload) => void saveItem(payload)}
       />
 
       {toast ? (
@@ -430,19 +632,22 @@ function IconAction({
   label,
   onClick,
   danger,
+  disabled,
 }: {
   name: string;
   label: string;
   onClick: () => void;
   danger?: boolean;
+  disabled?: boolean;
 }) {
   return (
     <button
       aria-label={label}
       className={cn(
-        "flex h-9 w-9 items-center justify-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container",
+        "flex h-9 w-9 items-center justify-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container disabled:opacity-40",
         danger && "hover:bg-error-container/50 hover:text-error",
       )}
+      disabled={disabled}
       title={label}
       type="button"
       onClick={onClick}
@@ -455,31 +660,44 @@ function IconAction({
 function ReferenceEditorDialog({
   open,
   mode,
-  catalogId,
+  catalogCode,
+  catalogLabel,
   item,
   nextOrder,
   showIcon,
+  busy,
   onClose,
   onSave,
 }: {
   open: boolean;
   mode: EditorMode;
-  catalogId: ReferenceCatalogId;
-  item: ReferenceItem | null;
+  catalogCode: string;
+  catalogLabel: string;
+  item: ReferenceItemDto | null;
   nextOrder: number;
   showIcon: boolean;
+  busy: boolean;
   onClose: () => void;
-  onSave: (payload: Omit<ReferenceItem, "id"> & { id?: string }) => void;
+  onSave: (payload: EditorForm & { id?: string }) => void;
 }) {
   const t = useTranslations("dataReferences");
   const titleId = useId();
-  const defaults = item ?? createEmptyReferenceItem(catalogId, nextOrder);
+  const defaults: EditorForm = item
+    ? {
+        code: item.code,
+        labelTh: item.labelTh,
+        labelEn: item.labelEn,
+        isActive: item.isActive,
+        sortOrder: item.sortOrder,
+        icon: item.icon ?? undefined,
+      }
+    : emptyForm(catalogCode, nextOrder);
   const [form, setForm] = useState(defaults);
 
   useEffect(() => {
     if (!open) return;
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") onClose();
+      if (event.key === "Escape" && !busy) onClose();
     }
     const previous = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -488,16 +706,17 @@ function ReferenceEditorDialog({
       document.body.style.overflow = previous;
       document.removeEventListener("keydown", onKeyDown);
     };
-  }, [open, onClose]);
+  }, [open, onClose, busy]);
 
   if (!open || typeof document === "undefined") return null;
 
-  function update<K extends keyof typeof form>(key: K, value: (typeof form)[K]) {
+  function update<K extends keyof EditorForm>(key: K, value: EditorForm[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (busy) return;
     onSave({
       code: form.code.trim(),
       labelTh: form.labelTh.trim(),
@@ -514,7 +733,7 @@ function ReferenceEditorDialog({
       <div
         className="flex min-h-full items-center justify-center p-space-md"
         onMouseDown={(event) => {
-          if (event.target === event.currentTarget) onClose();
+          if (event.target === event.currentTarget && !busy) onClose();
         }}
       >
         <div
@@ -525,7 +744,8 @@ function ReferenceEditorDialog({
         >
           <button
             aria-label={t("dialog.close")}
-            className="absolute right-space-md top-space-md flex h-9 w-9 items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-container"
+            className="absolute right-space-md top-space-md flex h-9 w-9 items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-container disabled:opacity-40"
+            disabled={busy}
             type="button"
             onClick={onClose}
           >
@@ -542,7 +762,7 @@ function ReferenceEditorDialog({
                 : t("dialog.editTitle")}
             </h2>
             <p className="mt-1 font-body-sm text-body-sm text-on-surface-variant">
-              {t(`catalogs.${catalogId}.name`)}
+              {catalogLabel}
             </p>
           </div>
 
@@ -622,18 +842,24 @@ function ReferenceEditorDialog({
 
             <div className="mt-space-xs flex flex-col-reverse gap-space-sm sm:flex-row sm:justify-end">
               <button
-                className="h-11 rounded-lg px-space-md font-label-md text-label-md text-on-surface-variant hover:bg-surface-container"
+                className="h-11 rounded-lg px-space-md font-label-md text-label-md text-on-surface-variant hover:bg-surface-container disabled:opacity-40"
+                disabled={busy}
                 type="button"
                 onClick={onClose}
               >
                 {t("dialog.cancel")}
               </button>
               <button
-                className="flex h-11 items-center justify-center gap-space-xs rounded-lg bg-primary px-space-md font-label-md text-label-md font-bold text-on-primary hover:bg-primary-container"
+                className="flex h-11 items-center justify-center gap-space-xs rounded-lg bg-primary px-space-md font-label-md text-label-md font-bold text-on-primary hover:bg-primary-container disabled:opacity-60"
+                disabled={busy}
                 type="submit"
               >
                 <MaterialIcon className="text-[18px]" name="check_circle" />
-                {mode === "create" ? t("dialog.createSubmit") : t("dialog.save")}
+                {busy
+                  ? t("saving")
+                  : mode === "create"
+                    ? t("dialog.createSubmit")
+                    : t("dialog.save")}
               </button>
             </div>
           </form>

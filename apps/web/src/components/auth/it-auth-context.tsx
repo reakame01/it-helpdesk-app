@@ -4,12 +4,19 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
 } from "react";
+import type { UserDto } from "@helpdesk/types";
+import {
+  fetchCurrentUser,
+  loginRequest,
+  setApiAccessToken,
+} from "@/lib/api";
 
-export type ItStaffRole = "IT_STAFF" | "IT_LEAD";
+export type ItStaffRole = "IT_STAFF" | "SUPERVISOR" | "GM";
 
 export type DutyStatus = "available" | "break" | "onsite";
 
@@ -69,7 +76,9 @@ type ChangePasswordResult =
 type ItAuthContextValue = {
   user: ItSessionUser | null;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => boolean;
+  isRestoringSession: boolean;
+  accessToken: string | null;
+  login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   updateProfile: (updates: ProfileUpdates) => void;
   changePassword: (
@@ -79,21 +88,12 @@ type ItAuthContextValue = {
   ) => ChangePasswordResult;
 };
 
-const MOCK_IT_CREDENTIALS = {
-  email: "it@company.com",
-  password: "it1234",
-} as const;
+const ACCESS_TOKEN_STORAGE_KEY = "helpdesk.it.accessToken";
 
 const DEFAULT_AVATAR =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuA_NePHXteXZ9yx7SIbUFiB0Y_Ny-CmxDPgqTJ4X35kPBr_q7zs_4d2-ZRM25dLefYhTZEAu3w8jQKcJAPAACSo8IWJW4wGuO0jvrlOsRd14qtTrsi27hLBJTleGKCG8pt__HLkPT3loKvwnuH72YM4mJBp6qt5bu1tjmNYzbpX-Yyax0yuX63Lmqs0hr-6Nkew0Jn_59RNYBB3y-OunQPWDqAZMZFjonan5266dgGrNL89QkY8Sow";
+  "https://www.kindpng.com/picc/m/24-248253_user-profile-default-image-png-clipart-png-download.png";
 
-const MOCK_IT_USER: ItSessionUser = {
-  id: "it-1",
-  displayName: "อนุชา ปัญญาไว",
-  displayNameTh: "คุณอนุชา ปัญญาไว",
-  displayNameEn: "Anucha Panyawai",
-  email: MOCK_IT_CREDENTIALS.email,
-  role: "IT_STAFF",
+const PROFILE_DEFAULTS = {
   avatarUrl: DEFAULT_AVATAR,
   jobTitle: "System & Network Specialist (ฝ่ายเทคโนโลยีสารสนเทศ)",
   employeeId: "EMP-0012",
@@ -101,14 +101,14 @@ const MOCK_IT_USER: ItSessionUser = {
   extension: "ต่อ 101, 102",
   mobile: "089-123-4567",
   location: "ห้องปฏิบัติการ IT อาคาร 2 ชั้น 3 (IT NOC Room)",
-  dutyStatus: "available",
+  dutyStatus: "available" as DutyStatus,
   skills: [
     { id: "network", icon: "wifi", labelKey: "network" },
     { id: "os", icon: "desktop_windows", labelKey: "os" },
     { id: "erp", icon: "database", labelKey: "erp" },
     { id: "hardware", icon: "print", labelKey: "hardware" },
     { id: "cctv", icon: "videocam", labelKey: "cctv" },
-  ],
+  ] satisfies ProfileSkill[],
   metrics: {
     closedCases: 142,
     rating: "4.9",
@@ -119,29 +119,131 @@ const MOCK_IT_USER: ItSessionUser = {
   lastSavedLabelKey: "yesterday",
 };
 
+function readStoredAccessToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return window.localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
+}
+
+function writeStoredAccessToken(token: string | null) {
+  if (typeof window === "undefined") return;
+  if (!token) {
+    window.localStorage.removeItem(ACCESS_TOKEN_STORAGE_KEY);
+    return;
+  }
+  window.localStorage.setItem(ACCESS_TOKEN_STORAGE_KEY, token);
+}
+
+function mapApiUserToSession(user: UserDto): ItSessionUser | null {
+  if (
+    user.role !== "IT_STAFF" &&
+    user.role !== "SUPERVISOR" &&
+    user.role !== "GM"
+  ) {
+    return null;
+  }
+
+  const displayName = user.nameTh?.trim() || user.name;
+  return {
+    id: user.id,
+    displayName,
+    displayNameTh: displayName.startsWith("คุณ")
+      ? displayName
+      : `คุณ${displayName}`,
+    displayNameEn: user.nameEn?.trim() || user.name,
+    email: user.email,
+    role: user.role,
+    ...PROFILE_DEFAULTS,
+    avatarUrl: user.avatarUrl || PROFILE_DEFAULTS.avatarUrl,
+    jobTitle: user.jobTitle || PROFILE_DEFAULTS.jobTitle,
+    employeeId: user.employeeId || PROFILE_DEFAULTS.employeeId,
+    extension: user.extension || PROFILE_DEFAULTS.extension,
+    mobile: user.mobile || PROFILE_DEFAULTS.mobile,
+  };
+}
+
 const ItAuthContext = createContext<ItAuthContextValue | null>(null);
 
 export function ItAuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<ItSessionUser | null>(null);
-  const [mockPassword, setMockPassword] = useState<string>(
-    MOCK_IT_CREDENTIALS.password,
-  );
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [localPassword, setLocalPassword] = useState<string | null>(null);
+  const [isRestoringSession, setIsRestoringSession] = useState(true);
 
-  const login = useCallback(
-    (email: string, password: string) => {
-      const emailOk =
-        email.trim().toLowerCase() === MOCK_IT_CREDENTIALS.email;
-      const passwordOk = password === mockPassword;
-      if (!emailOk || !passwordOk) return false;
-      setUser({ ...MOCK_IT_USER, email: MOCK_IT_CREDENTIALS.email });
+  const clearSession = useCallback(() => {
+    setApiAccessToken(null);
+    writeStoredAccessToken(null);
+    setAccessToken(null);
+    setUser(null);
+    setLocalPassword(null);
+  }, []);
+
+  const applySession = useCallback(
+    (token: string, profile: UserDto, password?: string | null) => {
+      const session = mapApiUserToSession(profile);
+      if (!session) {
+        clearSession();
+        return false;
+      }
+      setApiAccessToken(token);
+      writeStoredAccessToken(token);
+      setAccessToken(token);
+      setUser(session);
+      if (password !== undefined) {
+        setLocalPassword(password);
+      }
       return true;
     },
-    [mockPassword],
+    [clearSession],
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function restoreSession() {
+      const token = readStoredAccessToken();
+      if (!token) {
+        if (!cancelled) setIsRestoringSession(false);
+        return;
+      }
+
+      setApiAccessToken(token);
+      setAccessToken(token);
+
+      try {
+        const profile = await fetchCurrentUser();
+        if (cancelled) return;
+        if (!applySession(token, profile, null)) {
+          clearSession();
+        }
+      } catch {
+        if (!cancelled) clearSession();
+      } finally {
+        if (!cancelled) setIsRestoringSession(false);
+      }
+    }
+
+    void restoreSession();
+    return () => {
+      cancelled = true;
+    };
+  }, [applySession, clearSession]);
+
+  const login = useCallback(
+    async (email: string, password: string) => {
+      try {
+        const result = await loginRequest(email, password);
+        return applySession(result.tokens.accessToken, result.user, password);
+      } catch {
+        clearSession();
+        return false;
+      }
+    },
+    [applySession, clearSession],
   );
 
   const logout = useCallback(() => {
-    setUser(null);
-  }, []);
+    clearSession();
+  }, [clearSession]);
 
   const updateProfile = useCallback((updates: ProfileUpdates) => {
     setUser((prev) => {
@@ -160,7 +262,7 @@ export function ItAuthProvider({ children }: { children: ReactNode }) {
       newPassword: string,
       confirmPassword: string,
     ): ChangePasswordResult => {
-      if (currentPassword !== mockPassword) {
+      if (!localPassword || currentPassword !== localPassword) {
         return { ok: false, error: "wrongCurrent" };
       }
       if (newPassword.length < 8) {
@@ -169,22 +271,32 @@ export function ItAuthProvider({ children }: { children: ReactNode }) {
       if (newPassword !== confirmPassword) {
         return { ok: false, error: "mismatch" };
       }
-      setMockPassword(newPassword);
+      setLocalPassword(newPassword);
       return { ok: true };
     },
-    [mockPassword],
+    [localPassword],
   );
 
   const value = useMemo(
     () => ({
       user,
-      isAuthenticated: user !== null,
+      isAuthenticated: user !== null && accessToken !== null,
+      isRestoringSession,
+      accessToken,
       login,
       logout,
       updateProfile,
       changePassword,
     }),
-    [user, login, logout, updateProfile, changePassword],
+    [
+      user,
+      accessToken,
+      isRestoringSession,
+      login,
+      logout,
+      updateProfile,
+      changePassword,
+    ],
   );
 
   return (

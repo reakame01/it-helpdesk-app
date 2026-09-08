@@ -18,7 +18,7 @@ const fieldClassName =
   "h-12 w-full rounded-lg bg-surface-container-lowest py-3 pl-11 pr-4 font-body-md text-body-md text-on-surface shadow-sm outline-none ring-2 ring-transparent transition-all focus:ring-primary";
 
 const DEFAULT_FALLBACK_AVATAR =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuA_NePHXteXZ9yx7SIbUFiB0Y_Ny-CmxDPgqTJ4X35kPBr_q7zs_4d2-ZRM25dLefYhTZEAu3w8jQKcJAPAACSo8IWJW4wGuO0jvrlOsRd14qtTrsi27hLBJTleGKCG8pt__HLkPT3loKvwnuH72YM4mJBp6qt5bu1tjmNYzbpX-Yyax0yuX63Lmqs0hr-6Nkew0Jn_59RNYBB3y-OunQPWDqAZMZFjonan5266dgGrNL89QkY8Sow";
+  "https://www.kindpng.com/picc/m/24-248253_user-profile-default-image-png-clipart-png-download.png";
 
 export function ProfileWorkspace() {
   const t = useTranslations("profile");
