@@ -32,6 +32,7 @@ export function SubmitTicketForm({ onSuccess }: SubmitTicketFormProps) {
   const tMock = useTranslations("mock");
 
   const [requesterName, setRequesterName] = useState(tMock("requesterName"));
+  const [email, setEmail] = useState(tMock("email"));
   const [department, setDepartment] = useState(mockCurrentUser.department);
   const [extPhone, setExtPhone] = useState(tMock("extension"));
   const [category, setCategory] = useState<CategoryKey>("software");
@@ -47,11 +48,11 @@ export function SubmitTicketForm({ onSuccess }: SubmitTicketFormProps) {
   );
 
   const stepState = useMemo(() => {
-    const step1Done = Boolean(requesterName && department && extPhone);
+    const step1Done = Boolean(requesterName && email && department && extPhone);
     const step2Done = Boolean(category);
     const step3Done = Boolean(title && detail);
     return { step1Done, step2Done, step3Done };
-  }, [requesterName, department, extPhone, category, title, detail]);
+  }, [requesterName, email, department, extPhone, category, title, detail]);
 
   useEffect(() => {
     const onPaste = (event: ClipboardEvent) => {
@@ -88,6 +89,7 @@ export function SubmitTicketForm({ onSuccess }: SubmitTicketFormProps) {
   function resetForm() {
     if (!confirm(t("resetConfirm"))) return;
     setRequesterName(tMock("requesterName"));
+    setEmail(tMock("email"));
     setDepartment(mockCurrentUser.department);
     setExtPhone(tMock("extension"));
     setCategory("software");
@@ -159,7 +161,7 @@ export function SubmitTicketForm({ onSuccess }: SubmitTicketFormProps) {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-space-md md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-space-md md:grid-cols-2">
             <Field hint={t("nameHint")} icon="person" label={t("name")} required>
               <input
                 className="h-target-min w-full rounded-lg bg-surface-container-lowest pl-12 pr-space-md font-body-md text-body-md text-on-surface shadow-sm outline-none ring-2 ring-transparent transition-colors focus:bg-surface-container-low focus:ring-secondary"
@@ -167,6 +169,23 @@ export function SubmitTicketForm({ onSuccess }: SubmitTicketFormProps) {
                 type="text"
                 value={requesterName}
                 onChange={(e) => setRequesterName(e.target.value)}
+              />
+            </Field>
+
+            <Field
+              hint={t("emailHint")}
+              icon="mail"
+              label={t("email")}
+              required
+            >
+              <input
+                autoComplete="email"
+                className="h-target-min w-full rounded-lg bg-surface-container-lowest pl-12 pr-space-md font-body-md text-body-md text-on-surface shadow-sm outline-none ring-2 ring-transparent transition-colors focus:bg-surface-container-low focus:ring-secondary"
+                placeholder={t("emailPlaceholder")}
+                required
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </Field>
 

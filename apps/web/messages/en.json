@@ -19,11 +19,176 @@
   },
   "userManagement": {
     "title": "User Management",
-    "subtitle": "Content coming soon."
+    "subtitle": "Create and manage Helpdesk login accounts for IT staff. Employees without IT access do not need an account.",
+    "badge": "IT admin · login accounts only",
+    "loginRequired": "Sign in as IT to manage user accounts.",
+    "signInToManage": "IT Sign in",
+    "addUser": "Add user",
+    "searchPlaceholder": "Search name, email, employee ID, extension...",
+    "resultCount": "Showing {count} accounts",
+    "empty": "No accounts match your filters.",
+    "stats": {
+      "total": "All accounts",
+      "active": "Active",
+      "staff": "IT Staff",
+      "lead": "IT Lead"
+    },
+    "filters": {
+      "roleAll": "All roles",
+      "statusAll": "All statuses",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "roles": {
+      "IT_STAFF": "IT Staff",
+      "IT_LEAD": "IT Lead",
+      "GM": "GM"
+    },
+    "table": {
+      "user": "User",
+      "employeeId": "Employee ID",
+      "role": "Role",
+      "status": "Status",
+      "lastSignIn": "Last sign-in",
+      "actions": "Actions"
+    },
+    "actions": {
+      "edit": "Edit",
+      "resetPassword": "Reset password",
+      "deactivate": "Deactivate",
+      "activate": "Activate"
+    },
+    "lastSignIn": {
+      "never": "Never",
+      "minutes12": "12 min ago",
+      "hour1": "1 hr ago",
+      "hours3": "3 hr ago",
+      "yesterday": "Yesterday",
+      "days7": "7 days ago"
+    },
+    "fields": {
+      "nameTh": "Full name (Thai)",
+      "nameEn": "Full name (English)",
+      "email": "Corporate email",
+      "employeeId": "Employee ID",
+      "role": "System role",
+      "jobTitle": "Job title",
+      "extension": "Internal extension",
+      "mobile": "Mobile",
+      "password": "Temporary password",
+      "generatePassword": "Generate",
+      "copyPassword": "Copy",
+      "copied": "Copied",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
+      "activeAccount": "Account is active (can sign in)"
+    },
+    "dialog": {
+      "close": "Close",
+      "cancel": "Cancel",
+      "save": "Save changes",
+      "createTitle": "Add IT user",
+      "createSubtitle": "Provision a login account for Helpdesk IT tools.",
+      "editTitle": "Edit user",
+      "editSubtitle": "Update account details and role.",
+      "createSubmit": "Create account",
+      "createPasswordHint": "Copy this password and send it yourself by email or chat. Ask them to sign in and change the password later from Profile."
+    },
+    "reset": {
+      "title": "Reset password?",
+      "body": "Send a secure reset link to {name} ({email}). Existing sessions will be revoked.",
+      "securityNote": "Passwords are hashed. IT cannot view or set the user’s final password directly.",
+      "confirm": "Send reset link"
+    },
+    "toast": {
+      "createdTitle": "Account created",
+      "createdBody": "Copy the temporary password and send it to the user yourself.",
+      "updatedTitle": "Account updated",
+      "updatedBody": "User details were saved.",
+      "deactivatedTitle": "Account deactivated",
+      "activatedTitle": "Account activated",
+      "statusBody": "Updated status for {name}.",
+      "resetTitle": "Reset link sent",
+      "resetBody": "Mock: password reset emailed to {name}."
+    }
   },
   "dataReferences": {
     "title": "Data References",
-    "subtitle": "Content coming soon."
+    "subtitle": "Manage dropdown options used across the Helpdesk — without touching the database for everyday changes.",
+    "badge": "IT admin · reference lists",
+    "scopeNote": "Odd one-off data fixes may still need a DB change. This page covers normal add / edit / hide / delete of list options.",
+    "loginRequired": "Sign in as IT to manage reference data.",
+    "signInToManage": "IT Sign in",
+    "catalogsHeading": "Catalogs",
+    "activeCount": "{count} active",
+    "summary": "{active} active · {total} total",
+    "addItem": "Add option",
+    "searchPlaceholder": "Search code or label...",
+    "empty": "No options match your filters.",
+    "confirmDelete": "Delete “{label}”? Forms that still use this code may break until updated.",
+    "filters": {
+      "all": "All statuses",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "catalogs": {
+      "departments": {
+        "name": "Departments",
+        "description": "Department / division options on the ticket form and reports."
+      },
+      "categories": {
+        "name": "Issue categories",
+        "description": "Problem types shown when users report a case."
+      },
+      "skills": {
+        "name": "IT skills",
+        "description": "Specialty tags for IT profiles and future auto-assign."
+      }
+    },
+    "table": {
+      "order": "#",
+      "icon": "Icon",
+      "code": "Code",
+      "labelTh": "Label (TH)",
+      "labelEn": "Label (EN)",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "actions": {
+      "edit": "Edit",
+      "activate": "Activate",
+      "deactivate": "Hide from dropdowns",
+      "delete": "Delete"
+    },
+    "fields": {
+      "code": "Code",
+      "codeHint": "Stable key used in the app (e.g. account, software). Prefer lowercase.",
+      "labelTh": "Label (Thai)",
+      "labelEn": "Label (English)",
+      "sortOrder": "Display order",
+      "icon": "Material icon name",
+      "iconHint": "e.g. bug_report, wifi, computer",
+      "active": "Show in dropdowns"
+    },
+    "dialog": {
+      "close": "Close",
+      "cancel": "Cancel",
+      "save": "Save",
+      "createTitle": "Add option",
+      "editTitle": "Edit option",
+      "createSubmit": "Add option"
+    },
+    "toast": {
+      "createdTitle": "Option added",
+      "createdBody": "It will appear in dropdowns when active.",
+      "updatedTitle": "Option updated",
+      "updatedBody": "Reference data saved.",
+      "deactivatedTitle": "Hidden from dropdowns",
+      "activatedTitle": "Shown in dropdowns",
+      "statusBody": "Updated “{label}”.",
+      "deletedTitle": "Option deleted",
+      "deletedBody": "Removed “{label}” from this catalog."
+    }
   },
   "header": {
     "searchPlaceholder": "Search cases, badge ID, or issues...",
@@ -116,6 +281,9 @@
     "step1Hint": "Employee details are prefilled. Edit them if you are reporting for a colleague.",
     "name": "Full name",
     "nameHint": "System user name",
+    "email": "Corporate email",
+    "emailHint": "Used for close/reopen confirmation links",
+    "emailPlaceholder": "name@company.com",
     "department": "Department",
     "departmentHint": "Select your department",
     "extension": "Internal extension (desk phone)",
@@ -312,6 +480,7 @@
   },
   "mock": {
     "requesterName": "Somporn Jaideesuk",
+    "email": "somporn@company.com",
     "extension": "Ext. 204"
   },
   "kanban": {

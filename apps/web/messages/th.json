@@ -18,11 +18,176 @@
   },
   "userManagement": {
     "title": "จัดการผู้ใช้งาน",
-    "subtitle": "เนื้อหาจะมาในภายหลัง"
+    "subtitle": "สร้างและดูแลบัญชีเข้าสู่ระบบ Helpdesk สำหรับทีม IT พนักงานทั่วไปไม่จำเป็นต้องมีบัญชี",
+    "badge": "IT admin · เฉพาะบัญชีที่ login ได้",
+    "loginRequired": "เข้าสู่ระบบ IT เพื่อจัดการบัญชีผู้ใช้",
+    "signInToManage": "IT Sign in",
+    "addUser": "เพิ่มผู้ใช้",
+    "searchPlaceholder": "ค้นหาชื่อ อีเมล รหัสพนักงาน เบอร์ต่อ...",
+    "resultCount": "แสดง {count} บัญชี",
+    "empty": "ไม่พบบัญชีตามตัวกรอง",
+    "stats": {
+      "total": "บัญชีทั้งหมด",
+      "active": "ใช้งานอยู่",
+      "staff": "IT Staff",
+      "lead": "IT Lead"
+    },
+    "filters": {
+      "roleAll": "ทุก Role",
+      "statusAll": "ทุกสถานะ",
+      "active": "ใช้งาน",
+      "inactive": "ปิดใช้งาน"
+    },
+    "roles": {
+      "IT_STAFF": "IT Staff",
+      "IT_LEAD": "IT Lead",
+      "GM": "GM"
+    },
+    "table": {
+      "user": "ผู้ใช้",
+      "employeeId": "รหัสพนักงาน",
+      "role": "Role",
+      "status": "สถานะ",
+      "lastSignIn": "เข้าสู่ระบบล่าสุด",
+      "actions": "การทำงาน"
+    },
+    "actions": {
+      "edit": "แก้ไข",
+      "resetPassword": "รีเซ็ตรหัสผ่าน",
+      "deactivate": "ปิดใช้งาน",
+      "activate": "เปิดใช้งาน"
+    },
+    "lastSignIn": {
+      "never": "ยังไม่เคยเข้า",
+      "minutes12": "12 นาทีที่แล้ว",
+      "hour1": "1 ชม. ที่แล้ว",
+      "hours3": "3 ชม. ที่แล้ว",
+      "yesterday": "เมื่อวาน",
+      "days7": "7 วันที่แล้ว"
+    },
+    "fields": {
+      "nameTh": "ชื่อ-นามสกุล (ไทย)",
+      "nameEn": "ชื่อ-นามสกุล (English)",
+      "email": "อีเมลองค์กร",
+      "employeeId": "รหัสพนักงาน",
+      "role": "ระดับสิทธิ์ในระบบ",
+      "jobTitle": "ตำแหน่งงาน",
+      "extension": "เบอร์ภายใน",
+      "mobile": "เบอร์มือถือ",
+      "password": "รหัสผ่านชั่วคราว",
+      "generatePassword": "สุ่มรหัส",
+      "copyPassword": "คัดลอก",
+      "copied": "คัดลอกแล้ว",
+      "showPassword": "แสดงรหัสผ่าน",
+      "hidePassword": "ซ่อนรหัสผ่าน",
+      "activeAccount": "บัญชีใช้งานได้ (เข้าสู่ระบบได้)"
+    },
+    "dialog": {
+      "close": "ปิด",
+      "cancel": "ยกเลิก",
+      "save": "บันทึก",
+      "createTitle": "เพิ่มผู้ใช้ IT",
+      "createSubtitle": "สร้างบัญชีสำหรับเข้าใช้เครื่องมือ Helpdesk ของทีม IT",
+      "editTitle": "แก้ไขผู้ใช้",
+      "editSubtitle": "อัปเดตข้อมูลบัญชีและ Role",
+      "createSubmit": "สร้างบัญชี",
+      "createPasswordHint": "ก๊อปรหัสผ่านนี้แล้วส่งให้อีเมลหรือแชทเองได้ แจ้งให้ผู้ใช้เข้าสู่ระบบแล้วไปเปลี่ยนรหัสที่โปรไฟล์ภายหลัง"
+    },
+    "reset": {
+      "title": "รีเซ็ตรหัสผ่าน?",
+      "body": "ส่งลิงก์ตั้งรหัสใหม่ให้ {name} ({email}) และเพิกถอนเซสชันเดิม",
+      "securityNote": "รหัสผ่านถูกเก็บแบบ hashed — ฝ่าย IT มองหรือกำหนดรหัสสุดท้ายแทนผู้ใช้ไม่ได้",
+      "confirm": "ส่งลิงก์รีเซ็ต"
+    },
+    "toast": {
+      "createdTitle": "สร้างบัญชีแล้ว",
+      "createdBody": "ก๊อปรหัสผ่านชั่วคราวแล้วส่งให้ผู้ใช้เองได้",
+      "updatedTitle": "อัปเดตบัญชีแล้ว",
+      "updatedBody": "บันทึกข้อมูลผู้ใช้เรียบร้อย",
+      "deactivatedTitle": "ปิดใช้งานบัญชีแล้ว",
+      "activatedTitle": "เปิดใช้งานบัญชีแล้ว",
+      "statusBody": "อัปเดตสถานะของ {name}",
+      "resetTitle": "ส่งลิงก์รีเซ็ตแล้ว",
+      "resetBody": "โหมดจำลอง: ส่งอีเมลรีเซ็ตรหัสให้ {name}"
+    }
   },
   "dataReferences": {
     "title": "ข้อมูลอ้างอิง",
-    "subtitle": "เนื้อหาจะมาในภายหลัง"
+    "subtitle": "จัดการตัวเลือกใน Dropdown ของระบบ Helpdesk โดยไม่ต้องแตะฐานข้อมูลในงานประจำวัน",
+    "badge": "IT admin · รายการอ้างอิง",
+    "scopeNote": "เคสข้อมูลแปลก ๆ ที่ต้องแก้ใน database โดยตรงยังทำนอกหน้านี้ — หน้านี้โฟกัสเพิ่ม / แก้ / ซ่อน / ลบตัวเลือกปกติ",
+    "loginRequired": "เข้าสู่ระบบ IT เพื่อจัดการข้อมูลอ้างอิง",
+    "signInToManage": "IT Sign in",
+    "catalogsHeading": "หมวดรายการ",
+    "activeCount": "ใช้งาน {count} รายการ",
+    "summary": "ใช้งาน {active} · ทั้งหมด {total}",
+    "addItem": "เพิ่มตัวเลือก",
+    "searchPlaceholder": "ค้นหารหัสหรือชื่อ...",
+    "empty": "ไม่พบรายการตามตัวกรอง",
+    "confirmDelete": "ลบ “{label}”? ฟอร์มที่ยังอ้างรหัสนี้อาจเพี้ยนจนกว่าจะอัปเดต",
+    "filters": {
+      "all": "ทุกสถานะ",
+      "active": "ใช้งาน",
+      "inactive": "ซ่อน"
+    },
+    "catalogs": {
+      "departments": {
+        "name": "แผนก / ฝ่าย",
+        "description": "ตัวเลือกแผนกในฟอร์มแจ้งปัญหาและรายงาน"
+      },
+      "categories": {
+        "name": "หมวดปัญหา",
+        "description": "ประเภทปัญหาตอนผู้ใช้แจ้งเคส"
+      },
+      "skills": {
+        "name": "ทักษะ IT",
+        "description": "แท็กความเชี่ยวชาญในโปรไฟล์ IT และ auto-assign ภายหลัง"
+      }
+    },
+    "table": {
+      "order": "#",
+      "icon": "ไอคอน",
+      "code": "รหัส",
+      "labelTh": "ชื่อ (ไทย)",
+      "labelEn": "ชื่อ (EN)",
+      "status": "สถานะ",
+      "actions": "การทำงาน"
+    },
+    "actions": {
+      "edit": "แก้ไข",
+      "activate": "แสดงใน Dropdown",
+      "deactivate": "ซ่อนจาก Dropdown",
+      "delete": "ลบ"
+    },
+    "fields": {
+      "code": "รหัส",
+      "codeHint": "คีย์คงที่ในระบบ (เช่น account, software) แนะนำตัวพิมพ์เล็ก",
+      "labelTh": "ชื่อแสดง (ไทย)",
+      "labelEn": "ชื่อแสดง (English)",
+      "sortOrder": "ลำดับการแสดง",
+      "icon": "ชื่อ Material icon",
+      "iconHint": "เช่น bug_report, wifi, computer",
+      "active": "แสดงใน Dropdown"
+    },
+    "dialog": {
+      "close": "ปิด",
+      "cancel": "ยกเลิก",
+      "save": "บันทึก",
+      "createTitle": "เพิ่มตัวเลือก",
+      "editTitle": "แก้ไขตัวเลือก",
+      "createSubmit": "เพิ่มตัวเลือก"
+    },
+    "toast": {
+      "createdTitle": "เพิ่มตัวเลือกแล้ว",
+      "createdBody": "จะโชว์ใน Dropdown เมื่อสถานะใช้งาน",
+      "updatedTitle": "อัปเดตแล้ว",
+      "updatedBody": "บันทึกข้อมูลอ้างอิงเรียบร้อย",
+      "deactivatedTitle": "ซ่อนจาก Dropdown แล้ว",
+      "activatedTitle": "แสดงใน Dropdown แล้ว",
+      "statusBody": "อัปเดต “{label}”",
+      "deletedTitle": "ลบแล้ว",
+      "deletedBody": "ลบ “{label}” ออกจากรายการนี้"
+    }
   },
   "header": {
     "searchPlaceholder": "ค้นหาเคส, รหัสบัตร, หรือปัญหาที่พบ...",
@@ -115,6 +280,9 @@
     "step1Hint": "ระบบดึงข้อมูลพนักงานเบื้องต้นให้อัตโนมัติ สามารถแก้ไขหากแจ้งแทนเพื่อนร่วมงาน",
     "name": "ชื่อ-นามสกุล",
     "nameHint": "ชื่อผู้ใช้งานในระบบ",
+    "email": "อีเมลองค์กร",
+    "emailHint": "ใช้รับลิงก์ยืนยันปิดเคส / เปิดเคสใหม่",
+    "emailPlaceholder": "name@company.com",
     "department": "แผนก / ฝ่าย",
     "departmentHint": "เลือกแผนกของท่าน",
     "extension": "เบอร์โทรภายใน (โต๊ะทำงาน)",
@@ -311,6 +479,7 @@
   },
   "mock": {
     "requesterName": "สมพร ใจดีสุข",
+    "email": "somporn@company.com",
     "extension": "ต่อ 204"
   },
   "kanban": {
