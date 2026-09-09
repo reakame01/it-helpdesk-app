@@ -54,13 +54,13 @@ export function PortalHeader({
       href: "/users",
       key: "userManagement",
       label: t("nav.userManagement"),
-      roles: ["IT_STAFF", "SUPERVISOR", "GM"],
+      roles: ["IT_STAFF", "SUPERVISOR", "IT_MANAGER"],
     },
     {
       href: "/references",
       key: "dataReferences",
       label: t("nav.dataReferences"),
-      roles: ["IT_STAFF", "SUPERVISOR", "GM"],
+      roles: ["IT_STAFF", "SUPERVISOR", "IT_MANAGER"],
     },
   ];
 

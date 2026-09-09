@@ -17,5 +17,23 @@ services:
       timeout: 5s
       retries: 10
 
+  # Optional: verify FILE_STORAGE_ROOT bind mount.
+  # Usage: docker compose --profile files up -d
+  # Future `api` service should mount helpdesk_files:/data/files and set
+  # FILE_STORAGE_ROOT=/data/files (or FILE_STORAGE_CONTAINER_PATH).
+  files:
+    image: alpine:3.20
+    container_name: helpdesk-files
+    profiles: ["files"]
+    volumes:
+      - helpdesk_files:/data/files
+    command: ["sh", "-c", "ls -la /data/files && sleep infinity"]
+
 volumes:
   helpdesk_pg_data:
+  helpdesk_files:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${FILE_STORAGE_ROOT}

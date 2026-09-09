@@ -1,4 +1,4 @@
-import type { UserDto } from "@helpdesk/types";
+import type { OnDutyStaffDto, UserDto } from "@helpdesk/types";
 import { UserRole } from "@helpdesk/types";
 import type { User } from "../../domain/user.entity";
 
@@ -20,5 +20,22 @@ export function toUserDto(user: User): UserDto {
     lastSignInAt: user.lastSignInAt?.toISOString() ?? null,
     createdAt: user.createdAt.toISOString(),
     updatedAt: user.updatedAt.toISOString(),
+  };
+}
+
+export function toOnDutyStaffDto(user: User): OnDutyStaffDto {
+  const role = user.managedRole;
+  if (!role) {
+    throw new Error(`User ${user.id} is not a managed IT role`);
+  }
+  return {
+    id: user.id,
+    name: user.name,
+    nameTh: user.nameTh,
+    nameEn: user.nameEn,
+    role,
+    jobTitle: user.jobTitle,
+    extension: user.extension,
+    avatarUrl: user.avatarUrl,
   };
 }

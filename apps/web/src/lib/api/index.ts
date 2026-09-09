@@ -4,7 +4,15 @@ export {
   getApiErrorMessage,
   setApiAccessToken,
 } from "./client";
-export { fetchCurrentUser, loginRequest } from "./auth";
+export {
+  changeOwnPassword,
+  deleteOwnAvatar,
+  fetchCurrentUser,
+  loginRequest,
+  resolveMediaUrl,
+  updateOwnProfile,
+  uploadOwnAvatar,
+} from "./auth";
 export {
   createReferenceItem,
   deleteReferenceItem,
@@ -16,6 +24,9 @@ export {
   createManagedUser,
   deleteManagedUser,
   fetchManagedUsers,
+  fetchOnDutyStaff,
   resetManagedUserPassword,
   updateManagedUser,
 } from "./users";
+export { reportTicket } from "./tickets";
+export type { ReportTicketInput } from "./tickets";

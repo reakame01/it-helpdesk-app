@@ -1,17 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { PortalFooter } from "@/components/portal/portal-footer";
 import { PortalHeader } from "@/components/portal/portal-header";
+import { ItStaffPanel } from "@/components/portal/it-staff-panel";
 import {
-  ItStaffPanel,
   QueueStatsPanel,
   SelfHelpPanel,
 } from "@/components/portal/portal-side-panels";
 import { SubmitTicketForm } from "@/components/portal/submit-ticket-form";
 import { SuccessModal } from "@/components/portal/success-modal";
 import { MaterialIcon } from "@/components/shared/material-icon";
+import {
+  collectOnDutyExtensions,
+  useOnDutyStaff,
+} from "@/lib/hooks/use-on-duty-staff";
 
 type SuccessState = {
   ticketId: string;
@@ -23,6 +27,13 @@ type SuccessState = {
 export default function PortalPage() {
   const t = useTranslations("portal");
   const [success, setSuccess] = useState<SuccessState | null>(null);
+  const { members, loading, error } = useOnDutyStaff();
+
+  const hotlineLabel = useMemo(() => {
+    const numbers = collectOnDutyExtensions(members);
+    if (numbers.length === 0) return t("hotlineNumbersEmpty");
+    return t("hotlineNumbers", { numbers: numbers.join(", ") });
+  }, [members, t]);
 
   return (
     <div className="flex min-h-screen flex-col bg-surface">
@@ -53,7 +64,7 @@ export default function PortalPage() {
                   {t("hotlineTitle")}
                 </span>
                 <span className="font-headline-sm text-headline-sm font-bold text-on-surface">
-                  {t("hotlineNumbers")}
+                  {loading ? "…" : hotlineLabel}
                 </span>
               </div>
             </div>
@@ -66,7 +77,11 @@ export default function PortalPage() {
               />
             </div>
             <aside className="flex flex-col gap-space-lg lg:col-span-4">
-              <ItStaffPanel />
+              <ItStaffPanel
+                error={error}
+                loading={loading}
+                members={members}
+              />
               <SelfHelpPanel />
               <QueueStatsPanel />
             </aside>

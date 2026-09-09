@@ -2,71 +2,8 @@
 
 import { useTranslations } from "next-intl";
 import { MaterialIcon } from "@/components/shared/material-icon";
-import { mockStaff } from "@/lib/mock/portal";
 
-export function ItStaffPanel() {
-  const t = useTranslations("portal.staff");
-
-  const members = mockStaff.map((staff, index) => ({
-    ...staff,
-    name: t(`member${index + 1}Name` as "member1Name"),
-    specialty: t(`member${index + 1}Specialty` as "member1Specialty"),
-    extension: t(`member${index + 1}Ext` as "member1Ext"),
-  }));
-
-  return (
-    <div className="flex flex-col gap-space-md rounded-xl bg-surface-container-lowest p-space-lg shadow-sm">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-space-xs">
-          <MaterialIcon className="text-[24px] text-secondary" name="group" />
-          <h3 className="font-headline-sm text-headline-sm text-primary">
-            {t("title")}
-          </h3>
-        </div>
-        <span className="flex items-center gap-1 rounded-full bg-secondary-fixed px-space-xs py-0.5 font-label-sm text-label-sm font-bold text-on-secondary-fixed-variant">
-          <span className="h-2 w-2 rounded-full bg-secondary" />{" "}
-          {t("count", { count: 3 })}
-        </span>
-      </div>
-      <p className="font-body-sm text-body-sm text-on-surface-variant">
-        {t("description")}
-      </p>
-      {members.map((staff) => (
-        <div
-          key={staff.id}
-          className="flex items-center justify-between rounded-lg bg-surface-container-low p-space-sm shadow-sm"
-        >
-          <div className="flex items-center gap-space-sm">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              alt={staff.name}
-              className="h-11 w-11 rounded-full object-cover shadow-sm"
-              src={staff.avatarUrl}
-            />
-            <div className="flex flex-col">
-              <span className="font-label-md text-label-md font-bold text-on-surface">
-                {staff.name}
-              </span>
-              <span className="font-body-sm text-body-sm text-on-surface-variant">
-                {staff.specialty}
-              </span>
-            </div>
-          </div>
-          <span className="rounded-md bg-surface-container-lowest px-space-xs py-1 font-headline-sm text-headline-sm font-bold text-primary shadow-sm">
-            {staff.extension}
-          </span>
-        </div>
-      ))}
-      <div className="flex items-center gap-space-xs rounded-lg bg-surface-container-highest p-space-sm text-on-surface">
-        <MaterialIcon
-          className="shrink-0 text-[20px] text-primary"
-          name="access_time"
-        />
-        <span className="font-body-sm text-body-sm">{t("hours")}</span>
-      </div>
-    </div>
-  );
-}
+export { ItStaffPanel } from "./it-staff-panel";
 
 export function SelfHelpPanel() {
   const t = useTranslations("portal.tips");

@@ -55,6 +55,30 @@ export class PrismaUserRepository implements UserRepository {
     };
   }
 
+  async findAuthById(id: string): Promise<UserAuthRecord | null> {
+    const row = await this.prisma.user.findFirst({
+      where: {
+        id,
+        deletedAt: null,
+      },
+      select: {
+        id: true,
+        email: true,
+        passwordHash: true,
+        role: true,
+        isActive: true,
+      },
+    });
+    if (!row) return null;
+    return {
+      id: row.id,
+      email: row.email,
+      passwordHash: row.passwordHash,
+      role: row.role,
+      isActive: row.isActive,
+    };
+  }
+
   async existsEmail(email: string, excludeId?: string): Promise<boolean> {
     const row = await this.prisma.user.findFirst({
       where: {

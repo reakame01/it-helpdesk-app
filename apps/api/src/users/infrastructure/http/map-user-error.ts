@@ -6,11 +6,13 @@ import {
 import {
   DuplicateEmployeeIdError,
   DuplicateUserEmailError,
+  InvalidAvatarFileError,
   InvalidManagedRoleError,
   CannotDeleteSelfError,
   UserAlreadyDeletedError,
   UserNotFoundError,
   WeakPasswordError,
+  WrongCurrentPasswordError,
 } from "../../domain/errors";
 
 export function mapUserError(error: unknown): never {
@@ -27,7 +29,9 @@ export function mapUserError(error: unknown): never {
   if (
     error instanceof InvalidManagedRoleError ||
     error instanceof WeakPasswordError ||
-    error instanceof CannotDeleteSelfError
+    error instanceof CannotDeleteSelfError ||
+    error instanceof WrongCurrentPasswordError ||
+    error instanceof InvalidAvatarFileError
   ) {
     throw new BadRequestException(error.message);
   }

@@ -36,6 +36,7 @@ export interface UserRepository {
   listManagedUsers(): Promise<User[]>;
   findById(id: string): Promise<User | null>;
   findAuthByEmail(email: string): Promise<UserAuthRecord | null>;
+  findAuthById(id: string): Promise<UserAuthRecord | null>;
   existsEmail(email: string, excludeId?: string): Promise<boolean>;
   existsEmployeeId(employeeId: string, excludeId?: string): Promise<boolean>;
   create(input: CreateUserPersistInput): Promise<User>;

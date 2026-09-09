@@ -13,7 +13,7 @@ Most employees should report issues and follow work without creating accounts. O
 1. **Guest (no login)** can use:
    - Report Cases (ticket intake)
    - IT Workspace board in **read-only** mode (follow work; no claim / drag / edit)
-   - IT Overview (GM dashboard), including Excel / PDF export
+   - IT Overview (IT Manager dashboard), including Excel / PDF export
 2. **IT sign-in** is required for operational and admin work:
    - IT Workspace **write** actions
    - User Management

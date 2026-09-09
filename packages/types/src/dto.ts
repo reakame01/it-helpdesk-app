@@ -25,12 +25,24 @@ export interface UserDto {
   updatedAt: string;
 }
 
+/** Public roster card for the portal "on-duty IT staff" panel (no PII beyond contact extension). */
+export interface OnDutyStaffDto {
+  id: string;
+  name: string;
+  nameTh: string | null;
+  nameEn: string | null;
+  role: "IT_STAFF" | "SUPERVISOR" | "IT_MANAGER";
+  jobTitle: string | null;
+  extension: string | null;
+  avatarUrl: string | null;
+}
+
 export interface CreateManagedUserDto {
   email: string;
   password: string;
   nameTh: string;
   nameEn: string;
-  role: "IT_STAFF" | "SUPERVISOR" | "GM";
+  role: "IT_STAFF" | "SUPERVISOR" | "IT_MANAGER";
   employeeId: string;
   jobTitle?: string | null;
   extension?: string | null;
@@ -43,7 +55,7 @@ export interface UpdateManagedUserDto {
   email?: string;
   nameTh?: string;
   nameEn?: string;
-  role?: "IT_STAFF" | "SUPERVISOR" | "GM";
+  role?: "IT_STAFF" | "SUPERVISOR" | "IT_MANAGER";
   employeeId?: string;
   jobTitle?: string | null;
   extension?: string | null;
@@ -69,17 +81,34 @@ export interface TicketAssigneeDto {
   assignedAt: string;
 }
 
+export interface TicketAttachmentDto {
+  id: string;
+  ticketId: string;
+  publicPath: string;
+  contentType: string;
+  size: number;
+  originalName?: string | null;
+  createdAt: string;
+}
+
 export interface TicketDto {
   id: string;
+  ticketNo: string;
   title: string;
   description: string;
   category: TicketCategory;
+  categoryCode: string;
   status: TicketStatus;
   priority: TicketPriority;
   type: TicketType;
-  requesterId: string;
+  requesterId?: string | null;
+  requesterName: string;
+  requesterEmail: string;
+  departmentCode: string;
+  extension: string;
   requester?: Pick<UserDto, "id" | "name" | "email" | "department">;
   assignees?: TicketAssigneeDto[];
+  attachments?: TicketAttachmentDto[];
   createdAt: string;
   updatedAt: string;
   resolvedAt?: string | null;
@@ -124,7 +153,24 @@ export interface CreateTicketDto {
   category: TicketCategory;
   priority: TicketPriority;
   type?: TicketType;
+  requesterId?: string;
   assigneeIds?: string[];
+}
+
+export interface ReportTicketDto {
+  requesterName: string;
+  requesterEmail: string;
+  departmentCode: string;
+  extension: string;
+  categoryCode: string;
+  title: string;
+  description: string;
+  /** UI values: normal | urgent */
+  priority: "normal" | "urgent";
+}
+
+export interface ReportTicketResultDto {
+  ticket: TicketDto;
 }
 
 export interface UpdateTicketDto {
@@ -150,6 +196,20 @@ export interface AuthTokensDto {
 export interface AuthUserDto {
   user: UserDto;
   tokens: AuthTokensDto;
+}
+
+export interface UpdateOwnProfileDto {
+  email?: string;
+  nameTh?: string;
+  nameEn?: string;
+  jobTitle?: string | null;
+  extension?: string | null;
+  mobile?: string | null;
+}
+
+export interface ChangeOwnPasswordDto {
+  currentPassword: string;
+  newPassword: string;
 }
 
 export interface ApiErrorDto {

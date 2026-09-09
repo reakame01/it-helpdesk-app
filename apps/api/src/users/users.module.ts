@@ -10,6 +10,7 @@ import {
 import { CreateManagedUserUseCase } from "./application/use-cases/create-managed-user.use-case";
 import { DeleteManagedUserUseCase } from "./application/use-cases/delete-managed-user.use-case";
 import { ListManagedUsersUseCase } from "./application/use-cases/list-managed-users.use-case";
+import { ListOnDutyStaffUseCase } from "./application/use-cases/list-on-duty-staff.use-case";
 import { ResetManagedUserPasswordUseCase } from "./application/use-cases/reset-managed-user-password.use-case";
 import { UpdateManagedUserUseCase } from "./application/use-cases/update-managed-user.use-case";
 import { BcryptPasswordHasher } from "./infrastructure/crypto/bcrypt-password-hasher";
@@ -30,6 +31,11 @@ import { PrismaUserRepository } from "./infrastructure/persistence/prisma-user.r
     {
       provide: ListManagedUsersUseCase,
       useFactory: (repo: UserRepository) => new ListManagedUsersUseCase(repo),
+      inject: [USER_REPOSITORY],
+    },
+    {
+      provide: ListOnDutyStaffUseCase,
+      useFactory: (repo: UserRepository) => new ListOnDutyStaffUseCase(repo),
       inject: [USER_REPOSITORY],
     },
     {

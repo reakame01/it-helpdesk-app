@@ -8,7 +8,7 @@ import {
   MinLength,
 } from "class-validator";
 
-const MANAGED_ROLES = ["IT_STAFF", "SUPERVISOR", "GM"] as const;
+const MANAGED_ROLES = ["IT_STAFF", "SUPERVISOR", "IT_MANAGER"] as const;
 
 export class CreateManagedUserRequestDto {
   @IsEmail()

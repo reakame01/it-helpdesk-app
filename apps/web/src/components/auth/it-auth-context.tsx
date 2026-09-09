@@ -11,12 +11,18 @@ import {
 } from "react";
 import type { UserDto } from "@helpdesk/types";
 import {
+  changeOwnPassword,
+  deleteOwnAvatar,
   fetchCurrentUser,
+  getApiErrorMessage,
   loginRequest,
+  resolveMediaUrl,
   setApiAccessToken,
+  updateOwnProfile,
+  uploadOwnAvatar,
 } from "@/lib/api";
 
-export type ItStaffRole = "IT_STAFF" | "SUPERVISOR" | "GM";
+export type ItStaffRole = "IT_STAFF" | "SUPERVISOR" | "IT_MANAGER";
 
 export type DutyStatus = "available" | "break" | "onsite";
 
@@ -71,7 +77,10 @@ type ProfileUpdates = Partial<
 
 type ChangePasswordResult =
   | { ok: true }
-  | { ok: false; error: "wrongCurrent" | "mismatch" | "tooShort" };
+  | {
+      ok: false;
+      error: "wrongCurrent" | "mismatch" | "tooShort" | "requestFailed";
+    };
 
 type ItAuthContextValue = {
   user: ItSessionUser | null;
@@ -80,12 +89,14 @@ type ItAuthContextValue = {
   accessToken: string | null;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
-  updateProfile: (updates: ProfileUpdates) => void;
+  updateProfile: (updates: ProfileUpdates) => Promise<void>;
+  uploadAvatar: (file: File) => Promise<void>;
+  removeAvatar: () => Promise<void>;
   changePassword: (
     currentPassword: string,
     newPassword: string,
     confirmPassword: string,
-  ) => ChangePasswordResult;
+  ) => Promise<ChangePasswordResult>;
 };
 
 const ACCESS_TOKEN_STORAGE_KEY = "helpdesk.it.accessToken";
@@ -133,16 +144,22 @@ function writeStoredAccessToken(token: string | null) {
   window.localStorage.setItem(ACCESS_TOKEN_STORAGE_KEY, token);
 }
 
-function mapApiUserToSession(user: UserDto): ItSessionUser | null {
+function mapApiUserToSession(
+  user: UserDto,
+  previous?: ItSessionUser | null,
+): ItSessionUser | null {
   if (
     user.role !== "IT_STAFF" &&
     user.role !== "SUPERVISOR" &&
-    user.role !== "GM"
+    user.role !== "IT_MANAGER"
   ) {
     return null;
   }
 
   const displayName = user.nameTh?.trim() || user.name;
+  const resolvedAvatar =
+    resolveMediaUrl(user.avatarUrl) || PROFILE_DEFAULTS.avatarUrl;
+
   return {
     id: user.id,
     displayName,
@@ -153,7 +170,12 @@ function mapApiUserToSession(user: UserDto): ItSessionUser | null {
     email: user.email,
     role: user.role,
     ...PROFILE_DEFAULTS,
-    avatarUrl: user.avatarUrl || PROFILE_DEFAULTS.avatarUrl,
+    location: previous?.location ?? PROFILE_DEFAULTS.location,
+    dutyStatus: previous?.dutyStatus ?? PROFILE_DEFAULTS.dutyStatus,
+    skills: previous?.skills ?? PROFILE_DEFAULTS.skills,
+    metrics: previous?.metrics ?? PROFILE_DEFAULTS.metrics,
+    lastSavedLabelKey: "justNow",
+    avatarUrl: resolvedAvatar,
     jobTitle: user.jobTitle || PROFILE_DEFAULTS.jobTitle,
     employeeId: user.employeeId || PROFILE_DEFAULTS.employeeId,
     extension: user.extension || PROFILE_DEFAULTS.extension,
@@ -166,7 +188,6 @@ const ItAuthContext = createContext<ItAuthContextValue | null>(null);
 export function ItAuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<ItSessionUser | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [localPassword, setLocalPassword] = useState<string | null>(null);
   const [isRestoringSession, setIsRestoringSession] = useState(true);
 
   const clearSession = useCallback(() => {
@@ -174,12 +195,11 @@ export function ItAuthProvider({ children }: { children: ReactNode }) {
     writeStoredAccessToken(null);
     setAccessToken(null);
     setUser(null);
-    setLocalPassword(null);
   }, []);
 
   const applySession = useCallback(
-    (token: string, profile: UserDto, password?: string | null) => {
-      const session = mapApiUserToSession(profile);
+    (token: string, profile: UserDto, previous?: ItSessionUser | null) => {
+      const session = mapApiUserToSession(profile, previous);
       if (!session) {
         clearSession();
         return false;
@@ -188,9 +208,6 @@ export function ItAuthProvider({ children }: { children: ReactNode }) {
       writeStoredAccessToken(token);
       setAccessToken(token);
       setUser(session);
-      if (password !== undefined) {
-        setLocalPassword(password);
-      }
       return true;
     },
     [clearSession],
@@ -212,7 +229,7 @@ export function ItAuthProvider({ children }: { children: ReactNode }) {
       try {
         const profile = await fetchCurrentUser();
         if (cancelled) return;
-        if (!applySession(token, profile, null)) {
+        if (!applySession(token, profile)) {
           clearSession();
         }
       } catch {
@@ -232,7 +249,7 @@ export function ItAuthProvider({ children }: { children: ReactNode }) {
     async (email: string, password: string) => {
       try {
         const result = await loginRequest(email, password);
-        return applySession(result.tokens.accessToken, result.user, password);
+        return applySession(result.tokens.accessToken, result.user);
       } catch {
         clearSession();
         return false;
@@ -245,36 +262,96 @@ export function ItAuthProvider({ children }: { children: ReactNode }) {
     clearSession();
   }, [clearSession]);
 
-  const updateProfile = useCallback((updates: ProfileUpdates) => {
-    setUser((prev) => {
-      if (!prev) return prev;
-      const next = { ...prev, ...updates };
-      if (updates.displayNameTh) {
-        next.displayName = updates.displayNameTh.replace(/^คุณ/, "").trim();
+  const updateProfile = useCallback(
+    async (updates: ProfileUpdates) => {
+      if (!accessToken) {
+        throw new Error("Not authenticated");
       }
-      return next;
-    });
-  }, []);
+
+      const payload = {
+        email: updates.email,
+        nameTh: updates.displayNameTh?.replace(/^คุณ/, "").trim(),
+        nameEn: updates.displayNameEn?.trim(),
+        jobTitle: updates.jobTitle,
+        extension: updates.extension,
+        mobile: updates.mobile,
+      };
+
+      try {
+        const profile = await updateOwnProfile(payload);
+        setUser((prev) =>
+          mapApiUserToSession(profile, {
+            ...(prev ?? ({} as ItSessionUser)),
+            location:
+              updates.location ?? prev?.location ?? PROFILE_DEFAULTS.location,
+            dutyStatus:
+              updates.dutyStatus ??
+              prev?.dutyStatus ??
+              PROFILE_DEFAULTS.dutyStatus,
+            skills: updates.skills ?? prev?.skills ?? PROFILE_DEFAULTS.skills,
+          }),
+        );
+      } catch (error) {
+        throw new Error(getApiErrorMessage(error));
+      }
+    },
+    [accessToken],
+  );
+
+  const uploadAvatar = useCallback(
+    async (file: File) => {
+      if (!accessToken) {
+        throw new Error("Not authenticated");
+      }
+      try {
+        const profile = await uploadOwnAvatar(file);
+        setUser((prev) => mapApiUserToSession(profile, prev));
+      } catch (error) {
+        throw new Error(getApiErrorMessage(error));
+      }
+    },
+    [accessToken],
+  );
+
+  const removeAvatar = useCallback(async () => {
+    if (!accessToken) {
+      throw new Error("Not authenticated");
+    }
+    try {
+      const profile = await deleteOwnAvatar();
+      setUser((prev) => mapApiUserToSession(profile, prev));
+    } catch (error) {
+      throw new Error(getApiErrorMessage(error));
+    }
+  }, [accessToken]);
 
   const changePassword = useCallback(
-    (
+    async (
       currentPassword: string,
       newPassword: string,
       confirmPassword: string,
-    ): ChangePasswordResult => {
-      if (!localPassword || currentPassword !== localPassword) {
-        return { ok: false, error: "wrongCurrent" };
-      }
+    ): Promise<ChangePasswordResult> => {
       if (newPassword.length < 8) {
         return { ok: false, error: "tooShort" };
       }
       if (newPassword !== confirmPassword) {
         return { ok: false, error: "mismatch" };
       }
-      setLocalPassword(newPassword);
-      return { ok: true };
+      try {
+        await changeOwnPassword({ currentPassword, newPassword });
+        return { ok: true };
+      } catch (error) {
+        const message = getApiErrorMessage(error).toLowerCase();
+        if (
+          message.includes("current password") ||
+          message.includes("incorrect")
+        ) {
+          return { ok: false, error: "wrongCurrent" };
+        }
+        return { ok: false, error: "requestFailed" };
+      }
     },
-    [localPassword],
+    [],
   );
 
   const value = useMemo(
@@ -286,6 +363,8 @@ export function ItAuthProvider({ children }: { children: ReactNode }) {
       login,
       logout,
       updateProfile,
+      uploadAvatar,
+      removeAvatar,
       changePassword,
     }),
     [
@@ -295,6 +374,8 @@ export function ItAuthProvider({ children }: { children: ReactNode }) {
       login,
       logout,
       updateProfile,
+      uploadAvatar,
+      removeAvatar,
       changePassword,
     ],
   );

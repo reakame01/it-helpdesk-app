@@ -71,7 +71,7 @@ export class User {
     if (
       this.role === "IT_STAFF" ||
       this.role === "SUPERVISOR" ||
-      this.role === "GM"
+      this.role === "IT_MANAGER"
     ) {
       return this.role;
     }

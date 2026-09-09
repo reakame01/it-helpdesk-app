@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { MaterialIcon } from "@/components/shared/material-icon";
+import { useRouter } from "@/i18n/navigation";
 
 type SuccessModalProps = {
   open: boolean;
@@ -21,8 +22,14 @@ export function SuccessModal({
   onClose,
 }: SuccessModalProps) {
   const t = useTranslations("modal");
+  const router = useRouter();
 
   if (!open) return null;
+
+  function goToItBoard() {
+    onClose();
+    router.push("/it");
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-inverse-surface/60 p-space-md backdrop-blur-sm">
@@ -60,7 +67,7 @@ export function SuccessModal({
           <button
             className="flex h-target-min flex-1 items-center justify-center gap-space-xs rounded-xl bg-primary font-label-md text-label-md font-bold text-on-primary shadow-sm transition-colors hover:bg-primary-container"
             type="button"
-            onClick={onClose}
+            onClick={goToItBoard}
           >
             <MaterialIcon className="text-[20px]" name="track_changes" />
             <span>{t("goTrack")}</span>

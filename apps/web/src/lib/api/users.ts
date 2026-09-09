@@ -1,10 +1,16 @@
 import type {
   CreateManagedUserDto,
+  OnDutyStaffDto,
   ResetManagedUserPasswordResultDto,
   UpdateManagedUserDto,
   UserDto,
 } from "@helpdesk/types";
 import { apiClient } from "./client";
+
+export async function fetchOnDutyStaff() {
+  const { data } = await apiClient.get<OnDutyStaffDto[]>("/users/on-duty");
+  return data;
+}
 
 export async function fetchManagedUsers() {
   const { data } = await apiClient.get<UserDto[]>("/users");

@@ -17,9 +17,6 @@ import { cn } from "@/lib/utils";
 const fieldClassName =
   "h-12 w-full rounded-lg bg-surface-container-lowest py-3 pl-11 pr-4 font-body-md text-body-md text-on-surface shadow-sm outline-none ring-2 ring-transparent transition-all focus:ring-primary";
 
-const DEFAULT_FALLBACK_AVATAR =
-  "https://www.kindpng.com/picc/m/24-248253_user-profile-default-image-png-clipart-png-download.png";
-
 export function ProfileWorkspace() {
   const t = useTranslations("profile");
   const { user, isAuthenticated, updateProfile } = useItAuth();
@@ -52,7 +49,7 @@ export function ProfileWorkspace() {
 
 function ProfileEditor() {
   const t = useTranslations("profile");
-  const { user, updateProfile } = useItAuth();
+  const { user, updateProfile, uploadAvatar, removeAvatar } = useItAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [displayNameTh, setDisplayNameTh] = useState(user!.displayNameTh);
@@ -69,6 +66,13 @@ function ProfileEditor() {
   const [toastMode, setToastMode] = useState<"profile" | "password">("profile");
   const [skillPickerOpen, setSkillPickerOpen] = useState(false);
   const [changePasswordOpen, setChangePasswordOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [avatarBusy, setAvatarBusy] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setAvatarUrl(user!.avatarUrl);
+  }, [user]);
 
   useEffect(() => {
     if (!toastOpen) return;
@@ -87,30 +91,65 @@ function ProfileEditor() {
     setDutyStatus(user!.dutyStatus);
     setSkills(user!.skills);
     setAvatarUrl(user!.avatarUrl);
+    setSaveError(null);
   }
 
-  function handleSave(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSave(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    updateProfile({
-      displayNameTh,
-      displayNameEn,
-      jobTitle,
-      email,
-      extension,
-      mobile,
-      location,
-      dutyStatus,
-      skills,
-      avatarUrl,
-    });
-    setToastMode("profile");
-    setToastOpen(true);
+    setSaving(true);
+    setSaveError(null);
+    try {
+      await updateProfile({
+        displayNameTh,
+        displayNameEn,
+        jobTitle,
+        email,
+        extension,
+        mobile,
+        location,
+        dutyStatus,
+        skills,
+      });
+      setToastMode("profile");
+      setToastOpen(true);
+    } catch (error) {
+      setSaveError(
+        error instanceof Error ? error.message : t("saveFailed"),
+      );
+    } finally {
+      setSaving(false);
+    }
   }
 
-  function handleAvatarFile(fileList: FileList | null) {
+  async function handleAvatarFile(fileList: FileList | null) {
     const file = fileList?.[0];
     if (!file) return;
-    setAvatarUrl(URL.createObjectURL(file));
+    setAvatarBusy(true);
+    setSaveError(null);
+    try {
+      await uploadAvatar(file);
+    } catch (error) {
+      setSaveError(
+        error instanceof Error ? error.message : t("avatarUploadFailed"),
+      );
+    } finally {
+      setAvatarBusy(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
+
+  async function handleRemoveAvatar() {
+    setAvatarBusy(true);
+    setSaveError(null);
+    try {
+      await removeAvatar();
+    } catch (error) {
+      setSaveError(
+        error instanceof Error ? error.message : t("avatarRemoveFailed"),
+      );
+    } finally {
+      setAvatarBusy(false);
+    }
   }
 
   function removeSkill(id: string) {
@@ -196,7 +235,8 @@ function ProfileEditor() {
               </div>
               <button
                 aria-label={t("changePhoto")}
-                className="absolute bottom-0 right-0 flex h-9 w-9 items-center justify-center rounded-full bg-primary text-on-primary shadow-md transition-transform duration-150 hover:bg-primary-container active:scale-95"
+                className="absolute bottom-0 right-0 flex h-9 w-9 items-center justify-center rounded-full bg-primary text-on-primary shadow-md transition-transform duration-150 hover:bg-primary-container active:scale-95 disabled:opacity-60"
+                disabled={avatarBusy}
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
               >
@@ -207,7 +247,7 @@ function ProfileEditor() {
                 className="hidden"
                 ref={fileInputRef}
                 type="file"
-                onChange={(e) => handleAvatarFile(e.target.files)}
+                onChange={(e) => void handleAvatarFile(e.target.files)}
               />
             </div>
 
@@ -222,7 +262,7 @@ function ProfileEditor() {
                 />
               </div>
               <p className="font-body-sm text-body-sm text-on-surface-variant">
-                System & Network Specialist
+                {jobTitle || user!.jobTitle}
               </p>
             </div>
 
@@ -239,18 +279,20 @@ function ProfileEditor() {
             <div className="mt-space-lg flex w-full flex-col items-center gap-space-2xs rounded-lg bg-surface-container-low/50 p-space-sm pt-space-md">
               <div className="flex w-full items-center gap-space-xs">
                 <button
-                  className="flex h-10 flex-1 items-center justify-center gap-space-2xs rounded-lg bg-surface-container px-space-sm font-label-sm text-label-sm text-on-surface transition-colors hover:bg-surface-variant"
+                  className="flex h-10 flex-1 items-center justify-center gap-space-2xs rounded-lg bg-surface-container px-space-sm font-label-sm text-label-sm text-on-surface transition-colors hover:bg-surface-variant disabled:opacity-60"
+                  disabled={avatarBusy}
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                 >
                   <MaterialIcon className="text-[18px]" name="upload" />
-                  {t("uploadPhoto")}
+                  {avatarBusy ? t("uploadingPhoto") : t("uploadPhoto")}
                 </button>
                 <button
                   aria-label={t("removePhoto")}
-                  className="flex h-10 items-center justify-center rounded-lg px-space-sm text-error transition-colors hover:bg-error-container/40"
+                  className="flex h-10 items-center justify-center rounded-lg px-space-sm text-error transition-colors hover:bg-error-container/40 disabled:opacity-60"
+                  disabled={avatarBusy}
                   type="button"
-                  onClick={() => setAvatarUrl(DEFAULT_FALLBACK_AVATAR)}
+                  onClick={() => void handleRemoveAvatar()}
                 >
                   <MaterialIcon className="text-[20px]" name="delete" />
                 </button>
@@ -541,19 +583,26 @@ function ProfileEditor() {
           />
 
           <div className="mb-space-3xl flex flex-col items-center justify-end gap-space-md pt-space-md sm:flex-row">
+            {saveError ? (
+              <p className="w-full font-body-sm text-body-sm text-error sm:mr-auto sm:w-auto">
+                {saveError}
+              </p>
+            ) : null}
             <button
-              className="h-target-min w-full rounded-lg px-space-xl text-center font-label-md text-label-md text-on-surface-variant transition-colors hover:bg-surface-container sm:w-auto"
+              className="h-target-min w-full rounded-lg px-space-xl text-center font-label-md text-label-md text-on-surface-variant transition-colors hover:bg-surface-container disabled:opacity-60 sm:w-auto"
+              disabled={saving || avatarBusy}
               type="button"
               onClick={resetForm}
             >
               {t("cancel")}
             </button>
             <button
-              className="flex h-target-min w-full items-center justify-center gap-space-xs rounded-lg bg-primary-container px-space-xl font-label-md text-label-md text-on-primary shadow-md transition-all duration-150 hover:bg-primary active:scale-[0.98] sm:w-auto"
+              className="flex h-target-min w-full items-center justify-center gap-space-xs rounded-lg bg-primary-container px-space-xl font-label-md text-label-md text-on-primary shadow-md transition-all duration-150 hover:bg-primary active:scale-[0.98] disabled:opacity-60 sm:w-auto"
+              disabled={saving || avatarBusy}
               type="submit"
             >
               <MaterialIcon className="text-[20px]" name="check_circle" />
-              {t("save")}
+              {saving ? t("saving") : t("save")}
             </button>
           </div>
         </form>

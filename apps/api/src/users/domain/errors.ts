@@ -1,4 +1,4 @@
-export const MANAGED_USER_ROLES = ["IT_STAFF", "SUPERVISOR", "GM"] as const;
+export const MANAGED_USER_ROLES = ["IT_STAFF", "SUPERVISOR", "IT_MANAGER"] as const;
 
 export type ManagedUserRole = (typeof MANAGED_USER_ROLES)[number];
 
@@ -52,5 +52,19 @@ export class UserAlreadyDeletedError extends Error {
   constructor(public readonly userId: string) {
     super(`User already deleted: ${userId}`);
     this.name = "UserAlreadyDeletedError";
+  }
+}
+
+export class WrongCurrentPasswordError extends Error {
+  constructor() {
+    super("Current password is incorrect");
+    this.name = "WrongCurrentPasswordError";
+  }
+}
+
+export class InvalidAvatarFileError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "InvalidAvatarFileError";
   }
 }

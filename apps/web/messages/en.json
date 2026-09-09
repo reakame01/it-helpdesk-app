@@ -47,7 +47,7 @@
     "roles": {
       "IT_STAFF": "IT Staff",
       "SUPERVISOR": "Supervisor",
-      "GM": "GM"
+      "IT_MANAGER": "IT Manager"
     },
     "table": {
       "user": "User",
@@ -251,7 +251,8 @@
     "title": "Report IT usage or equipment issues",
     "subtitle": "Fill in 3 simple steps. Three IT staff are ready to help and respond quickly.",
     "hotlineTitle": "Prefer not to type? Call the team now",
-    "hotlineNumbers": "Ext. 101, 102, 103",
+    "hotlineNumbers": "Ext. {numbers}",
+    "hotlineNumbersEmpty": "Contact IT",
     "steps": {
       "step1Title": "Requester info",
       "step1Subtitle": "Check name & phone",
@@ -264,16 +265,11 @@
       "title": "On-duty IT staff",
       "count": "{count} people",
       "description": "If your PC won't start, the screen is blank, or printing fails, call the matching specialist by extension:",
-      "hours": "Hours: Mon–Fri (08:30 – 17:30)",
-      "member1Name": "Somchai (Team Lead)",
-      "member1Specialty": "Network, Internet & Servers",
-      "member1Ext": "Ext. 101",
-      "member2Name": "Wichai",
-      "member2Specialty": "Computers, Printers & Devices",
-      "member2Ext": "Ext. 102",
-      "member3Name": "Anucha",
-      "member3Specialty": "ERP, Email & Access",
-      "member3Ext": "Ext. 103"
+      "hours": "Hours: Mon–Fri (08:30 – 17:00)",
+      "extension": "Ext. {ext}",
+      "loading": "Loading on-duty staff...",
+      "loadError": "Could not load on-duty staff. Please try again.",
+      "empty": "No IT staff are listed yet"
     },
     "tips": {
       "title": "3 quick self-help tips",
@@ -300,7 +296,7 @@
   },
   "form": {
     "step1Heading": "Step 1: Requester information",
-    "step1Hint": "Employee details are prefilled. Edit them if you are reporting for a colleague.",
+    "step1Hint": "Enter your employee details. You can also report on behalf of a colleague.",
     "name": "Full name",
     "nameHint": "System user name",
     "email": "Corporate email",
@@ -308,10 +304,13 @@
     "emailPlaceholder": "name@company.com",
     "department": "Department",
     "departmentHint": "Select your department",
+    "departmentPlaceholder": "Select department",
     "extension": "Internal extension (desk phone)",
     "extensionHint": "So IT can call you back",
     "step2Heading": "Step 2: Choose the issue category",
     "step2Hint": "Pick the closest match so we can assign the right specialist.",
+    "step2Loading": "Loading categories...",
+    "step2Empty": "No active categories available. Please contact IT.",
     "step3Heading": "Step 3: Describe symptoms & attach screenshots",
     "step3Hint": "Include on-screen messages so technicians can prepare tools and parts.",
     "ticketTitle": "Issue title (short and clear)",
@@ -322,22 +321,32 @@
     "ticketDetailPlaceholder": "Describe timing, error text, or for feature requests: purpose, expected result, and departments involved...",
     "attachmentLabel": "Attach screenshot or device photo",
     "attachmentRecommended": "Highly recommended",
-    "dropzoneTitle": "Drag an image here or press Ctrl + V to paste",
-    "dropzoneHint": "PNG, JPG up to 10MB (click this area to browse files)",
-    "chooseFile": "Choose image from computer",
+    "dropzoneTitle": "Drag images here or press Ctrl + V to paste",
+    "dropzoneHint": "Multiple PNG/JPG files, up to 2MB each, max {max} images (click this area to browse)",
+    "chooseFile": "Choose images from computer",
     "readyToSend": "Ready",
-    "attachmentMeta": "1.2 MB • Clear screenshot",
+    "attachmentMeta": "Image ready to upload",
+    "attachmentCount": "{count}/{max} images attached",
     "viewFull": "View full",
     "removeImage": "Remove",
+    "removeAllImages": "Remove all",
     "priorityLabel": "Urgency",
     "priorityNormal": "Normal (within 1 business day)",
     "priorityNormalHint": "Other work can continue; production not blocked",
     "priorityUrgent": "Urgent (work is blocked)",
     "priorityUrgentHint": "Month-end close, urgent billing, or customer service blocked",
     "submit": "Submit ticket now",
+    "submitting": "Submitting...",
     "reset": "Clear form",
     "resetConfirm": "Clear all entered information?",
     "submitHint": "After submit you will get a Ticket ID and can track status immediately.",
+    "optionsLoading": "Loading form options...",
+    "optionsError": "Could not load departments or categories.",
+    "retryOptions": "Try again",
+    "submitFailed": "Could not submit ticket: {message}",
+    "attachmentTooLarge": "Image must be 2 MB or smaller.",
+    "attachmentInvalidType": "Only JPEG or PNG images are allowed.",
+    "attachmentTooMany": "You can attach up to {max} images.",
     "departments": {
       "account": "Accounting & Finance",
       "marketing": "Marketing & Sales",
@@ -412,12 +421,18 @@
     "breadcrumbCurrent": "IT staff profile",
     "lastSaved": "Last saved: {when}",
     "lastSavedTimes": {
-      "yesterday": "Yesterday 16:30"
+      "yesterday": "Yesterday 16:30",
+      "justNow": "Just now"
     },
     "changePhoto": "Change profile photo",
     "uploadPhoto": "Upload new photo",
     "removePhoto": "Remove photo",
-    "photoHint": "JPG or PNG, up to 5MB",
+    "photoHint": "JPG or PNG, up to 2MB",
+    "saveFailed": "Could not save profile. Please try again.",
+    "avatarUploadFailed": "Could not upload photo. Use JPG/PNG up to 2MB.",
+    "avatarRemoveFailed": "Could not remove photo. Please try again.",
+    "saving": "Saving…",
+    "uploadingPhoto": "Uploading…",
     "dutyStatus": "Duty status",
     "duty": {
       "available": {
@@ -434,7 +449,7 @@
       }
     },
     "levels": {
-      "level2": "IT Specialist (Level 2)"
+      "level2": "IT Specialist"
     },
     "metricsTitle": "This month’s results",
     "metricsYear": "Year {year}",
@@ -456,7 +471,7 @@
     "roles": {
       "IT_STAFF": "IT Staff Administrator",
       "SUPERVISOR": "Supervisor",
-      "GM": "GM"
+      "IT_MANAGER": "IT Manager"
     },
     "contactTitle": "Contact & station",
     "contactSubtitle": "So users and teammates can reach you quickly on site",
@@ -493,7 +508,8 @@
     "changePasswordErrors": {
       "wrongCurrent": "Current password is incorrect",
       "mismatch": "New passwords do not match",
-      "tooShort": "New password must be at least 8 characters"
+      "tooShort": "New password must be at least 8 characters",
+      "requestFailed": "Could not update password. Please try again."
     },
     "passwordToastTitle": "Password updated",
     "passwordToastBody": "Use your new password the next time you sign in.",
@@ -789,7 +805,6 @@
     "staffSection": {
       "title": "Individual performance this cycle",
       "badge": "Selected cycle",
-      "ext": "Ext. {n}",
       "stars": "stars",
       "scope": "Primary scope",
       "resolved": "Resolved",
@@ -797,18 +812,18 @@
       "workload": "Share of team load"
     },
     "staff": {
-      "golf": "Golf",
-      "golfRole": "Network / Hardware",
+      "golf": "Songpon",
+      "golfRole": "Network / Hardware / Team lead",
       "golfScope": "LAN, Wi-Fi, printers, and on-site devices",
       "golfFooterLeft": "Avg first response 14 min",
       "golfFooterRight": "Parts ready",
-      "bank": "Bank",
-      "bankRole": "ERP / Team lead",
+      "bank": "Ratthasart",
+      "bankRole": "Application Developer",
       "bankScope": "ERP, access control, cross-team coordination",
       "bankFooterLeft": "Leads multi-assignee cases",
       "bankFooterRight": "2 hotfixes",
-      "new": "New",
-      "newRole": "Database / Dev",
+      "new": "Baitong",
+      "newRole": "Database / Application Support",
       "newScope": "SQL, APIs, small features, patches",
       "newFooterLeft": "Stable deploys",
       "newFooterRight": "DB uptime 99.9%"

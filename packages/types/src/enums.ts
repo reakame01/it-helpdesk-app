@@ -2,7 +2,7 @@ export enum UserRole {
   USER = "USER",
   IT_STAFF = "IT_STAFF",
   SUPERVISOR = "SUPERVISOR",
-  GM = "GM",
+  IT_MANAGER = "IT_MANAGER",
 }
 
 export enum TicketCategory {
@@ -10,6 +10,7 @@ export enum TicketCategory {
   NETWORK = "NETWORK",
   SOFTWARE_BUG = "SOFTWARE_BUG",
   FEATURE_REQUEST = "FEATURE_REQUEST",
+  ACCESS = "ACCESS",
   OTHER = "OTHER",
 }
 

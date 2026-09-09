@@ -8,23 +8,27 @@ import { ItLoginDialog } from "@/components/auth/it-login-dialog";
 import { useItAuth } from "@/components/auth/it-auth-context";
 import { MaterialIcon } from "@/components/shared/material-icon";
 import {
+  DEFAULT_AVATAR_SRC,
+  SafeAvatar,
+} from "@/components/shared/safe-avatar";
+import {
   createManagedUser,
   deleteManagedUser,
   fetchManagedUsers,
   getApiErrorMessage,
   resetManagedUserPassword,
+  resolveMediaUrl,
   updateManagedUser,
 } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
-type ManagedUserRole = "IT_STAFF" | "SUPERVISOR" | "GM";
+type ManagedUserRole = "IT_STAFF" | "SUPERVISOR" | "IT_MANAGER";
 type ToastState = { title: string; body: string } | null;
 type EditorMode = "create" | "edit";
 
-const managedUserRoles: ManagedUserRole[] = ["IT_STAFF", "SUPERVISOR", "GM"];
+const managedUserRoles: ManagedUserRole[] = ["IT_STAFF", "SUPERVISOR", "IT_MANAGER"];
 
-const DEFAULT_AVATAR_URL =
-  "https://www.kindpng.com/picc/m/24-248253_user-profile-default-image-png-clipart-png-download.png";
+const DEFAULT_AVATAR_URL = DEFAULT_AVATAR_SRC;
 
 type EditorForm = {
   employeeId: string;
@@ -63,7 +67,7 @@ function displayName(user: UserDto): string {
 }
 
 function avatarSrc(user: UserDto): string {
-  return user.avatarUrl?.trim() || DEFAULT_AVATAR_URL;
+  return resolveMediaUrl(user.avatarUrl) || DEFAULT_AVATAR_URL;
 }
 
 function formatLastSignIn(
@@ -224,7 +228,10 @@ export function UserManagementWorkspace() {
           jobTitle: payload.jobTitle || null,
           extension: payload.extension || null,
           mobile: payload.mobile || null,
-          avatarUrl: payload.avatarUrl || DEFAULT_AVATAR_URL,
+          avatarUrl:
+            !payload.avatarUrl || payload.avatarUrl === DEFAULT_AVATAR_URL
+              ? null
+              : payload.avatarUrl,
           isActive: true,
         });
         setToast({
@@ -241,7 +248,10 @@ export function UserManagementWorkspace() {
           jobTitle: payload.jobTitle || null,
           extension: payload.extension || null,
           mobile: payload.mobile || null,
-          avatarUrl: payload.avatarUrl || DEFAULT_AVATAR_URL,
+          avatarUrl:
+            !payload.avatarUrl || payload.avatarUrl === DEFAULT_AVATAR_URL
+              ? null
+              : payload.avatarUrl,
           isActive: payload.isActive,
         });
         setToast({
@@ -479,10 +489,9 @@ export function UserManagementWorkspace() {
                   >
                     <td className="px-space-md py-space-sm">
                       <div className="flex items-center gap-space-sm">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
+                        <SafeAvatar
                           alt=""
-                          className="h-9 w-9 rounded-full object-cover"
+                          className="h-9 w-9 rounded-full"
                           src={avatarSrc(user)}
                         />
                         <div className="min-w-0">
@@ -653,7 +662,7 @@ function RoleChip({ role }: { role: string }) {
         "inline-flex rounded-lg px-space-sm py-1 font-label-sm text-label-sm font-semibold",
         role === "SUPERVISOR" && "bg-primary/10 text-primary",
         role === "IT_STAFF" && "bg-surface-container text-on-surface",
-        role === "GM" && "bg-secondary/10 text-secondary",
+        role === "IT_MANAGER" && "bg-secondary/10 text-secondary",
       )}
     >
       {t(`roles.${role}`)}

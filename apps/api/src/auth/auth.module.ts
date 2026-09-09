@@ -6,6 +6,24 @@ import { UsersModule } from "../users/users.module";
 import { AuthService } from "./auth.service";
 import { AuthController } from "./auth.controller";
 import { JwtStrategy } from "./jwt.strategy";
+import {
+  PASSWORD_HASHER,
+  type PasswordHasher,
+} from "../users/application/ports/password-hasher";
+import {
+  USER_REPOSITORY,
+  type UserRepository,
+} from "../users/application/ports/user.repository";
+import {
+  OBJECT_STORAGE,
+  type ObjectStorage,
+} from "../storage/application/ports/object-storage.port";
+import { UpdateOwnProfileUseCase } from "../users/application/use-cases/update-own-profile.use-case";
+import { ChangeOwnPasswordUseCase } from "../users/application/use-cases/change-own-password.use-case";
+import {
+  DeleteOwnAvatarUseCase,
+  UploadOwnAvatarUseCase,
+} from "../users/application/use-cases/upload-own-avatar.use-case";
 
 @Module({
   imports: [
@@ -23,7 +41,33 @@ import { JwtStrategy } from "./jwt.strategy";
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
+  providers: [
+    AuthService,
+    JwtStrategy,
+    {
+      provide: UpdateOwnProfileUseCase,
+      useFactory: (repo: UserRepository) => new UpdateOwnProfileUseCase(repo),
+      inject: [USER_REPOSITORY],
+    },
+    {
+      provide: ChangeOwnPasswordUseCase,
+      useFactory: (repo: UserRepository, hasher: PasswordHasher) =>
+        new ChangeOwnPasswordUseCase(repo, hasher),
+      inject: [USER_REPOSITORY, PASSWORD_HASHER],
+    },
+    {
+      provide: UploadOwnAvatarUseCase,
+      useFactory: (repo: UserRepository, storage: ObjectStorage) =>
+        new UploadOwnAvatarUseCase(repo, storage),
+      inject: [USER_REPOSITORY, OBJECT_STORAGE],
+    },
+    {
+      provide: DeleteOwnAvatarUseCase,
+      useFactory: (repo: UserRepository, storage: ObjectStorage) =>
+        new DeleteOwnAvatarUseCase(repo, storage),
+      inject: [USER_REPOSITORY, OBJECT_STORAGE],
+    },
+  ],
   exports: [AuthService, JwtModule, PassportModule],
 })
 export class AuthModule {}

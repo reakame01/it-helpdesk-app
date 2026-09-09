@@ -20,7 +20,8 @@ docs/adr/             Architecture Decision Records
 
 - Node.js 20+
 - pnpm 10+
-- Docker Desktop (for PostgreSQL)
+- Docker Desktop (for PostgreSQL + optional file-storage mount check)
+- A local folder for uploaded files (default: `C:/source-project/project-file/it-helpdesk-files`) — create it before starting Compose file profile; path is set via `FILE_STORAGE_ROOT`
 
 ## Setup
 
@@ -33,8 +34,15 @@ cp .env.example .env
 cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env.local
 
+# Ensure FILE_STORAGE_ROOT exists (default path in .env.example)
+# mkdir -p /path/from/FILE_STORAGE_ROOT/{avatars,attachments}   # or create on Windows Explorer
+
 # Start PostgreSQL in Docker
 pnpm db:up
+
+# Optional: verify file-storage bind mount (does not affect db:up)
+docker compose --profile files up -d
+docker compose exec files ls /data/files
 
 # Generate Prisma client, apply migrations, seed data
 pnpm db:generate
@@ -51,6 +59,7 @@ pnpm dev
 - API: http://localhost:4000/api
 - Health: http://localhost:4000/api/health
 - Postgres: `localhost:5433` (user/pass/db: `postgres` / `postgres` / `helpdesk`)
+- File storage: host path from `FILE_STORAGE_ROOT` (Compose volume `helpdesk_files` → `/data/files` for a future API container). Design notes: `application-docs/file-storage-options.html`
 
 ### Dev login (seed)
 
@@ -58,9 +67,9 @@ pnpm dev
 |-------|----------|------|
 | `it@company.com` | `it1234` | IT_STAFF |
 
-Managed login roles (highest → lowest): **GM** → **SUPERVISOR** → **IT_STAFF**.
+Managed login roles (highest → lowest): **IT_MANAGER** → **SUPERVISOR** → **IT_STAFF**.
 
-Seed also creates additional IT Staff / Supervisor / GM sample accounts (same password `it1234`) plus Data References catalogs (`departments`, `categories`, `skills`).
+Seed also creates additional IT Staff / Supervisor / IT Manager sample accounts (same password `it1234`) plus Data References catalogs (`departments`, `categories`, `skills`).
 
 ## Auth & API (current)
 
@@ -72,7 +81,8 @@ Seed also creates additional IT Staff / Supervisor / GM sample accounts (same pa
 
 | Area | Methods |
 |------|---------|
-| Auth | `POST /api/auth/login`, `GET /api/auth/me` |
+| Auth | `POST /api/auth/login`, `GET|PATCH /api/auth/me`, `POST /api/auth/me/password`, `POST|DELETE /api/auth/me/avatar` |
+| Files | `GET /api/files/avatars/:userId/:filename` (served from `FILE_STORAGE_ROOT`) |
 | References | `GET /api/references/catalogs`, `GET|POST /api/references/:catalogCode/items`, `PATCH|DELETE /api/references/items/:id` |
 | Users | `GET|POST /api/users`, `PATCH /api/users/:id`, `POST /api/users/:id/reset-password` |
 

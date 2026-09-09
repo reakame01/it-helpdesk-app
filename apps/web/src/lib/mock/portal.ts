@@ -8,11 +8,6 @@ export type TicketCategoryOption = {
   fullWidth?: boolean;
 };
 
-export type ItStaffMember = {
-  id: string;
-  avatarUrl: string;
-};
-
 export const mockCurrentUser = {
   department: "account",
   avatarUrl:
@@ -33,24 +28,6 @@ export const mockCategories: TicketCategoryOption[] = [
   { value: "network", icon: "wifi_off" },
   { value: "access", icon: "key" },
   { value: "feature_request", icon: "rocket_launch", fullWidth: true },
-];
-
-export const mockStaff: ItStaffMember[] = [
-  {
-    id: "1",
-    avatarUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBeklKKETjPyc0PyX9WaACR1Lt-t-4FWx2a8CIGh7mREWZcWHZzJc5lCOMLQfL-eZcqyV2WY6g-hmRaGISCdcB6HF-PKCAL7rW5GwJ5QidLELV7Nrxu9mYCaWAvpO1chbVEeW2I_muAN3N9AwH6hvA8sEANz94ooq6TupnDJrKvvDPStQQJrB5ZQYm_A73XALNrFp1zJ7fUlXoPH13uqDhj3xZRmz-Uv9XFC8Zv1Pa2EwmaeBG6jRZV",
-  },
-  {
-    id: "2",
-    avatarUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBitPhsXMJAd48tLYnoWcr0N8fMdBGTE299kjnWOAbzPW1zKKwhUxTG_NiLh7NcwWJqHUAm6VAeqejYzXAQpfraKDwtYW3qinmDplOgP_Bqgq2CrdIhZUcrynj8j8qbpFCPrfrKdn2yhZfLiR7cteYQvUrNhZtP1_sjUxAScZOHA9ZhWP5EuBfjJfbEAVbApyQaLAjh98_SulcFd6k7742R3D17WBNEcr8bOjhrhd0Y3AAbGZMpxGIg",
-  },
-  {
-    id: "3",
-    avatarUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCpSXRbZmgccHf7UZ32LFs-cuxtGhtcg1oIBb1qdtrvbrLmbF9zpqS-a0ZF0w2nuEXKhoMyO_T2nhIvzwjpLo4yeqIbasWpPS8k0-0a_xkvR8rUvuIxe4fEcfEjvVdeoWFwmWqt9gGOfZRBU9PXLlXYodaTMF8tWV-8vykRE9Y6nuZdqlKw5sbc3tG-oro6Rc7E9bL1N-B7r-09TXMJZv_ft7UVCfIsgzDOgfEmAln003NlQfsmChnB",
-  },
 ];
 
 export const mockAttachmentPreview = {

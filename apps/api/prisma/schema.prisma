@@ -11,7 +11,7 @@ enum UserRole {
   USER
   IT_STAFF
   SUPERVISOR
-  GM
+  IT_MANAGER
 }
 
 enum TicketCategory {
@@ -19,6 +19,7 @@ enum TicketCategory {
   NETWORK
   SOFTWARE_BUG
   FEATURE_REQUEST
+  ACCESS
   OTHER
 }
 
@@ -80,27 +81,53 @@ model User {
 }
 
 model Ticket {
-  id          String         @id @default(cuid())
-  title       String
-  description String
-  category    TicketCategory
-  status      TicketStatus   @default(OPEN)
-  priority    TicketPriority @default(MEDIUM)
-  type        TicketType     @default(STANDARD)
-  requesterId String
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-  resolvedAt  DateTime?
+  id             String         @id @default(cuid())
+  ticketNo       String         @unique
+  title          String
+  description    String
+  category       TicketCategory
+  categoryCode   String
+  status         TicketStatus   @default(OPEN)
+  priority       TicketPriority @default(MEDIUM)
+  type           TicketType     @default(STANDARD)
+  requesterId    String?
+  requesterName  String
+  requesterEmail String
+  departmentCode String
+  extension      String
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  resolvedAt     DateTime?
 
-  requester User             @relation("TicketRequester", fields: [requesterId], references: [id])
-  assignees TicketAssignee[]
-  worklogs  Worklog[]
-  approval  QuickTicketApproval?
+  requester   User?              @relation("TicketRequester", fields: [requesterId], references: [id])
+  assignees   TicketAssignee[]
+  worklogs    Worklog[]
+  approval    QuickTicketApproval?
+  attachments TicketAttachment[]
 
   @@index([status])
   @@index([priority])
   @@index([requesterId])
+  @@index([requesterEmail])
+  @@index([createdAt])
   @@map("tickets")
+}
+
+model TicketAttachment {
+  id           String   @id @default(cuid())
+  ticketId     String
+  storageKey   String
+  publicPath   String
+  contentType  String
+  size         Int
+  originalName String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+  @@map("ticket_attachments")
 }
 
 model TicketAssignee {

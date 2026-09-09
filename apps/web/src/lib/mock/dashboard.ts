@@ -68,7 +68,6 @@ export type DashboardSnapshot = {
     id: string;
     nameKey: string;
     roleKey: string;
-    ext: string;
     initial: string;
     colorClass: string;
     csat: number;
@@ -110,8 +109,7 @@ const staffBase = [
     id: "golf",
     nameKey: "staff.golf",
     roleKey: "staff.golfRole",
-    ext: "101",
-    initial: "ก",
+    initial: "ท",
     colorClass: "bg-primary text-on-primary",
     barClass: "bg-primary",
   },
@@ -119,8 +117,7 @@ const staffBase = [
     id: "bank",
     nameKey: "staff.bank",
     roleKey: "staff.bankRole",
-    ext: "102",
-    initial: "บ",
+    initial: "ร",
     colorClass: "bg-secondary text-on-secondary",
     barClass: "bg-secondary",
   },
@@ -128,10 +125,9 @@ const staffBase = [
     id: "new",
     nameKey: "staff.new",
     roleKey: "staff.newRole",
-    ext: "103",
-    initial: "น",
+    initial: "บ",
     colorClass: "bg-tertiary text-on-tertiary",
-    barClass: "bg-surface-tint",
+    barClass: "bg-tertiary",
   },
 ] as const;
 
