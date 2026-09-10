@@ -10,8 +10,8 @@ datasource db {
 enum UserRole {
   USER
   IT_STAFF
-  IT_LEAD
-  GM
+  SUPERVISOR
+  IT_MANAGER
 }
 
 enum TicketCategory {
@@ -19,6 +19,7 @@ enum TicketCategory {
   NETWORK
   SOFTWARE_BUG
   FEATURE_REQUEST
+  ACCESS
   OTHER
 }
 
@@ -49,15 +50,24 @@ enum ApprovalStatus {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
+  id           String    @id @default(cuid())
+  email        String    @unique
   passwordHash String
   name         String
-  role         UserRole @default(USER)
+  nameTh       String?
+  nameEn       String?
+  role         UserRole  @default(USER)
+  employeeId   String?   @unique
+  jobTitle     String?
+  extension    String?
+  mobile       String?
+  avatarUrl    String?
   department   String?
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  isActive     Boolean   @default(true)
+  lastSignInAt DateTime?
+  deletedAt    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   requestedTickets Ticket[]               @relation("TicketRequester")
   assignments      TicketAssignee[]
@@ -66,31 +76,58 @@ model User {
   approvalsDecided   QuickTicketApproval[] @relation("ApprovalDecider")
   auditLogs        AuditLog[]
 
+  @@index([role, isActive])
   @@map("users")
 }
 
 model Ticket {
-  id          String         @id @default(cuid())
-  title       String
-  description String
-  category    TicketCategory
-  status      TicketStatus   @default(OPEN)
-  priority    TicketPriority @default(MEDIUM)
-  type        TicketType     @default(STANDARD)
-  requesterId String
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-  resolvedAt  DateTime?
+  id             String         @id @default(cuid())
+  ticketNo       String         @unique
+  title          String
+  description    String
+  category       TicketCategory
+  categoryCode   String
+  status         TicketStatus   @default(OPEN)
+  priority       TicketPriority @default(MEDIUM)
+  type           TicketType     @default(STANDARD)
+  requesterId    String?
+  requesterName  String
+  requesterEmail String
+  departmentCode String
+  extension      String
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  resolvedAt     DateTime?
 
-  requester User             @relation("TicketRequester", fields: [requesterId], references: [id])
-  assignees TicketAssignee[]
-  worklogs  Worklog[]
-  approval  QuickTicketApproval?
+  requester   User?              @relation("TicketRequester", fields: [requesterId], references: [id])
+  assignees   TicketAssignee[]
+  worklogs    Worklog[]
+  approval    QuickTicketApproval?
+  attachments TicketAttachment[]
 
   @@index([status])
   @@index([priority])
   @@index([requesterId])
+  @@index([requesterEmail])
+  @@index([createdAt])
   @@map("tickets")
+}
+
+model TicketAttachment {
+  id           String   @id @default(cuid())
+  ticketId     String
+  storageKey   String
+  publicPath   String
+  contentType  String
+  size         Int
+  originalName String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+  @@map("ticket_attachments")
 }
 
 model TicketAssignee {
@@ -154,4 +191,36 @@ model AuditLog {
   @@index([entityType, entityId])
   @@index([actorId])
   @@map("audit_logs")
+}
+
+model ReferenceCatalog {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  nameTh    String   @map("name_th")
+  nameEn    String   @map("name_en")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  items ReferenceItem[]
+
+  @@map("reference_catalogs")
+}
+
+model ReferenceItem {
+  id        String   @id @default(cuid())
+  catalogId String   @map("catalog_id")
+  code      String
+  labelTh   String   @map("label_th")
+  labelEn   String   @map("label_en")
+  icon      String?
+  isActive  Boolean  @default(true) @map("is_active")
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  catalog ReferenceCatalog @relation(fields: [catalogId], references: [id], onDelete: Cascade)
+
+  @@unique([catalogId, code])
+  @@index([catalogId, isActive, sortOrder])
+  @@map("reference_items")
 }

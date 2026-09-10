@@ -1,0 +1,15 @@
+---
+description: Put agent-authored HTML documentation in application-docs/
+alwaysApply: true
+---
+
+# HTML docs location
+
+When the user asks for documentation as an **HTML file** (guides, comparisons, ER diagrams, architecture notes, decision write-ups, etc.):
+
+- Save it under `application-docs/` at the repo root (create the folder if missing).
+- Do **not** put these HTML docs in `docs/`, `apps/`, or random project roots unless the user explicitly names another path.
+- Prefer a clear kebab-case filename (e.g. `file-storage-options.html`, `er-data-references.html`).
+- Match the visual style of existing files in `application-docs/` when practical (Thai-friendly typography, readable sections).
+
+The user should not need to repeat “put it in application-docs” every time.

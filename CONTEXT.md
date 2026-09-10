@@ -15,8 +15,8 @@ See `docs/adr/0002-intranet-guest-and-it-signin.md`.
 ### Work tracking
 
 **Report Range** (ช่วงเวลารายงาน):
-How the GM dashboard scopes metrics: a single **Work Cycle**, a **calendar month**, or a **calendar year**. Month/year views aggregate Ticket History across the work cycles inside that range; export uses the selected range once.
-_Avoid_: Asking GM to export multiple cycles and merge manually
+How the IT Overview (IT Manager) dashboard scopes metrics: a single **Work Cycle**, a **calendar month**, or a **calendar year**. Month/year views aggregate Ticket History across the work cycles inside that range; export uses the selected range once.
+_Avoid_: Asking IT Manager to export multiple cycles and merge manually
 
 **Work Cycle** (รอบงาน):
 A fixed **2-week** planning window for the IT board. The board always belongs to one active Work Cycle until close.
@@ -53,6 +53,18 @@ One-time link emailed to the requester’s **required corporate email**. Valid f
 **Reopen**:
 Requester marks the case still unresolved **before** it becomes a Closed Ticket (via email token). Unlimited while open; requires reason and may attach evidence. The live card belongs to the **Work Cycle in which reopen happened**. After user close → no reopen; open a new ticket instead.
 _Avoid_: Treating reopen as silent continue of the old closed cycle on the board; allowing reopen after Closed Ticket
+
+### Roles (login accounts)
+
+Hierarchy (highest → lowest): **IT Manager** → **Supervisor** → **IT Staff**.
+
+| Role | Meaning |
+|------|---------|
+| **IT_MANAGER** | IT Manager — oversight / IT Overview |
+| **Supervisor** | IT supervisor — leads the IT team |
+| **IT Staff** | Day-to-day IT operators on the board |
+
+Accounts are provisioned in User Management. Guests (no login) are not assigned these roles.
 
 ### Roles (board)
 

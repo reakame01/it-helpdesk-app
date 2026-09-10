@@ -504,7 +504,7 @@ export function DashboardWorkspace() {
                       {t(person.nameKey)}
                     </p>
                     <p className="font-label-sm text-label-sm text-on-surface-variant">
-                      {t(person.roleKey)} · {t("staffSection.ext", { n: person.ext })}
+                      {t(person.roleKey)}
                     </p>
                   </div>
                 </div>

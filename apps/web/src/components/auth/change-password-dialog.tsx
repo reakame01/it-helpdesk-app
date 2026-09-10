@@ -23,7 +23,7 @@ export function ChangePasswordDialog({
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errorKey, setErrorKey] = useState<
-    "wrongCurrent" | "mismatch" | "tooShort" | null
+    "wrongCurrent" | "mismatch" | "tooShort" | "requestFailed" | null
   >(null);
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
@@ -58,18 +58,20 @@ export function ChangePasswordDialog({
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const result = changePassword(
-      currentPassword,
-      newPassword,
-      confirmPassword,
-    );
-    if (!result.ok) {
-      setErrorKey(result.error);
-      return;
-    }
-    setErrorKey(null);
-    onSuccess?.();
-    onClose();
+    void (async () => {
+      const result = await changePassword(
+        currentPassword,
+        newPassword,
+        confirmPassword,
+      );
+      if (!result.ok) {
+        setErrorKey(result.error);
+        return;
+      }
+      setErrorKey(null);
+      onSuccess?.();
+      onClose();
+    })();
   }
 
   return createPortal(

@@ -12,6 +12,7 @@
     "db:generate": "pnpm --filter api db:generate",
     "db:push": "pnpm --filter api db:push",
     "db:studio": "pnpm --filter api db:studio",
+    "db:seed": "pnpm --filter api db:seed",
     "clean": "turbo run clean && rimraf node_modules"
   },
   "devDependencies": {

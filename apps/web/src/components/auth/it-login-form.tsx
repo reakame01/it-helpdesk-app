@@ -18,16 +18,20 @@ export function ItLoginForm({
   const { login } = useItAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const ok = login(email, password);
+    setSubmitting(true);
+    setError(false);
+    const ok = await login(email, password);
+    setSubmitting(false);
     if (!ok) {
       setError(true);
       return;
     }
-    setError(false);
     onSuccess?.();
   }
 
@@ -59,16 +63,29 @@ export function ItLoginForm({
         >
           {t("password")}
         </label>
-        <input
-          autoComplete="current-password"
-          className="h-target-min w-full rounded-xl bg-surface-container-low px-space-md font-body-md text-body-md text-on-surface outline-none ring-2 ring-transparent transition-colors placeholder:text-outline focus:bg-surface-container-lowest focus:ring-secondary"
-          id={`${idPrefix}-password`}
-          placeholder={t("passwordPlaceholder")}
-          required
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        <div className="relative">
+          <input
+            autoComplete="current-password"
+            className="h-target-min w-full rounded-xl bg-surface-container-low px-space-md pr-12 font-body-md text-body-md text-on-surface outline-none ring-2 ring-transparent transition-colors placeholder:text-outline focus:bg-surface-container-lowest focus:ring-secondary"
+            id={`${idPrefix}-password`}
+            placeholder={t("passwordPlaceholder")}
+            required
+            type={showPassword ? "text" : "password"}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <button
+            aria-label={showPassword ? t("hidePassword") : t("showPassword")}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-outline transition-colors hover:text-on-surface"
+            type="button"
+            onClick={() => setShowPassword((v) => !v)}
+          >
+            <MaterialIcon
+              className="text-[22px]"
+              name={showPassword ? "visibility_off" : "visibility"}
+            />
+          </button>
+        </div>
       </div>
 
       <div className="flex justify-end">
@@ -81,11 +98,12 @@ export function ItLoginForm({
       </div>
 
       <button
-        className="flex h-12 w-full items-center justify-center gap-space-xs rounded-xl bg-primary font-label-md text-label-md font-bold text-on-primary shadow-sm transition-colors hover:bg-primary-container"
+        className="flex h-12 w-full items-center justify-center gap-space-xs rounded-xl bg-primary font-label-md text-label-md font-bold text-on-primary shadow-sm transition-colors hover:bg-primary-container disabled:opacity-60"
+        disabled={submitting}
         type="submit"
       >
         <MaterialIcon className="text-[20px]" name="login" />
-        <span>{t("submit")}</span>
+        <span>{submitting ? t("submitting") : t("submit")}</span>
       </button>
 
       {error ? (

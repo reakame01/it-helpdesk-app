@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useState } from "react";
+import type { ItStaffRole } from "@/components/auth/it-auth-context";
 import { useItAuth } from "@/components/auth/it-auth-context";
 import { ItSessionControls } from "@/components/auth/it-session-controls";
 import { NotificationMenu } from "@/components/portal/notification-menu";
@@ -10,8 +11,6 @@ import { LanguageSwitcher } from "@/components/shared/language-switcher";
 import { MaterialIcon } from "@/components/shared/material-icon";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
-
-type ItAdminRole = "IT_STAFF" | "IT_LEAD";
 
 type NavKey =
   | "userPortal"
@@ -25,7 +24,7 @@ type NavItem = {
   key: NavKey;
   label: string;
   /** When set, only signed-in IT roles see the item. */
-  roles?: readonly ItAdminRole[];
+  roles?: readonly ItStaffRole[];
 };
 
 type PortalHeaderProps = {
@@ -55,13 +54,13 @@ export function PortalHeader({
       href: "/users",
       key: "userManagement",
       label: t("nav.userManagement"),
-      roles: ["IT_STAFF", "IT_LEAD"],
+      roles: ["IT_STAFF", "SUPERVISOR", "IT_MANAGER"],
     },
     {
       href: "/references",
       key: "dataReferences",
       label: t("nav.dataReferences"),
-      roles: ["IT_STAFF", "IT_LEAD"],
+      roles: ["IT_STAFF", "SUPERVISOR", "IT_MANAGER"],
     },
   ];
 

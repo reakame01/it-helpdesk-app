@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>File Storage Options — Profile &amp; Attachments (IT Helpdesk)</title>
+  <script type="module">
+    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: "base",
+      themeVariables: {
+        primaryColor: "#e8f0fe",
+        primaryTextColor: "#1a2332",
+        primaryBorderColor: "#3b6ea5",
+        lineColor: "#5a6a7a",
+        secondaryColor: "#f4f7fa",
+        tertiaryColor: "#fff8e7",
+        fontFamily: "IBM Plex Sans Thai, Segoe UI, sans-serif",
+      },
+    });
+  </script>
+  <style>
+    :root {
+      --ink: #1a2332;
+      --muted: #5a6a7a;
+      --line: #d0d8e0;
+      --bg: #f2f5f8;
+      --paper: #ffffff;
+      --accent: #2f5f8f;
+      --accent-soft: #e8f0fe;
+      --warn: #8a6d1d;
+      --warn-bg: #fff8e7;
+      --ok: #1f6b4a;
+      --ok-bg: #e8f6ef;
+      --info: #1e4a7a;
+      --info-bg: #eaf2fb;
+      --radius: 10px;
+      --font: "IBM Plex Sans Thai", "Segoe UI", system-ui, sans-serif;
+      --mono: "IBM Plex Mono", Consolas, monospace;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--font);
+      color: var(--ink);
+      background:
+        radial-gradient(ellipse 80% 50% at 10% -10%, #dce8f5 0%, transparent 55%),
+        radial-gradient(ellipse 60% 40% at 100% 0%, #e8efe6 0%, transparent 45%),
+        var(--bg);
+      line-height: 1.55;
+    }
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
+    header.doc-head {
+      margin-bottom: 1.75rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid var(--line);
+    }
+    header.doc-head p.kicker {
+      margin: 0 0 0.35rem;
+      font-size: 0.8rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 600;
+    }
+    h1 {
+      margin: 0 0 0.5rem;
+      font-size: clamp(1.4rem, 2.5vw, 1.85rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .lead { margin: 0; max-width: 44rem; color: var(--muted); }
+    .meta {
+      display: flex; flex-wrap: wrap; gap: 0.5rem 0.75rem;
+      margin-top: 1rem; font-size: 0.85rem; color: var(--muted);
+    }
+    .meta span {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 0.2rem 0.75rem;
+    }
+    section { margin-top: 2rem; }
+    h2 { margin: 0 0 0.75rem; font-size: 1.15rem; font-weight: 700; }
+    h3 { margin: 1.1rem 0 0.45rem; font-size: 0.95rem; font-weight: 650; color: var(--accent); }
+    p, li { font-size: 0.95rem; }
+    .muted { color: var(--muted); }
+    .panel {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 1.15rem 1.3rem;
+      box-shadow: 0 1px 0 rgba(26, 35, 50, 0.04);
+    }
+    .diagram {
+      overflow-x: auto;
+      background: #fafcfe;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 1rem;
+    }
+    .diagram .mermaid { display: flex; justify-content: center; }
+    .callout {
+      border-radius: var(--radius);
+      padding: 0.85rem 1.05rem;
+      border: 1px solid var(--line);
+      margin: 0.75rem 0 0;
+      font-size: 0.9rem;
+    }
+    .callout.warn { background: var(--warn-bg); border-color: #e6d7a8; color: var(--warn); }
+    .callout.ok { background: var(--ok-bg); border-color: #b8e0cc; color: var(--ok); }
+    .callout.info { background: var(--info-bg); border-color: #c5d8ef; color: var(--info); }
+    .grid-2 {
+      display: grid; gap: 1rem; grid-template-columns: 1fr;
+    }
+    @media (min-width: 820px) {
+      .grid-2 { grid-template-columns: 1fr 1fr; }
+    }
+    .grid-3 {
+      display: grid; gap: 0.85rem; grid-template-columns: 1fr;
+    }
+    @media (min-width: 900px) {
+      .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+    }
+    .card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 1rem 1.1rem;
+    }
+    .card h3 { margin-top: 0; }
+    .card .tag {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      margin-bottom: 0.5rem;
+    }
+    .tag.rec { background: var(--ok-bg); color: var(--ok); }
+    .tag.okish { background: var(--info-bg); color: var(--info); }
+    .tag.avoid { background: #fde8e8; color: #9b1c1c; }
+    table.cmp {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      margin-top: 0.5rem;
+    }
+    table.cmp th, table.cmp td {
+      text-align: left;
+      padding: 0.5rem 0.6rem;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+    table.cmp th {
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    code, .mono {
+      font-family: var(--mono);
+      font-size: 0.84em;
+      background: #eef2f6;
+      padding: 0.1em 0.35em;
+      border-radius: 4px;
+    }
+    pre.code {
+      margin: 0.6rem 0 0;
+      padding: 0.9rem 1rem;
+      background: #1a2332;
+      color: #e8eef5;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      line-height: 1.45;
+    }
+    ol.steps { margin: 0.4rem 0 0; padding-left: 1.2rem; }
+    ol.steps li { margin-bottom: 0.35rem; }
+    footer {
+      margin-top: 2.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--line);
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="wrap">
+    <header class="doc-head">
+      <p class="kicker">Application docs · Storage</p>
+      <h1>ทางเลือกการเก็บไฟล์ — Profile &amp; Attachments</h1>
+      <p class="lead">
+        สรุป solution สำหรับเก็บรูปโปรไฟล์ (และเตรียมทางสำหรับ screenshot แนบเคสในอนาคต)
+        ในบริบท IT Helpdesk: Nest API + Next.js + PostgreSQL บน intranet
+      </p>
+      <div class="meta">
+        <span>Use case แรก: avatar</span>
+        <span>ขยายได้: ticket attachments</span>
+        <span>เป้าหมาย: ง่ายตอนนี้ · ย้ายคลาวด์ทีหลังได้</span>
+      </div>
+    </header>
+
+    <section>
+      <h2>1. หลักการที่ไม่ควรละเลย</h2>
+      <div class="panel">
+        <ul style="margin:0;padding-left:1.2rem">
+          <li><strong>แยก metadata กับ binary</strong> — Postgres เก็บ “ไฟล์คืออะไร / ใครเป็นเจ้าของ”; เนื้อไฟล์อยู่นอก DB</li>
+          <li><strong>อย่าเก็บรูปเป็น base64 ใน JSON/DB</strong> — บloat, backup ช้า, query ช้า</li>
+          <li><strong>URL ที่ client ใช้ไม่ควรเป็น path จริงบนดิสก์</strong> — ผ่าน API หรือ signed URL</li>
+          <li><strong>ตรวจชนิด/ขนาดตอนอัปโหลด</strong> — MIME allowlist, max size, (ทางเลือก) strip EXIF</li>
+          <li><strong>ตั้งชื่อ object ด้วย id ที่ไม่เดา</strong> — เช่น <code>avatars/{userId}/{cuid}.webp</code></li>
+        </ul>
+      </div>
+    </section>
+
+    <section>
+      <h2>2. ตัวเลือกหลัก (เปรียบเทียบเร็ว)</h2>
+      <div class="grid-3" style="margin-top:0.75rem">
+        <div class="card">
+          <span class="tag rec">แนะนำเริ่มต้น</span>
+          <h3>A. Local disk / Docker volume</h3>
+          <p class="muted">เขียนไฟล์ลงโฟลเดอร์บนเครื่อง API (หรือ volume ใน Compose)</p>
+          <ul class="muted" style="padding-left:1.1rem;margin:0.4rem 0 0;font-size:0.88rem">
+            <li>ตั้งเร็วมากสำหรับ intranet</li>
+            <li>backup = volume + DB</li>
+            <li>ขยายหลาย instance ยาก (sticky / shared NAS)</li>
+          </ul>
+        </div>
+        <div class="card">
+          <span class="tag rec">แนะนำระยะกลาง</span>
+          <h3>B. S3-compatible (MinIO → S3/R2)</h3>
+          <p class="muted">ใช้ API แบบ S3; ตอน dev รัน MinIO ใน Docker เดียวกับ Postgres</p>
+          <ul class="muted" style="padding-left:1.1rem;margin:0.4rem 0 0;font-size:0.88rem">
+            <li>โค้ดชุดเดียวกับ production object storage</li>
+            <li>scale / CDN / lifecycle ได้</li>
+            <li>ต้องดูแล bucket + key + policy</li>
+          </ul>
+        </div>
+        <div class="card">
+          <span class="tag avoid">ไม่แนะนำ</span>
+          <h3>C. เก็บใน PostgreSQL (BYTEA)</h3>
+          <p class="muted">ใส่ binary ลงแถวใน DB</p>
+          <ul class="muted" style="padding-left:1.1rem;margin:0.4rem 0 0;font-size:0.88rem">
+            <li>ดูง่ายตอน demo เล็ก ๆ</li>
+            <li>backup / replication พอง</li>
+            <li>ไม่เหมาะกับรูปจำนวนมาก</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:1rem;overflow-x:auto">
+        <table class="cmp">
+          <thead>
+            <tr>
+              <th>เกณฑ์</th>
+              <th>Local volume</th>
+              <th>MinIO / S3</th>
+              <th>BYTEA ใน Postgres</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>ความเร็วในการเริ่ม</td>
+              <td>เร็วสุด</td>
+              <td>ปานกลาง</td>
+              <td>เร็ว (แต่ติดกับดัก)</td>
+            </tr>
+            <tr>
+              <td>ย้ายขึ้น cloud ภายหลัง</td>
+              <td>ต้องย้ายไฟล์ + เปลี่ยน adapter</td>
+              <td>เปลี่ยน endpoint/bucket</td>
+              <td>ยาก / ไม่คุ้ม</td>
+            </tr>
+            <tr>
+              <td>หลาย API instance</td>
+              <td>ต้อง shared storage</td>
+              <td>ดีโดยธรรมชาติ</td>
+              <td>ใช้ได้ แต่ไม่ใช่เหตุผลพอ</td>
+            </tr>
+            <tr>
+              <td>ต้นทุน ops (intranet)</td>
+              <td>ต่ำ</td>
+              <td>ต่ำ–กลาง (MinIO ใน Compose)</td>
+              <td>ซ่อนใน DB</td>
+            </tr>
+            <tr>
+              <td>เหมาะกับ avatar + ticket file</td>
+              <td>ดีสำหรับ MVP</td>
+              <td>ดีที่สุดระยะยาว</td>
+              <td>ไม่เหมาะ</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2>3. Solution ที่เสนอให้โปรเจกต์นี้</h2>
+      <div class="callout ok">
+        <strong>แนะนำแบบ 2 เฟส:</strong>
+        เริ่มด้วย <em>Storage Port</em> ใน API (clean architecture) → implement แรกเป็น
+        <strong>Local disk</strong> เพื่อให้มีอัปโหลดโปรไฟล์เร็ว ๆ —
+        พร้อมออกแบบ interface ให้สลับเป็น <strong>MinIO/S3</strong> โดยไม่แตะ use case
+      </div>
+
+      <div class="diagram" style="margin-top:1rem">
+        <pre class="mermaid">
+flowchart LR
+  UI["Next.js Profile / Ticket form"] -->|multipart upload| API["Nest API"]
+  API --> UC["Use case: UploadAvatar"]
+  UC --> META["Postgres: file metadata + users.avatarUrl"]
+  UC --> STORE["StoragePort"]
+  STORE --> LOCAL["LocalVolumeAdapter\n./uploads"]
+  STORE -.->|ภายหลัง| S3["S3Adapter\nMinIO / R2 / S3"]
+  UI -->|GET /files/:id or public URL| API
+  API --> STORE
+        </pre>
+      </div>
+
+      <h3>ทำไมไม่กระโดด MinIO ทันที?</h3>
+      <p class="muted">
+        Avatar ตอนนี้ปริมาณน้อย และทีมยังโฟกัส domain อื่น — Local เร็วกว่าและไม่เพิ่ม service
+        แต่ถ้าข้ามไป MinIO ตั้งแต่แรกก็ได้ถ้าอยากล็อกสัญญา S3 ตั้งแต่ต้น (trade-off: compose ซับซ้อนกว่านิด)
+      </p>
+
+      <h3>สัญญา StoragePort (ตัวอย่าง)</h3>
+      <pre class="code">interface StoredObject {
+  key: string           // avatars/{userId}/{fileId}.webp
+  contentType: string
+  byteSize: number
+}
+
+interface ObjectStorage {
+  put(key: string, body: Buffer, contentType: string): Promise&lt;StoredObject&gt;
+  getStream(key: string): Promise&lt;Readable&gt;
+  delete(key: string): Promise&lt;void&gt;
+  // optional later:
+  // getSignedUrl(key: string, expiresSec: number): Promise&lt;string&gt;
+}</pre>
+    </section>
+
+    <section>
+      <h2>4. โมเดลข้อมูลที่แนะนำ</h2>
+      <div class="grid-2">
+        <div class="panel">
+          <h3 style="margin-top:0">ตาราง <code>file_objects</code> (metadata)</h3>
+          <table class="cmp">
+            <thead><tr><th>Column</th><th>Notes</th></tr></thead>
+            <tbody>
+              <tr><td><code>id</code></td><td>cuid PK</td></tr>
+              <tr><td><code>ownerUserId</code></td><td>FK → users (nullable ถ้า guest attach ภายหลัง)</td></tr>
+              <tr><td><code>purpose</code></td><td><code>AVATAR</code> | <code>TICKET_ATTACHMENT</code> | …</td></tr>
+              <tr><td><code>storageKey</code></td><td>path/key ใน storage</td></tr>
+              <tr><td><code>contentType</code></td><td>เช่น <code>image/webp</code></td></tr>
+              <tr><td><code>byteSize</code></td><td>bytes</td></tr>
+              <tr><td><code>originalName</code></td><td>ชื่อไฟล์ที่ user ส่งมา</td></tr>
+              <tr><td><code>createdAt</code></td><td></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="panel">
+          <h3 style="margin-top:0">ผูกกับ User</h3>
+          <p class="muted" style="margin-top:0">
+            คงฟิลด์ <code>users.avatarUrl</code> เป็น URL ที่ฝั่งเว็บเรียกได้
+            (เช่น <code>/api/files/{id}</code> หรือ public path ภายใต้ CDN)
+            หรือชี้ <code>avatarFileId</code> แล้วให้ presenter สร้าง URL
+          </p>
+          <div class="callout info">
+            สำหรับ ticket ภายหลัง: ตารางเชื่อม <code>ticket_attachments(ticketId, fileId)</code>
+            ไม่ยัดไฟล์ลงแถว ticket
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>5. Flow อัปโหลด Avatar (ควรเป็นแบบนี้)</h2>
+      <div class="panel">
+        <ol class="steps">
+          <li>Client ส่ง <code>multipart/form-data</code> → <code>POST /api/users/me/avatar</code> (JWT)</li>
+          <li>API ตรวจ MIME (<code>image/jpeg|png|webp</code>) และขนาด (เช่น ≤ 2–5 MB)</li>
+          <li>(แนะนำ) แปลง/ย่อเป็น WebP สี่เหลี่ยมจัตุรัสด้วย sharp — ประหยัดที่เก็บ + โหลดเร็ว</li>
+          <li>บันทึกผ่าน <code>ObjectStorage.put</code> + insert metadata</li>
+          <li>อัปเดต <code>users.avatarUrl</code> / <code>avatarFileId</code>; ลบไฟล์เก่า (soft หรือ hard ตาม policy)</li>
+          <li>Client แสดงรูปจาก URL ใหม่ (+ cache-bust query <code>?v=updatedAt</code>)</li>
+        </ol>
+        <div class="callout warn">
+          <strong>อย่า</strong> ให้ Next.js เขียนไฟล์ขึ้น disk ของ web container โดยตรงถ้า API เป็น source of truth —
+          อัปโหลดผ่าน API จะคุม auth / validation / storage ให้ที่เดียว
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>6. ทางเลือก “เด็ด” อื่นที่คุ้มรู้ไว้</h2>
+      <div class="grid-2">
+        <div class="card">
+          <h3>Presigned upload (S3)</h3>
+          <p class="muted">
+            API ออก URL ชั่วคราว → browser อัปโหลดตรงเข้า bucket → callback/confirm metadata
+            ลดโหลดบน Nest เมื่อไฟล์ใหญ่ (เหมาะ ticket video/screenshot เยอะ)
+          </p>
+        </div>
+        <div class="card">
+          <h3>Cloudflare R2 / AWS S3 / Azure Blob</h3>
+          <p class="muted">
+            Production นอก intranet หรือต้องการ CDN สากล — ใช้ adapter เดียวกับ MinIO
+            (S3 API หรือ SDK เฉพาะค่าย)
+          </p>
+        </div>
+        <div class="card">
+          <h3>Image CDN / imgproxy</h3>
+          <p class="muted">
+            เก็บต้นฉบับอย่างเดียว แล้วให้บริการหลายขนาด (64 / 128 / 256)
+            ผ่าน query — avatar ใน header จะลื่นมาก
+          </p>
+        </div>
+        <div class="card">
+          <h3>Antivirus / ClamAV (optional)</h3>
+          <p class="muted">
+            ถ้าเปิดให้แนบไฟล์หลากชนิดจากพนักงานทั่วไป — สแกนก่อนเก็บ
+            สำหรับ avatar อย่างเดียว มักพอด้วย MIME + re-encode
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>7. ข้อเสนอตัดสินใจ (สำหรับคุยรอบถัดไป)</h2>
+      <div class="panel">
+        <table class="cmp">
+          <thead>
+            <tr><th>คำถาม</th><th>ค่าที่แนะนำตั้งต้น</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Storage เฟส 1</td>
+              <td>Local volume <code>apps/api/uploads</code> + Docker volume</td>
+            </tr>
+            <tr>
+              <td>Storage เฟส 2</td>
+              <td>MinIO ใน Compose → ย้าย R2/S3 ได้โดยไม่เปลี่ยน use case</td>
+            </tr>
+            <tr>
+              <td>รูปแบบรูป</td>
+              <td>รับ JPEG/PNG/WebP → แปลงเป็น WebP ก่อนเก็บ</td>
+            </tr>
+            <tr>
+              <td>ขนาดสูงสุด (avatar)</td>
+              <td>2 MB ต้นทาง / เก็บที่ ~256–512 px</td>
+            </tr>
+            <tr>
+              <td>การเข้าถึง</td>
+              <td>JWT สำหรับอัปโหลด; อ่าน avatar เป็น public-ish intranet URL หรือ signed ถ้าต้องการเข้ม</td>
+            </tr>
+            <tr>
+              <td>ลบ user (soft delete)</td>
+              <td>เก็บไฟล์ไว้หรือ GC ทีหลังด้วย job — อย่าลบทันทีถ้า ticket ยังอ้างอิง</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="callout info" style="margin-top:0.85rem">
+          เมื่อตกลงเฟส 1 แล้ว งาน implement ถัดไปคือ:
+          <code>ObjectStorage</code> port + Local adapter + <code>POST /users/me/avatar</code> + ต่อปุ่มเปลี่ยนรูปใน Profile
+        </p>
+      </div>
+    </section>
+
+    <footer>
+      เอกสารนี้เป็นทางเลือกและข้อเสนอ — ยังไม่ผูก implementation
+      จนกว่าจะเลือกเฟส 1 (Local) หรือกระโดด MinIO ตั้งแต่แรก
+    </footer>
+  </div>
+</body>
+</html>

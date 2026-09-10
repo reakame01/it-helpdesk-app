@@ -1,28 +1,101 @@
 "use client";
 
-import { useEffect, useId, useMemo, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
+import type { UserDto } from "@helpdesk/types";
 import { ItLoginDialog } from "@/components/auth/it-login-dialog";
 import { useItAuth } from "@/components/auth/it-auth-context";
 import { MaterialIcon } from "@/components/shared/material-icon";
 import {
-  createEmptyManagedUser,
-  initialManagedUsers,
-  managedUserRoles,
-  type ManagedUser,
-  type ManagedUserRole,
-} from "@/lib/mock/users";
+  DEFAULT_AVATAR_SRC,
+  SafeAvatar,
+} from "@/components/shared/safe-avatar";
+import {
+  createManagedUser,
+  deleteManagedUser,
+  fetchManagedUsers,
+  getApiErrorMessage,
+  resetManagedUserPassword,
+  resolveMediaUrl,
+  updateManagedUser,
+} from "@/lib/api";
 import { cn } from "@/lib/utils";
 
+type ManagedUserRole = "IT_STAFF" | "SUPERVISOR" | "IT_MANAGER";
 type ToastState = { title: string; body: string } | null;
 type EditorMode = "create" | "edit";
 
+const managedUserRoles: ManagedUserRole[] = ["IT_STAFF", "SUPERVISOR", "IT_MANAGER"];
+
+const DEFAULT_AVATAR_URL = DEFAULT_AVATAR_SRC;
+
+type EditorForm = {
+  employeeId: string;
+  nameTh: string;
+  nameEn: string;
+  email: string;
+  role: ManagedUserRole;
+  extension: string;
+  mobile: string;
+  jobTitle: string;
+  isActive: boolean;
+  avatarUrl: string;
+};
+
+function createEmptyEditorForm(): EditorForm {
+  return {
+    employeeId: "",
+    nameTh: "",
+    nameEn: "",
+    email: "",
+    role: "IT_STAFF",
+    extension: "",
+    mobile: "",
+    jobTitle: "",
+    isActive: true,
+    avatarUrl: DEFAULT_AVATAR_URL,
+  };
+}
+
+function isManagedUserRole(role: string): role is ManagedUserRole {
+  return managedUserRoles.includes(role as ManagedUserRole);
+}
+
+function displayName(user: UserDto): string {
+  return user.nameTh?.trim() || user.name || user.email;
+}
+
+function avatarSrc(user: UserDto): string {
+  return resolveMediaUrl(user.avatarUrl) || DEFAULT_AVATAR_URL;
+}
+
+function formatLastSignIn(
+  iso: string | null | undefined,
+  t: (key: string, values?: Record<string, number>) => string,
+): string {
+  if (!iso) return t("never");
+  const then = new Date(iso).getTime();
+  if (Number.isNaN(then)) return t("never");
+  const diffMs = Date.now() - then;
+  if (diffMs < 60_000) return t("justNow");
+  const minutes = Math.floor(diffMs / 60_000);
+  if (minutes < 60) return t("minutes", { count: minutes });
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return t("hours", { count: hours });
+  const days = Math.floor(hours / 24);
+  return t("days", { count: days });
+}
+
 export function UserManagementWorkspace() {
   const t = useTranslations("userManagement");
-  const { isAuthenticated } = useItAuth();
+  const { isAuthenticated, user: sessionUser } = useItAuth();
   const [loginOpen, setLoginOpen] = useState(false);
-  const [users, setUsers] = useState<ManagedUser[]>(initialManagedUsers);
+  const [users, setUsers] = useState<UserDto[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState<"all" | ManagedUserRole>("all");
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">(
@@ -30,8 +103,9 @@ export function UserManagementWorkspace() {
   );
   const [editorOpen, setEditorOpen] = useState(false);
   const [editorMode, setEditorMode] = useState<EditorMode>("create");
-  const [editingUser, setEditingUser] = useState<ManagedUser | null>(null);
-  const [resetUser, setResetUser] = useState<ManagedUser | null>(null);
+  const [editingUser, setEditingUser] = useState<UserDto | null>(null);
+  const [resetUser, setResetUser] = useState<UserDto | null>(null);
+  const [deleteUser, setDeleteUser] = useState<UserDto | null>(null);
   const [toast, setToast] = useState<ToastState>(null);
 
   useEffect(() => {
@@ -40,6 +114,34 @@ export function UserManagementWorkspace() {
     return () => window.clearTimeout(timer);
   }, [toast]);
 
+  const loadUsers = useCallback(async () => {
+    const rows = await fetchManagedUsers();
+    setUsers(rows);
+    return rows;
+  }, []);
+
+  const refreshUsers = useCallback(async () => {
+    if (!isAuthenticated) return;
+    setLoading(true);
+    setLoadError(null);
+    try {
+      await loadUsers();
+    } catch (error) {
+      setLoadError(getApiErrorMessage(error));
+    } finally {
+      setLoading(false);
+    }
+  }, [isAuthenticated, loadUsers]);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setUsers([]);
+      setLoadError(null);
+      return;
+    }
+    void refreshUsers();
+  }, [isAuthenticated]); // eslint-disable-line react-hooks/exhaustive-deps -- load once when signed in
+
   const stats = useMemo(() => {
     const active = users.filter((u) => u.isActive).length;
     return {
@@ -47,7 +149,7 @@ export function UserManagementWorkspace() {
       active,
       inactive: users.length - active,
       staff: users.filter((u) => u.role === "IT_STAFF" && u.isActive).length,
-      lead: users.filter((u) => u.role === "IT_LEAD" && u.isActive).length,
+      supervisor: users.filter((u) => u.role === "SUPERVISOR" && u.isActive).length,
     };
   }, [users]);
 
@@ -61,10 +163,12 @@ export function UserManagementWorkspace() {
       const hay = [
         user.nameTh,
         user.nameEn,
+        user.name,
         user.email,
         user.employeeId,
         user.extension,
       ]
+        .filter(Boolean)
         .join(" ")
         .toLowerCase();
       return hay.includes(q);
@@ -96,52 +200,128 @@ export function UserManagementWorkspace() {
   function openCreate() {
     setEditorMode("create");
     setEditingUser(null);
+    setActionError(null);
     setEditorOpen(true);
   }
 
-  function openEdit(user: ManagedUser) {
+  function openEdit(user: UserDto) {
     setEditorMode("edit");
     setEditingUser(user);
+    setActionError(null);
     setEditorOpen(true);
   }
 
-  function saveUser(payload: Omit<ManagedUser, "id"> & { id?: string }) {
-    if (editorMode === "create") {
-      const id = `u-${Date.now()}`;
-      setUsers((prev) => [{ ...payload, id, lastSignInKey: "never" }, ...prev]);
-      setToast({ title: t("toast.createdTitle"), body: t("toast.createdBody") });
-    } else if (payload.id) {
-      setUsers((prev) =>
-        prev.map((user) =>
-          user.id === payload.id ? { ...user, ...payload, id: user.id } : user,
-        ),
-      );
-      setToast({ title: t("toast.updatedTitle"), body: t("toast.updatedBody") });
+  async function saveUser(
+    payload: EditorForm & { id?: string; password?: string },
+  ) {
+    setBusy(true);
+    setActionError(null);
+    try {
+      if (editorMode === "create") {
+        await createManagedUser({
+          email: payload.email,
+          password: payload.password ?? "",
+          nameTh: payload.nameTh,
+          nameEn: payload.nameEn,
+          role: payload.role,
+          employeeId: payload.employeeId,
+          jobTitle: payload.jobTitle || null,
+          extension: payload.extension || null,
+          mobile: payload.mobile || null,
+          avatarUrl:
+            !payload.avatarUrl || payload.avatarUrl === DEFAULT_AVATAR_URL
+              ? null
+              : payload.avatarUrl,
+          isActive: true,
+        });
+        setToast({
+          title: t("toast.createdTitle"),
+          body: t("toast.createdBody"),
+        });
+      } else if (payload.id) {
+        await updateManagedUser(payload.id, {
+          email: payload.email,
+          nameTh: payload.nameTh,
+          nameEn: payload.nameEn,
+          role: payload.role,
+          employeeId: payload.employeeId,
+          jobTitle: payload.jobTitle || null,
+          extension: payload.extension || null,
+          mobile: payload.mobile || null,
+          avatarUrl:
+            !payload.avatarUrl || payload.avatarUrl === DEFAULT_AVATAR_URL
+              ? null
+              : payload.avatarUrl,
+          isActive: payload.isActive,
+        });
+        setToast({
+          title: t("toast.updatedTitle"),
+          body: t("toast.updatedBody"),
+        });
+      }
+      setEditorOpen(false);
+      await loadUsers();
+    } catch (error) {
+      setActionError(getApiErrorMessage(error));
+    } finally {
+      setBusy(false);
     }
-    setEditorOpen(false);
   }
 
-  function toggleActive(user: ManagedUser) {
-    setUsers((prev) =>
-      prev.map((item) =>
-        item.id === user.id ? { ...item, isActive: !item.isActive } : item,
-      ),
-    );
-    setToast({
-      title: user.isActive
-        ? t("toast.deactivatedTitle")
-        : t("toast.activatedTitle"),
-      body: t("toast.statusBody", { name: user.nameTh }),
-    });
+  async function toggleActive(user: UserDto) {
+    setBusy(true);
+    setActionError(null);
+    try {
+      await updateManagedUser(user.id, { isActive: !user.isActive });
+      setToast({
+        title: user.isActive
+          ? t("toast.deactivatedTitle")
+          : t("toast.activatedTitle"),
+        body: t("toast.statusBody", { name: displayName(user) }),
+      });
+      await loadUsers();
+    } catch (error) {
+      setActionError(getApiErrorMessage(error));
+    } finally {
+      setBusy(false);
+    }
   }
 
-  function confirmReset() {
-    if (!resetUser) return;
-    setToast({
-      title: t("toast.resetTitle"),
-      body: t("toast.resetBody", { name: resetUser.nameTh }),
-    });
-    setResetUser(null);
+  async function confirmReset(user: UserDto): Promise<string> {
+    setBusy(true);
+    setActionError(null);
+    try {
+      const result = await resetManagedUserPassword(user.id);
+      setToast({
+        title: t("toast.resetTitle"),
+        body: t("toast.resetBody", { name: displayName(user) }),
+      });
+      await loadUsers();
+      return result.temporaryPassword;
+    } catch (error) {
+      setActionError(getApiErrorMessage(error));
+      throw error;
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function confirmDelete(user: UserDto) {
+    setBusy(true);
+    setActionError(null);
+    try {
+      await deleteManagedUser(user.id);
+      setToast({
+        title: t("toast.deletedTitle"),
+        body: t("toast.deletedBody", { name: displayName(user) }),
+      });
+      setDeleteUser(null);
+      await loadUsers();
+    } catch (error) {
+      setActionError(getApiErrorMessage(error));
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
@@ -162,7 +342,8 @@ export function UserManagementWorkspace() {
             </p>
           </div>
           <button
-            className="flex h-11 shrink-0 items-center justify-center gap-space-xs rounded-lg bg-primary px-space-lg font-label-md text-label-md font-bold text-on-primary shadow-sm transition-colors hover:bg-primary-container"
+            className="flex h-11 shrink-0 items-center justify-center gap-space-xs rounded-lg bg-primary px-space-lg font-label-md text-label-md font-bold text-on-primary shadow-sm transition-colors hover:bg-primary-container disabled:opacity-60"
+            disabled={busy || loading}
             type="button"
             onClick={openCreate}
           >
@@ -171,6 +352,27 @@ export function UserManagementWorkspace() {
           </button>
         </div>
       </section>
+
+      {loadError ? (
+        <div className="flex flex-col items-start gap-space-sm rounded-xl bg-error-container/40 p-space-lg text-error">
+          <p className="font-body-md text-body-md">
+            {t("loadError")} {loadError}
+          </p>
+          <button
+            className="rounded-lg bg-primary px-space-md py-2 font-label-md text-label-md font-bold text-on-primary"
+            type="button"
+            onClick={() => void refreshUsers()}
+          >
+            {t("retry")}
+          </button>
+        </div>
+      ) : null}
+
+      {actionError ? (
+        <div className="rounded-xl bg-error-container/40 px-space-md py-space-sm font-body-sm text-body-sm text-error">
+          {t("actionError", { message: actionError })}
+        </div>
+      ) : null}
 
       <section className="grid grid-cols-2 gap-space-sm lg:grid-cols-4">
         <StatCard
@@ -191,8 +393,8 @@ export function UserManagementWorkspace() {
         />
         <StatCard
           icon="supervisor_account"
-          label={t("stats.lead")}
-          value={String(stats.lead)}
+          label={t("stats.supervisor")}
+          value={String(stats.supervisor)}
         />
       </section>
 
@@ -239,7 +441,9 @@ export function UserManagementWorkspace() {
         </div>
 
         <p className="font-body-sm text-body-sm text-on-surface-variant">
-          {t("resultCount", { count: filtered.length })}
+          {loading && users.length === 0
+            ? t("loading")
+            : t("resultCount", { count: filtered.length })}
         </p>
 
         <div className="overflow-x-auto rounded-lg border border-outline-variant/30">
@@ -259,7 +463,16 @@ export function UserManagementWorkspace() {
               </tr>
             </thead>
             <tbody>
-              {filtered.length === 0 ? (
+              {loading && users.length === 0 ? (
+                <tr>
+                  <td
+                    className="px-space-md py-space-xl text-center font-body-sm text-body-sm text-on-surface-variant"
+                    colSpan={6}
+                  >
+                    {t("loading")}
+                  </td>
+                </tr>
+              ) : filtered.length === 0 ? (
                 <tr>
                   <td
                     className="px-space-md py-space-xl text-center font-body-sm text-body-sm text-on-surface-variant"
@@ -276,15 +489,14 @@ export function UserManagementWorkspace() {
                   >
                     <td className="px-space-md py-space-sm">
                       <div className="flex items-center gap-space-sm">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
+                        <SafeAvatar
                           alt=""
-                          className="h-9 w-9 rounded-full object-cover"
-                          src={user.avatarUrl}
+                          className="h-9 w-9 rounded-full"
+                          src={avatarSrc(user)}
                         />
                         <div className="min-w-0">
                           <p className="truncate font-label-md text-label-md font-semibold text-on-surface">
-                            {user.nameTh}
+                            {displayName(user)}
                           </p>
                           <p className="truncate font-body-sm text-body-sm text-on-surface-variant">
                             {user.email}
@@ -293,7 +505,7 @@ export function UserManagementWorkspace() {
                       </div>
                     </td>
                     <td className="px-space-md py-space-sm font-mono text-[13px] text-on-surface-variant">
-                      {user.employeeId}
+                      {user.employeeId ?? "—"}
                     </td>
                     <td className="px-space-md py-space-sm">
                       <RoleChip role={user.role} />
@@ -302,29 +514,47 @@ export function UserManagementWorkspace() {
                       <StatusChip active={user.isActive} />
                     </td>
                     <td className="hidden px-space-md py-space-sm font-body-sm text-body-sm text-on-surface-variant lg:table-cell">
-                      {t(`lastSignIn.${user.lastSignInKey}`)}
+                      {formatLastSignIn(user.lastSignInAt, (key, values) =>
+                        t(`lastSignIn.${key}`, values),
+                      )}
                     </td>
                     <td className="px-space-md py-space-sm">
                       <div className="flex items-center justify-end gap-1">
                         <IconAction
+                          disabled={busy}
                           label={t("actions.edit")}
                           name="edit"
                           onClick={() => openEdit(user)}
                         />
                         <IconAction
+                          disabled={busy}
                           label={t("actions.resetPassword")}
                           name="lock_reset"
-                          onClick={() => setResetUser(user)}
+                          onClick={() => {
+                            setActionError(null);
+                            setResetUser(user);
+                          }}
                         />
                         <IconAction
-                          danger={!user.isActive ? false : true}
+                          danger={user.isActive}
+                          disabled={busy}
                           label={
                             user.isActive
                               ? t("actions.deactivate")
                               : t("actions.activate")
                           }
                           name={user.isActive ? "person_off" : "how_to_reg"}
-                          onClick={() => toggleActive(user)}
+                          onClick={() => void toggleActive(user)}
+                        />
+                        <IconAction
+                          danger
+                          disabled={busy || sessionUser?.id === user.id}
+                          label={t("actions.delete")}
+                          name="delete"
+                          onClick={() => {
+                            setActionError(null);
+                            setDeleteUser(user);
+                          }}
                         />
                       </div>
                     </td>
@@ -338,18 +568,34 @@ export function UserManagementWorkspace() {
 
       <UserEditorDialog
         key={`${editorMode}-${editingUser?.id ?? "new"}-${editorOpen}`}
+        busy={busy}
         mode={editorMode}
         open={editorOpen}
         user={editingUser}
-        onClose={() => setEditorOpen(false)}
-        onSave={saveUser}
+        onClose={() => {
+          if (!busy) setEditorOpen(false);
+        }}
+        onSave={(payload) => void saveUser(payload)}
       />
 
       <ResetPasswordDialog
+        busy={busy}
         open={Boolean(resetUser)}
         user={resetUser}
-        onClose={() => setResetUser(null)}
+        onClose={() => {
+          if (!busy) setResetUser(null);
+        }}
         onConfirm={confirmReset}
+      />
+
+      <DeleteUserDialog
+        busy={busy}
+        open={Boolean(deleteUser)}
+        user={deleteUser}
+        onClose={() => {
+          if (!busy) setDeleteUser(null);
+        }}
+        onConfirm={(user) => void confirmDelete(user)}
       />
 
       {toast ? (
@@ -401,15 +647,22 @@ function StatCard({
   );
 }
 
-function RoleChip({ role }: { role: ManagedUserRole }) {
+function RoleChip({ role }: { role: string }) {
   const t = useTranslations("userManagement");
+  if (!isManagedUserRole(role)) {
+    return (
+      <span className="inline-flex rounded-lg bg-surface-container px-space-sm py-1 font-label-sm text-label-sm font-semibold text-on-surface">
+        {role}
+      </span>
+    );
+  }
   return (
     <span
       className={cn(
         "inline-flex rounded-lg px-space-sm py-1 font-label-sm text-label-sm font-semibold",
-        role === "IT_LEAD" && "bg-primary/10 text-primary",
+        role === "SUPERVISOR" && "bg-primary/10 text-primary",
         role === "IT_STAFF" && "bg-surface-container text-on-surface",
-        role === "GM" && "bg-secondary/10 text-secondary",
+        role === "IT_MANAGER" && "bg-secondary/10 text-secondary",
       )}
     >
       {t(`roles.${role}`)}
@@ -444,19 +697,22 @@ function IconAction({
   label,
   onClick,
   danger,
+  disabled,
 }: {
   name: string;
   label: string;
   onClick: () => void;
   danger?: boolean;
+  disabled?: boolean;
 }) {
   return (
     <button
       aria-label={label}
       className={cn(
-        "flex h-9 w-9 items-center justify-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container",
+        "flex h-9 w-9 items-center justify-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container disabled:opacity-50",
         danger && "hover:bg-error-container/50 hover:text-error",
       )}
+      disabled={disabled}
       title={label}
       type="button"
       onClick={onClick}
@@ -470,21 +726,33 @@ function UserEditorDialog({
   open,
   mode,
   user,
+  busy,
   onClose,
   onSave,
 }: {
   open: boolean;
   mode: EditorMode;
-  user: ManagedUser | null;
+  user: UserDto | null;
+  busy: boolean;
   onClose: () => void;
-  onSave: (payload: Omit<ManagedUser, "id"> & { id?: string }) => void;
+  onSave: (payload: EditorForm & { id?: string; password?: string }) => void;
 }) {
   const t = useTranslations("userManagement");
   const titleId = useId();
-  const defaults = user ?? { ...createEmptyManagedUser(), id: undefined };
-  const [form, setForm] = useState({
-    ...createEmptyManagedUser(),
-    ...defaults,
+  const [form, setForm] = useState<EditorForm>(() => {
+    if (!user) return createEmptyEditorForm();
+    return {
+      employeeId: user.employeeId ?? "",
+      nameTh: user.nameTh ?? user.name ?? "",
+      nameEn: user.nameEn ?? "",
+      email: user.email,
+      role: isManagedUserRole(user.role) ? user.role : "IT_STAFF",
+      extension: user.extension ?? "",
+      mobile: user.mobile ?? "",
+      jobTitle: user.jobTitle ?? "",
+      isActive: user.isActive,
+      avatarUrl: user.avatarUrl ?? DEFAULT_AVATAR_URL,
+    };
   });
   const [password, setPassword] = useState(() =>
     mode === "create" ? generateTempPassword() : "",
@@ -495,7 +763,7 @@ function UserEditorDialog({
   useEffect(() => {
     if (!open) return;
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") onClose();
+      if (event.key === "Escape" && !busy) onClose();
     }
     const previous = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -504,16 +772,17 @@ function UserEditorDialog({
       document.body.style.overflow = previous;
       document.removeEventListener("keydown", onKeyDown);
     };
-  }, [open, onClose]);
+  }, [open, onClose, busy]);
 
   if (!open || typeof document === "undefined") return null;
 
-  function update<K extends keyof typeof form>(key: K, value: (typeof form)[K]) {
+  function update<K extends keyof EditorForm>(key: K, value: EditorForm[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (busy) return;
     if (mode === "create" && password.trim().length < 8) return;
     onSave({
       employeeId: form.employeeId.trim(),
@@ -521,13 +790,12 @@ function UserEditorDialog({
       nameEn: form.nameEn.trim(),
       email: form.email.trim(),
       role: form.role,
-      department: "operations",
       extension: form.extension.trim(),
       mobile: form.mobile.trim(),
       jobTitle: form.jobTitle.trim(),
       isActive: form.isActive,
-      avatarUrl: form.avatarUrl,
-      lastSignInKey: form.lastSignInKey || "never",
+      avatarUrl: form.avatarUrl || DEFAULT_AVATAR_URL,
+      password: mode === "create" ? password.trim() : undefined,
       id: mode === "edit" ? user?.id : undefined,
     });
   }
@@ -537,7 +805,7 @@ function UserEditorDialog({
       <div
         className="flex min-h-full items-center justify-center p-space-md"
         onMouseDown={(event) => {
-          if (event.target === event.currentTarget) onClose();
+          if (event.target === event.currentTarget && !busy) onClose();
         }}
       >
         <div
@@ -548,7 +816,8 @@ function UserEditorDialog({
         >
           <button
             aria-label={t("dialog.close")}
-            className="absolute right-space-md top-space-md flex h-9 w-9 items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-container"
+            className="absolute right-space-md top-space-md flex h-9 w-9 items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-container disabled:opacity-50"
+            disabled={busy}
             type="button"
             onClick={onClose}
           >
@@ -729,18 +998,24 @@ function UserEditorDialog({
 
             <div className="mt-space-xs flex flex-col-reverse gap-space-sm sm:flex-row sm:justify-end">
               <button
-                className="h-11 rounded-lg px-space-md font-label-md text-label-md text-on-surface-variant hover:bg-surface-container"
+                className="h-11 rounded-lg px-space-md font-label-md text-label-md text-on-surface-variant hover:bg-surface-container disabled:opacity-50"
+                disabled={busy}
                 type="button"
                 onClick={onClose}
               >
                 {t("dialog.cancel")}
               </button>
               <button
-                className="flex h-11 items-center justify-center gap-space-xs rounded-lg bg-primary px-space-md font-label-md text-label-md font-bold text-on-primary hover:bg-primary-container"
+                className="flex h-11 items-center justify-center gap-space-xs rounded-lg bg-primary px-space-md font-label-md text-label-md font-bold text-on-primary hover:bg-primary-container disabled:opacity-60"
+                disabled={busy}
                 type="submit"
               >
                 <MaterialIcon className="text-[18px]" name="check_circle" />
-                {mode === "create" ? t("dialog.createSubmit") : t("dialog.save")}
+                {busy
+                  ? t("saving")
+                  : mode === "create"
+                    ? t("dialog.createSubmit")
+                    : t("dialog.save")}
               </button>
             </div>
           </form>
@@ -754,21 +1029,34 @@ function UserEditorDialog({
 function ResetPasswordDialog({
   open,
   user,
+  busy,
   onClose,
   onConfirm,
 }: {
   open: boolean;
-  user: ManagedUser | null;
+  user: UserDto | null;
+  busy: boolean;
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm: (user: UserDto) => Promise<string>;
 }) {
   const t = useTranslations("userManagement");
   const titleId = useId();
+  const [temporaryPassword, setTemporaryPassword] = useState<string | null>(
+    null,
+  );
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (!open) {
+      setTemporaryPassword(null);
+      setCopied(false);
+    }
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") onClose();
+      if (event.key === "Escape" && !busy) onClose();
     }
     const previous = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -777,16 +1065,170 @@ function ResetPasswordDialog({
       document.body.style.overflow = previous;
       document.removeEventListener("keydown", onKeyDown);
     };
-  }, [open, onClose]);
+  }, [open, onClose, busy]);
 
   if (!open || !user || typeof document === "undefined") return null;
+
+  const name = displayName(user);
 
   return createPortal(
     <div className="fixed inset-0 z-[60] overflow-y-auto bg-inverse-surface/50 backdrop-blur-sm">
       <div
         className="flex min-h-full items-center justify-center p-space-md"
         onMouseDown={(event) => {
-          if (event.target === event.currentTarget) onClose();
+          if (event.target === event.currentTarget && !busy) onClose();
+        }}
+      >
+        <div
+          aria-labelledby={titleId}
+          aria-modal="true"
+          className="w-full max-w-md rounded-2xl bg-surface-container-lowest p-space-xl shadow-2xl"
+          role="dialog"
+        >
+          {temporaryPassword ? (
+            <>
+              <div className="mb-space-md flex h-12 w-12 items-center justify-center rounded-xl bg-secondary-container/50 text-secondary">
+                <MaterialIcon className="text-[26px]" name="key" />
+              </div>
+              <h2
+                className="font-headline-sm text-headline-sm font-semibold text-on-surface"
+                id={titleId}
+              >
+                {t("reset.resultTitle")}
+              </h2>
+              <p className="mt-space-xs font-body-sm text-body-sm text-on-surface-variant">
+                {t("reset.resultBody", { name })}
+              </p>
+              <div className="mt-space-md flex flex-col gap-space-xs sm:flex-row">
+                <input
+                  className="h-12 min-w-0 flex-1 rounded-lg bg-surface-container-low px-space-md font-mono text-body-md text-on-surface outline-none"
+                  readOnly
+                  value={temporaryPassword}
+                />
+                <button
+                  className="flex h-12 shrink-0 items-center justify-center gap-space-2xs rounded-lg bg-surface-container px-space-md font-label-md text-label-md font-semibold text-on-surface transition-colors hover:bg-surface-variant"
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      await navigator.clipboard.writeText(temporaryPassword);
+                      setCopied(true);
+                      window.setTimeout(() => setCopied(false), 2000);
+                    } catch {
+                      setCopied(false);
+                    }
+                  }}
+                >
+                  <MaterialIcon
+                    className="text-[18px]"
+                    name={copied ? "check" : "content_copy"}
+                  />
+                  {copied ? t("fields.copied") : t("fields.copyPassword")}
+                </button>
+              </div>
+              <div className="mt-space-lg flex justify-end">
+                <button
+                  className="flex h-11 items-center justify-center gap-space-xs rounded-lg bg-primary px-space-md font-label-md text-label-md font-bold text-on-primary hover:bg-primary-container"
+                  type="button"
+                  onClick={onClose}
+                >
+                  {t("reset.done")}
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="mb-space-md flex h-12 w-12 items-center justify-center rounded-xl bg-error-container/60 text-error">
+                <MaterialIcon className="text-[26px]" name="lock_reset" />
+              </div>
+              <h2
+                className="font-headline-sm text-headline-sm font-semibold text-on-surface"
+                id={titleId}
+              >
+                {t("reset.title")}
+              </h2>
+              <p className="mt-space-xs font-body-sm text-body-sm text-on-surface-variant">
+                {t("reset.body", { name, email: user.email })}
+              </p>
+              <p className="mt-space-sm rounded-lg bg-surface-container-low p-space-md font-body-sm text-body-sm text-on-surface-variant">
+                {t("reset.securityNote")}
+              </p>
+              <div className="mt-space-lg flex flex-col-reverse gap-space-sm sm:flex-row sm:justify-end">
+                <button
+                  className="h-11 rounded-lg px-space-md font-label-md text-label-md text-on-surface-variant hover:bg-surface-container disabled:opacity-50"
+                  disabled={busy}
+                  type="button"
+                  onClick={onClose}
+                >
+                  {t("dialog.cancel")}
+                </button>
+                <button
+                  className="flex h-11 items-center justify-center gap-space-xs rounded-lg bg-primary px-space-md font-label-md text-label-md font-bold text-on-primary hover:bg-primary-container disabled:opacity-60"
+                  disabled={busy}
+                  type="button"
+                  onClick={() => {
+                    void (async () => {
+                      try {
+                        const next = await onConfirm(user);
+                        setTemporaryPassword(next);
+                      } catch {
+                        // actionError is set by parent
+                      }
+                    })();
+                  }}
+                >
+                  <MaterialIcon className="text-[18px]" name="send" />
+                  {busy ? t("saving") : t("reset.confirm")}
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>,
+    document.body,
+  );
+}
+
+function DeleteUserDialog({
+  open,
+  user,
+  busy,
+  onClose,
+  onConfirm,
+}: {
+  open: boolean;
+  user: UserDto | null;
+  busy: boolean;
+  onClose: () => void;
+  onConfirm: (user: UserDto) => void;
+}) {
+  const t = useTranslations("userManagement");
+  const titleId = useId();
+
+  useEffect(() => {
+    if (!open) return;
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape" && !busy) onClose();
+    }
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = previous;
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open, onClose, busy]);
+
+  if (!open || !user || typeof document === "undefined") return null;
+
+  const name = displayName(user);
+
+  return createPortal(
+    <div className="fixed inset-0 z-[60] overflow-y-auto bg-inverse-surface/50 backdrop-blur-sm">
+      <div
+        className="flex min-h-full items-center justify-center p-space-md"
+        onMouseDown={(event) => {
+          if (event.target === event.currentTarget && !busy) onClose();
         }}
       >
         <div
@@ -796,35 +1238,37 @@ function ResetPasswordDialog({
           role="dialog"
         >
           <div className="mb-space-md flex h-12 w-12 items-center justify-center rounded-xl bg-error-container/60 text-error">
-            <MaterialIcon className="text-[26px]" name="lock_reset" />
+            <MaterialIcon className="text-[26px]" name="person_remove" />
           </div>
           <h2
             className="font-headline-sm text-headline-sm font-semibold text-on-surface"
             id={titleId}
           >
-            {t("reset.title")}
+            {t("delete.title")}
           </h2>
           <p className="mt-space-xs font-body-sm text-body-sm text-on-surface-variant">
-            {t("reset.body", { name: user.nameTh, email: user.email })}
+            {t("delete.body", { name, email: user.email })}
           </p>
           <p className="mt-space-sm rounded-lg bg-surface-container-low p-space-md font-body-sm text-body-sm text-on-surface-variant">
-            {t("reset.securityNote")}
+            {t("delete.securityNote")}
           </p>
           <div className="mt-space-lg flex flex-col-reverse gap-space-sm sm:flex-row sm:justify-end">
             <button
-              className="h-11 rounded-lg px-space-md font-label-md text-label-md text-on-surface-variant hover:bg-surface-container"
+              className="h-11 rounded-lg px-space-md font-label-md text-label-md text-on-surface-variant hover:bg-surface-container disabled:opacity-50"
+              disabled={busy}
               type="button"
               onClick={onClose}
             >
               {t("dialog.cancel")}
             </button>
             <button
-              className="flex h-11 items-center justify-center gap-space-xs rounded-lg bg-primary px-space-md font-label-md text-label-md font-bold text-on-primary hover:bg-primary-container"
+              className="flex h-11 items-center justify-center gap-space-xs rounded-lg bg-error px-space-md font-label-md text-label-md font-bold text-on-error hover:opacity-90 disabled:opacity-60"
+              disabled={busy}
               type="button"
-              onClick={onConfirm}
+              onClick={() => onConfirm(user)}
             >
-              <MaterialIcon className="text-[18px]" name="send" />
-              {t("reset.confirm")}
+              <MaterialIcon className="text-[18px]" name="delete" />
+              {busy ? t("saving") : t("delete.confirm")}
             </button>
           </div>
         </div>

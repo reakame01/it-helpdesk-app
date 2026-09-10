@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Software Architecture Patterns — คู่มือศึกษา</title>
+  <script type="module">
+    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: "base",
+      themeVariables: {
+        primaryColor: "#e8f0fe",
+        primaryTextColor: "#1a2332",
+        primaryBorderColor: "#3b6ea5",
+        lineColor: "#5a6a7a",
+        secondaryColor: "#f4f7fa",
+        tertiaryColor: "#fff8e7",
+        fontFamily: "IBM Plex Sans Thai, Segoe UI, sans-serif",
+      },
+    });
+  </script>
+  <style>
+    :root {
+      --ink: #1a2332;
+      --muted: #5a6a7a;
+      --line: #d0d8e0;
+      --bg: #f2f5f8;
+      --paper: #ffffff;
+      --accent: #2f5f8f;
+      --accent-soft: #e8f0fe;
+      --warn: #8a6d1d;
+      --warn-bg: #fff8e7;
+      --ok: #1f6b4a;
+      --ok-bg: #e8f6ef;
+      --info: #1e4a7a;
+      --info-bg: #eaf2fb;
+      --radius: 10px;
+      --font: "IBM Plex Sans Thai", "Segoe UI", system-ui, sans-serif;
+      --mono: "IBM Plex Mono", Consolas, monospace;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      font-family: var(--font);
+      color: var(--ink);
+      background:
+        radial-gradient(ellipse 80% 50% at 10% -10%, #dce8f5 0%, transparent 55%),
+        radial-gradient(ellipse 60% 40% at 100% 0%, #e8efe6 0%, transparent 45%),
+        var(--bg);
+      line-height: 1.55;
+    }
+
+    .wrap {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 2.5rem 1.25rem 4rem;
+    }
+
+    header.doc-head {
+      margin-bottom: 1.5rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid var(--line);
+    }
+
+    header.doc-head p.kicker {
+      margin: 0 0 0.35rem;
+      font-size: 0.8rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    h1 {
+      margin: 0 0 0.5rem;
+      font-size: clamp(1.45rem, 2.5vw, 1.9rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    header.doc-head .lead {
+      margin: 0;
+      max-width: 46rem;
+      color: var(--muted);
+      font-size: 0.98rem;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 0.75rem;
+      margin-top: 1rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .meta span {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 0.2rem 0.75rem;
+    }
+
+    /* TOC */
+    nav.toc {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      margin: 1.5rem 0 0;
+    }
+
+    nav.toc h2 {
+      margin: 0 0 0.65rem;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--accent);
+    }
+
+    nav.toc ol {
+      margin: 0;
+      padding-left: 1.25rem;
+      columns: 1;
+      gap: 1.5rem;
+    }
+
+    @media (min-width: 720px) {
+      nav.toc ol { columns: 2; }
+    }
+
+    nav.toc li {
+      break-inside: avoid;
+      margin-bottom: 0.35rem;
+      font-size: 0.9rem;
+    }
+
+    nav.toc a {
+      color: var(--ink);
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+    }
+
+    nav.toc a:hover {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    section {
+      margin-top: 2.25rem;
+      scroll-margin-top: 1rem;
+    }
+
+    h2 {
+      margin: 0 0 0.75rem;
+      font-size: 1.2rem;
+      font-weight: 700;
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    h2 .badge {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border: 1px solid #c5d6ea;
+      border-radius: 999px;
+      padding: 0.15rem 0.55rem;
+    }
+
+    h3 {
+      margin: 1.15rem 0 0.45rem;
+      font-size: 0.98rem;
+      font-weight: 650;
+      color: var(--accent);
+    }
+
+    p, li { font-size: 0.95rem; color: var(--ink); }
+    .muted { color: var(--muted); }
+
+    .panel {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.35rem;
+      box-shadow: 0 1px 0 rgba(26, 35, 50, 0.04);
+    }
+
+    .panel + .panel { margin-top: 0.85rem; }
+
+    .diagram {
+      overflow-x: auto;
+      background: #fafcfe;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 0.75rem;
+      margin: 0.75rem 0;
+    }
+
+    .diagram .mermaid {
+      display: flex;
+      justify-content: center;
+    }
+
+    .callout {
+      border-radius: var(--radius);
+      padding: 0.9rem 1.1rem;
+      border: 1px solid var(--line);
+      margin: 0.75rem 0 0;
+      font-size: 0.9rem;
+    }
+    .callout.warn { background: var(--warn-bg); border-color: #e6d7a8; color: var(--warn); }
+    .callout.ok { background: var(--ok-bg); border-color: #b8e0cc; color: var(--ok); }
+    .callout.info { background: var(--info-bg); border-color: #b8cce4; color: var(--info); }
+    .callout strong { color: inherit; }
+
+    .obs {
+      display: grid;
+      gap: 0.75rem;
+      margin-top: 0.75rem;
+    }
+
+    @media (min-width: 700px) {
+      .obs { grid-template-columns: 1fr 1fr; }
+    }
+
+    .obs-card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 0.85rem 1rem;
+      font-size: 0.88rem;
+    }
+
+    .obs-card h4 {
+      margin: 0 0 0.4rem;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+    }
+
+    .obs-card ul {
+      margin: 0;
+      padding-left: 1.1rem;
+    }
+
+    .obs-card li { margin-bottom: 0.25rem; font-size: 0.88rem; }
+
+    pre.tree, pre.code {
+      margin: 0.65rem 0 0;
+      padding: 0.9rem 1rem;
+      background: #1a2332;
+      color: #e2e8f0;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      line-height: 1.45;
+    }
+
+    pre.code .c { color: #94a3b8; }
+    pre.code .k { color: #7dd3fc; }
+    pre.code .s { color: #86efac; }
+
+    table.compare {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.86rem;
+      margin-top: 0.5rem;
+    }
+
+    table.compare th,
+    table.compare td {
+      text-align: left;
+      padding: 0.5rem 0.65rem;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+
+    table.compare th {
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 650;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    table.compare code,
+    p code, li code {
+      font-family: var(--mono);
+      font-size: 0.82em;
+      background: #eef2f6;
+      padding: 0.1em 0.35em;
+      border-radius: 4px;
+    }
+
+    .grid-2 {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: 1fr;
+    }
+
+    @media (min-width: 800px) {
+      .grid-2 { grid-template-columns: 1fr 1fr; }
+    }
+
+    .pattern-card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 1rem 1.15rem;
+    }
+
+    .pattern-card h3 {
+      margin: 0 0 0.4rem;
+      font-size: 1rem;
+    }
+
+    .pattern-card p {
+      margin: 0;
+      font-size: 0.88rem;
+      color: var(--muted);
+    }
+
+    .pattern-card .tag {
+      display: inline-block;
+      margin-top: 0.55rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--accent);
+      background: var(--accent-soft);
+      padding: 0.12rem 0.5rem;
+      border-radius: 999px;
+    }
+
+    .stack {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      margin: 0.75rem 0;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+    }
+
+    .stack .layer {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0.55rem 0.85rem;
+      text-align: center;
+      font-weight: 550;
+    }
+
+    .stack .l1 { background: #dbeafe; border-color: #93c5fd; }
+    .stack .l2 { background: #d1fae5; border-color: #6ee7b7; }
+    .stack .l3 { background: #fef3c7; border-color: #fcd34d; }
+    .stack .l4 { background: #e2e8f0; border-color: #cbd5e1; }
+
+    .arrow-down {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.85rem;
+      line-height: 1;
+    }
+
+    footer {
+      margin-top: 2.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--line);
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="wrap">
+    <header class="doc-head">
+      <p class="kicker">Application docs · Architecture</p>
+      <h1>Software Architecture Patterns</h1>
+      <p class="lead">
+        คู่มือสั้น ๆ สำหรับเข้าใจรูปแบบสถาปัตยกรรมที่ทีมซอฟต์แวร์ใช้พูดคุยกันบ่อย
+        — ว่าแต่ละแบบคืออะไร ต่างกันยังไง ข้อสังเกตอะไร และแบบไหนที่ควรรู้จักเพิ่ม
+        เพื่อสื่อสารกับทีมได้อย่างเป็นมาตรฐานและดูโปรเฟสชันนัล
+      </p>
+      <div class="meta">
+        <span>ภาษา: ไทย + คำศัพท์อังกฤษ</span>
+        <span>โฟกัส: โครงสร้างโค้ด / ความรับผิดชอบ</span>
+        <span>ไม่ใช่ deployment-only guide</span>
+      </div>
+    </header>
+
+    <nav class="toc" aria-label="สารบัญ">
+      <h2>สารบัญ</h2>
+      <ol>
+        <li><a href="#big-picture">ภาพรวมก่อนเริ่ม</a></li>
+        <li><a href="#modular">Modular Architecture</a></li>
+        <li><a href="#layered">Layered / N-Tier Architecture</a></li>
+        <li><a href="#ddd">Domain-Driven Design (DDD)</a></li>
+        <li><a href="#clean">Clean / Hexagonal Architecture</a></li>
+        <li><a href="#others">รูปแบบอื่นที่นิยมและควรรู้</a></li>
+        <li><a href="#compare">ตารางเปรียบเทียบสั้น ๆ</a></li>
+        <li><a href="#team">คุยกับทีมยังไงให้เป็นมาตรฐาน</a></li>
+      </ol>
+    </nav>
+
+    <!-- ========== BIG PICTURE ========== -->
+    <section id="big-picture">
+      <h2>ภาพรวมก่อนเริ่ม <span class="badge">Mindset</span></h2>
+      <div class="panel">
+        <p style="margin-top:0">
+          <strong>Architecture pattern</strong> คือ “ข้อตกลงเรื่องการจัดวางความรับผิดชอบ”
+          ไม่ใช่ framework เฉพาะตัว และมัก<strong>ผสมกันได้</strong> เช่น
+          NestJS ที่เป็น <em>Modular</em> + แยก layer แบบ <em>Controller → Service → Repository</em>
+          หรือระบบใหญ่ที่ใช้ <em>DDD + Clean Architecture + Modular Monolith</em>
+        </p>
+        <p class="muted" style="margin-bottom:0">
+          คนมักสับสนระหว่าง <strong>logical layers</strong> (ชั้นในโค้ด) กับ
+          <strong>physical tiers</strong> (เครื่อง/เซิร์ฟเวอร์ที่ deploy แยก)
+          — ทั้งสองเกี่ยวข้องกัน แต่ไม่ใช่คำเดียวกัน
+        </p>
+      </div>
+
+      <div class="diagram">
+        <pre class="mermaid">
+flowchart LR
+  subgraph concern["สิ่งที่ pattern พยายามตอบ"]
+    A["แยกความรับผิดชอบ"]
+    B["ลด coupling"]
+    C["ทดสอบง่ายขึ้น"]
+    D["ทีมพูดภาษาเดียวกัน"]
+  end
+  A --> B --> C --> D
+        </pre>
+      </div>
+
+      <div class="callout info">
+        <strong>เคล็ดลับ:</strong> เวลาอ่านโค้ดคนอื่น ให้ถามก่อนว่า
+        “เขาตัดตาม <em>feature/module</em>, ตาม <em>layer</em>, หรือตาม <em>domain</em>?”
+        — คำตอบนี้มักชี้ได้ทันทีว่าใช้แนวไหนเป็นหลัก
+      </div>
+    </section>
+
+    <!-- ========== MODULAR ========== -->
+    <section id="modular">
+      <h2>1. Modular Architecture <span class="badge">โครงสร้างแพ็กเกจ</span></h2>
+      <div class="panel">
+        <p style="margin-top:0">
+          แบ่งระบบเป็น <strong>โมดูล</strong> (module / package) ที่แต่ละก้อนมีขอบเขตชัดเจน
+          มี API สาธารณะของตัวเอง และซ่อนรายละเอียดภายใน
+          เป้าหมายคือให้ทีมแก้/ขยายฟีเจอร์โดยไม่ต้องรู้ทั้งระบบ
+        </p>
+        <p class="muted" style="margin-bottom:0">
+          ใน NestJS, Angular, หรือ monorepo ที่แยก <code>apps/*</code> + <code>packages/*</code>
+          มักใช้แนวนี้เป็นพื้นฐาน — โมดูลอาจตัดตาม <em>feature</em> (Tickets, Auth)
+          หรือตาม <em>shared capability</em> (Mail, Database)
+        </p>
+      </div>
+
+      <h3>ตัวอย่างโครงสร้างโฟลเดอร์ (feature modules)</h3>
+      <pre class="tree">apps/api/src/
+├── tickets/
+│   ├── tickets.module.ts
+│   ├── tickets.controller.ts
+│   ├── tickets.service.ts
+│   └── dto/
+├── auth/
+│   ├── auth.module.ts
+│   └── ...
+├── users/
+└── shared/                 ← ใช้ร่วม (ไม่ใช่ business ของใครคนใดคนหนึ่ง)
+    ├── mail/
+    └── prisma/</pre>
+
+      <div class="diagram">
+        <pre class="mermaid">
+flowchart TB
+  App["App / Composition root"]
+  T["TicketsModule"]
+  A["AuthModule"]
+  U["UsersModule"]
+  S["Shared / Infra"]
+  App --> T
+  App --> A
+  App --> U
+  T --> S
+  A --> S
+  U --> S
+  T -.->|"public API เท่านั้น"| U
+        </pre>
+      </div>
+
+      <div class="obs">
+        <div class="obs-card">
+          <h4>ข้อสังเกต / ข้อดี</h4>
+          <ul>
+            <li>สเกลทีมได้ดี — คนละโมดูลทำงานคู่ขนาน</li>
+            <li>ขอบเขตชัด → review และ ownership ชัด</li>
+            <li>เตรียมทางไป Modular Monolith หรือ Microservice ได้</li>
+          </ul>
+        </div>
+        <div class="obs-card">
+          <h4>ข้อพลาดที่พบบ่อย</h4>
+          <ul>
+            <li>โมดูล import กันมั่ว → กลายเป็น “spaghetti modules”</li>
+            <li>ยัดทุกอย่างลง <code>shared/</code> จน shared เป็นถังขยะ</li>
+            <li>แยกโมดูลตาม technical layer อย่างเดียว แล้ว feature กระจาย</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout ok">
+        <strong>มาตรฐานทีม:</strong> โมดูลหนึ่งควรมี “สัญญา” ชัด — export อะไรได้, อะไรห้าม import ข้าม
+        (เช่น ห้าม Tickets ไปเรียก repository ภายใน Users โดยตรง)
+      </div>
+    </section>
+
+    <!-- ========== LAYERED / N-TIER ========== -->
+    <section id="layered">
+      <h2>2. Layered / N-Tier Architecture <span class="badge">ชั้นความรับผิดชอบ</span></h2>
+      <div class="panel">
+        <p style="margin-top:0">
+          <strong>Layered Architecture</strong> (บางคนเรียก Tiered) จัดโค้ดเป็นชั้นซ้อนกัน
+          แต่ละชั้นเรียกได้เฉพาะชั้นที่อยู่ “ข้างล่าง” (หรือข้างใน) ตามกฎที่ทีมตกลง
+        </p>
+        <p>
+          <strong>N-Tier</strong> มักหมายถึงการแยก <em>ทางกายภาพ</em> ด้วย เช่น
+          Web server / Application server / Database server (2-tier, 3-tier, …)
+          ในชีวิตจริงทีมมักพูด “3-tier” หมายถึง Presentation + Business + Data
+          ทั้งแบบ logical และ physical ปนกัน — ควรถามให้ชัดว่าหมายถึงชั้นในโค้ดหรือเครื่องแยก
+        </p>
+        <p class="muted" style="margin-bottom:0">
+          ชั้นคลาสสิก: <strong>Presentation → Application / Business → Persistence / Data</strong>
+        </p>
+      </div>
+
+      <div class="grid-2">
+        <div class="panel">
+          <h3 style="margin-top:0">Logical layers (ในโปรเจกต์)</h3>
+          <div class="stack">
+            <div class="layer l1">Presentation — Controller / UI / API</div>
+            <div class="arrow-down">↓ เรียกได้</div>
+            <div class="layer l2">Business — Service / Use case</div>
+            <div class="arrow-down">↓ เรียกได้</div>
+            <div class="layer l3">Persistence — Repository / ORM</div>
+            <div class="arrow-down">↓ เรียกได้</div>
+            <div class="layer l4">Database / External systems</div>
+          </div>
+        </div>
+        <div class="panel">
+          <h3 style="margin-top:0">Physical tiers (deploy)</h3>
+          <div class="stack">
+            <div class="layer l1">Tier 1 — Browser / Mobile client</div>
+            <div class="arrow-down">↓ network</div>
+            <div class="layer l2">Tier 2 — API / App server</div>
+            <div class="arrow-down">↓ network</div>
+            <div class="layer l3">Tier 3 — Database server</div>
+          </div>
+          <p class="muted" style="margin:0.75rem 0 0;font-size:0.85rem">
+            Layer ในโค้ดอาจอยู่ครบใน Tier 2 ก้อนเดียวก็ได้
+          </p>
+        </div>
+      </div>
+
+      <h3>ตัวอย่างโฟลว์ (Helpdesk)</h3>
+      <pre class="code"><span class="c">// Presentation</span>
+<span class="k">POST</span> /tickets  →  TicketsController.create()
+       ↓
+<span class="c">// Business</span>
+TicketsService.createTicket(dto)  <span class="c">// กฎ: ใครเปิดได้, SLA, ฯลฯ</span>
+       ↓
+<span class="c">// Persistence</span>
+TicketRepository.save(entity)
+       ↓
+PostgreSQL</pre>
+
+      <div class="obs">
+        <div class="obs-card">
+          <h4>ข้อสังเกต / ข้อดี</h4>
+          <ul>
+            <li>เรียนรู้ง่าย — มือใหม่เข้าใจเร็ว</li>
+            <li>มาตรฐานใน enterprise / CRUD apps มานาน</li>
+            <li>แยก UI ออกจาก business ได้ระดับหนึ่ง</li>
+          </ul>
+        </div>
+        <div class="obs-card">
+          <h4>ข้อพลาดที่พบบ่อย</h4>
+          <ul>
+            <li><strong>Fat service / Anemic domain</strong> — logic กองใน service ยาว ๆ</li>
+            <li>ชั้นบนข้ามชั้นกลางไปคุย DB โดยตรง</li>
+            <li>เปลี่ยน DB / UI แล้วยัง “รั่ว” รายละเอียดขึ้นบน</li>
+            <li>ทุก feature ผ่านชั้นเดียวกัน → ไฟล์ service บวม</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout warn">
+        <strong>อย่าสับสนคำ:</strong> “Layered” ≠ “Clean”
+        Layered อนุญาตให้ business พึ่ง ORM ได้บ่อย ๆ
+        ส่วน Clean/Hexagonal จะบังคับให้ dependency ชี้เข้าหา domain มากกว่า
+      </div>
+    </section>
+
+    <!-- ========== DDD ========== -->
+    <section id="ddd">
+      <h2>3. Domain-Driven Design (DDD) <span class="badge">ภาษาธุรกิจ</span></h2>
+      <div class="panel">
+        <p style="margin-top:0">
+          DDD ไม่ใช่แค่โฟลเดอร์ แต่เป็นแนวคิดให้<strong>โมเดลซอฟต์แวร์สะท้อนโดเมนธุรกิจ</strong>
+          โดยใช้ภาษาเดียวกันกับผู้เชี่ยวชาญธุรกิจ (<strong>Ubiquitous Language</strong>)
+          และแบ่งระบบตามขอบเขตความหมาย (<strong>Bounded Context</strong>)
+        </p>
+        <p class="muted" style="margin-bottom:0">
+          มีสองระดับ: <strong>Strategic</strong> (แบ่งโลกธุรกิจ) และ
+          <strong>Tactical</strong> (เครื่องมือในโค้ด: Entity, Value Object, Aggregate, Domain Event, …)
+        </p>
+      </div>
+
+      <div class="diagram">
+        <pre class="mermaid">
+flowchart LR
+  subgraph strategic["Strategic"]
+    BC1["Bounded Context<br/>Ticketing"]
+    BC2["Bounded Context<br/>Identity / HR"]
+    BC3["Bounded Context<br/>Asset Mgmt"]
+  end
+  BC1 -->|"Anti-Corruption Layer"| BC2
+  BC1 -.-> BC3
+        </pre>
+      </div>
+
+      <h3>คำศัพท์ tactical ที่ควรรู้</h3>
+      <div class="panel">
+        <table class="compare">
+          <thead>
+            <tr>
+              <th>คำ</th>
+              <th>ความหมายสั้น ๆ</th>
+              <th>ตัวอย่าง Helpdesk</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>Entity</code></td>
+              <td>มีตัวตนต่อเนื่อง มี identity</td>
+              <td><code>Ticket</code>, <code>User</code></td>
+            </tr>
+            <tr>
+              <td><code>Value Object</code></td>
+              <td>ไม่มี identity แยก — เท่ากันถ้าค่าเท่ากัน</td>
+              <td><code>Email</code>, <code>Priority</code>, <code>TicketStatus</code></td>
+            </tr>
+            <tr>
+              <td><code>Aggregate</code></td>
+              <td>คลัสเตอร์ที่ consistency ต้องผ่าน root</td>
+              <td><code>Ticket</code> + comments ภายใต้กฎเดียวกัน</td>
+            </tr>
+            <tr>
+              <td><code>Domain Event</code></td>
+              <td>สิ่งที่ “เกิดแล้ว” ในโดเมน</td>
+              <td><code>TicketClosed</code>, <code>TicketReopened</code></td>
+            </tr>
+            <tr>
+              <td><code>Repository</code></td>
+              <td>โหลด/เก็บ aggregate — ไม่ใช่ CRUD ทุกตาราง</td>
+              <td><code>TicketRepository.findById()</code></td>
+            </tr>
+            <tr>
+              <td><code>Bounded Context</code></td>
+              <td>ขอบเขตที่คำศัพท์มีความหมายเดียว</td>
+              <td>“User” ใน Auth ≠ “Requester” ใน Ticket</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>ตัวอย่างแนวคิด (ไม่ต้อง framework พิเศษ)</h3>
+      <pre class="code"><span class="c">// Domain รู้กฎ — ไม่รู้ว่าใช้ Prisma หรือ HTTP</span>
+<span class="k">class</span> Ticket {
+  close(actor: Agent) {
+    <span class="k">if</span> (this.status === <span class="s">'CLOSED'</span>) <span class="k">throw</span> ...
+    this.status = <span class="s">'CLOSED'</span>
+    this.record(new TicketClosed(this.id, actor.id))
+  }
+}</pre>
+
+      <div class="obs">
+        <div class="obs-card">
+          <h4>ข้อสังเกต / ข้อดี</h4>
+          <ul>
+            <li>เหมาะกับธุรกิจซับซ้อน มีกฎเยอะ</li>
+            <li>ลดการคุยคนละภาษา (“status” หมายความว่าอะไร)</li>
+            <li>จับคู่กับ Clean/Hexagonal ได้ดี</li>
+          </ul>
+        </div>
+        <div class="obs-card">
+          <h4>ข้อพลาดที่พบบ่อย</h4>
+          <ul>
+            <li>ใส่ Entity/VO เต็มโปรเจกต์ CRUD เล็ก ๆ → over-engineering</li>
+            <li>เรียก DDD แต่ logic ยังอยู่ใน service + DTO</li>
+            <li>ลืม Strategic — โฟกัสแต่ folder ชื่อ <code>domain/</code></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout info">
+        <strong>เมื่อไหร่ใช้หนัก:</strong> เมื่อกฎธุรกิจเปลี่ยนบ่อยและผิดพลาดมีผลสูง
+        ถ้าเป็น admin CRUD ง่าย ๆ Layered + Modular อาจพอ
+      </div>
+    </section>
+
+    <!-- ========== CLEAN / HEXAGONAL ========== -->
+    <section id="clean">
+      <h2>4. Clean Architecture / Hexagonal Architecture <span class="badge">Dependency Rule</span></h2>
+      <div class="panel">
+        <p style="margin-top:0">
+          ทั้งสองแนวคิดใกล้กันมาก: <strong>ธุรกิจอยู่ตรงกลาง</strong>
+          ส่วน UI, DB, Queue, Email เป็นรายละเอียดที่ “เสียบ” เข้ามาทีหลัง
+        </p>
+        <ul style="margin-bottom:0">
+          <li>
+            <strong>Hexagonal (Ports &amp; Adapters)</strong> — โดเมนมี
+            <em>port</em> (interface) และโลกภายนอกเป็น <em>adapter</em>
+            (HTTP controller, Prisma adapter, SMTP adapter)
+          </li>
+          <li>
+            <strong>Clean Architecture</strong> (Uncle Bob) — วงแหวนของชั้น
+            โดย dependency ชี้เข้าในเสมอ (Dependency Rule)
+            ชั้นในไม่รู้จัก framework / DB
+          </li>
+        </ul>
+      </div>
+
+      <div class="diagram">
+        <pre class="mermaid">
+flowchart TB
+  subgraph adapters["Adapters (ข้างนอก)"]
+    HTTP["HTTP / Next.js / Nest Controller"]
+    DB["Prisma / SQL Adapter"]
+    MAIL["Email Adapter"]
+  end
+  subgraph app["Application (Use cases)"]
+    UC["CreateTicket / CloseTicket"]
+  end
+  subgraph domain["Domain (Entities / Rules)"]
+    T["Ticket Aggregate"]
+  end
+  HTTP --> UC
+  UC --> T
+  UC --> DB
+  UC --> MAIL
+  DB -.->|"implements port"| UC
+  MAIL -.->|"implements port"| UC
+        </pre>
+      </div>
+
+      <h3>โครงสร้างโฟลเดอร์แบบที่เจอบ่อย</h3>
+      <pre class="tree">src/
+├── domain/                 ← entities, value objects, domain errors
+├── application/            ← use cases / ports (interfaces)
+│   ├── ports/
+│   │   ├── ticket.repository.ts
+│   │   └── mailer.ts
+│   └── use-cases/
+│       └── close-ticket.ts
+└── infrastructure/         ← adapters จริง
+    ├── http/
+    ├── persistence/prisma/
+    └── mail/smtp/</pre>
+
+      <h3>ทิศทาง dependency ที่ถูกต้อง</h3>
+      <pre class="code"><span class="c">// application/ports/ticket.repository.ts  (interface อยู่ชั้นใน)</span>
+<span class="k">interface</span> TicketRepository {
+  findById(id: TicketId): Promise&lt;Ticket | null&gt;
+  save(ticket: Ticket): Promise&lt;void&gt;
+}
+
+<span class="c">// infrastructure/... implements interface ด้านบน</span>
+<span class="c">// domain / use-case ไม่ import Prisma ตรง ๆ</span></pre>
+
+      <div class="obs">
+        <div class="obs-card">
+          <h4>ข้อสังเกต / ข้อดี</h4>
+          <ul>
+            <li>ทดสอบ use case โดย mock port ได้ง่าย</li>
+            <li>เปลี่ยน DB / UI โดยไม่ทำลายกฎธุรกิจ</li>
+            <li>สื่อสารกับทีมอาวุโสได้ตรงคำศัพท์ industry</li>
+          </ul>
+        </div>
+        <div class="obs-card">
+          <h4>ข้อพลาดที่พบบ่อย</h4>
+          <ul>
+            <li>สร้าง interface ทุกอย่างโดยไม่จำเป็น → ceremony สูง</li>
+            <li>use case กลายเป็น proxy บาง ๆ ที่แค่เรียก repository</li>
+            <li>ลาก framework types (เช่น Nest <code>@Injectable</code>) เข้า domain</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout ok">
+        <strong>Onion Architecture</strong> เป็นญาติสนิทของ Clean —
+        วงแหวน Domain → Application → Infrastructure เช่นกัน
+        ถ้าใครพูด Onion ให้คิดภาพ Clean/Hexagonal ได้เลย
+      </div>
+    </section>
+
+    <!-- ========== OTHERS ========== -->
+    <section id="others">
+      <h2>5. รูปแบบอื่นที่นิยมและควรรู้ <span class="badge">Must-know</span></h2>
+      <p class="muted">ไม่ต้องเก่งทุกแบบ แต่ควรรู้จักชื่อและความหมายเมื่อทีมพูดถึง</p>
+
+      <div class="grid-2" style="margin-top:0.75rem">
+        <div class="pattern-card">
+          <h3>Modular Monolith</h3>
+          <p>
+            ระบบก้อนเดียว (deploy ร่วม) แต่ภายในแบ่งโมดูลขอบเขตชัด
+            — ทางสายกลางก่อนแตกเป็น microservice
+          </p>
+          <span class="tag">นิยมสูงในทีมโต</span>
+        </div>
+        <div class="pattern-card">
+          <h3>Microservices</h3>
+          <p>
+            แยกบริการตาม business capability deploy อิสระ
+            ได้ isolation แต่แลกด้วยเครือข่าย, data consistency, ops
+          </p>
+          <span class="tag">กระจายระบบ</span>
+        </div>
+        <div class="pattern-card">
+          <h3>Vertical Slice / Feature Slice</h3>
+          <p>
+            จัดโค้ดตาม use case แนวตั้ง (CreateTicket รวม handler+dto+logic)
+            แทนการตัดตาม layer แนวนอนอย่างเดียว
+          </p>
+          <span class="tag">ลดไฟล์กระโดด</span>
+        </div>
+        <div class="pattern-card">
+          <h3>MVC / MVP / MVVM</h3>
+          <p>
+            แพทเทิร์นฝั่ง UI: แยก View ออกจาก state/logic
+            (React มักเป็น component + hooks / store มากกว่า MVC ตรงตัว)
+          </p>
+          <span class="tag">Frontend</span>
+        </div>
+        <div class="pattern-card">
+          <h3>CQRS</h3>
+          <p>
+            แยกโมเดลอ่าน (Query) กับเขียน (Command)
+            ใช้เมื่อหน้าจออ่านซับซ้อนหรือ throughput สูง — อย่าใช้ทุก CRUD
+          </p>
+          <span class="tag">อ่าน/เขียนแยก</span>
+        </div>
+        <div class="pattern-card">
+          <h3>Event-Driven Architecture</h3>
+          <p>
+            บริการสื่อสารผ่าน event/message (queue, bus)
+            ลด coupling ด้านเวลา แต่ต้องออกแบบ idempotency / ordering
+          </p>
+          <span class="tag">Async / Integration</span>
+        </div>
+        <div class="pattern-card">
+          <h3>Event Sourcing</h3>
+          <p>
+            เก็บลำดับเหตุการณ์เป็นแหล่งความจริง แล้ว derive state
+            ทรงพลังแต่ซับซ้อน — มักคู่กับ CQRS
+          </p>
+          <span class="tag">Advanced</span>
+        </div>
+        <div class="pattern-card">
+          <h3>SOA / API Gateway</h3>
+          <p>
+            บริการถูกเปิดผ่าน contract (API) รวมศูนย์ทางเข้า
+            พบบ่อยในองค์กรที่มีระบบเดิมหลายตัว
+          </p>
+          <span class="tag">Enterprise</span>
+        </div>
+      </div>
+
+      <div class="callout info" style="margin-top:1rem">
+        <strong>ที่เจอในโปรเจกต์สมัยใหม่บ่อยสุด:</strong>
+        Modular (หรือ Modular Monolith) + Layered เบา ๆ ภายในโมดูล
+        และค่อยดึง DDD/Clean เข้ามาเฉพาะ bounded context ที่ซับซ้อน
+      </div>
+    </section>
+
+    <!-- ========== COMPARE ========== -->
+    <section id="compare">
+      <h2>6. ตารางเปรียบเทียบสั้น ๆ</h2>
+      <div class="panel" style="overflow-x:auto">
+        <table class="compare">
+          <thead>
+            <tr>
+              <th>แนวทาง</th>
+              <th>ตัดระบบตาม</th>
+              <th>จุดแข็ง</th>
+              <th>ระวัง</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Modular</td>
+              <td>ขอบเขตโมดูล / feature</td>
+              <td>ownership, สเกลทีม</td>
+              <td>dependency ระหว่างโมดูล</td>
+            </tr>
+            <tr>
+              <td>Layered / N-Tier</td>
+              <td>ชั้น technical</td>
+              <td>เรียบง่าย เป็นมาตรฐาน</td>
+              <td>service อ้วน, ข้ามชั้น</td>
+            </tr>
+            <tr>
+              <td>DDD</td>
+              <td>ภาษาและขอบเขตโดเมน</td>
+              <td>ธุรกิจซับซ้อน</td>
+              <td>overkill ถ้าโดเมนง่าย</td>
+            </tr>
+            <tr>
+              <td>Clean / Hexagonal</td>
+              <td>ทิศทาง dependency</td>
+              <td>ทดสอบ, เปลี่ยน infra</td>
+              <td>boilerplate</td>
+            </tr>
+            <tr>
+              <td>Vertical Slice</td>
+              <td>use case แนวตั้ง</td>
+              <td>เปลี่ยน feature เร็ว</td>
+              <td>ซ้ำโค้ดข้าม slice</td>
+            </tr>
+            <tr>
+              <td>Microservices</td>
+              <td>บริการ + deploy</td>
+              <td>อิสระ สเกลแยก</td>
+              <td>กระจายความซับซ้อน</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="diagram">
+        <pre class="mermaid">
+flowchart TB
+  Q{"โดเมนซับซ้อน<br/>กฎเปลี่ยนบ่อย?"}
+  Q -->|ใช่| DDD["DDD + Clean/Hex เบา ๆ"]
+  Q -->|ไม่| M["Modular + Layered"]
+  DDD --> MM["Modular Monolith ก่อน"]
+  M --> MM
+  MM --> MS{"ทีม/สเกล<br/>ต้องการ deploy แยก?"}
+  MS -->|ยังไม่| Stay["อยู่ monolith โมดูลาร์"]
+  MS -->|ใช่ และพร้อม ops| Micro["ค่อยแตก Microservice"]
+        </pre>
+      </div>
+    </section>
+
+    <!-- ========== TEAM ========== -->
+    <section id="team">
+      <h2>7. คุยกับทีมยังไงให้เป็นมาตรฐาน</h2>
+      <div class="panel">
+        <h3 style="margin-top:0">ประโยคที่ใช้อธิบายงานได้ทันที</h3>
+        <ul>
+          <li>“โมดูลนี้เป็น <strong>bounded context</strong> ของ Ticketing ไม่ปน Identity”</li>
+          <li>“Controller เป็น adapter — กฎปิดตั๋วอยู่ใน domain/use case”</li>
+          <li>“อย่าให้ presentation พึ่ง Prisma โดยตรง ผ่าน repository port”</li>
+          <li>“เราเป็น modular monolith ตอนนี้ ยังไม่แยก service”</li>
+          <li>“อันนี้เป็น vertical slice ของ Close Ticket ไม่ใช่ shared util ทั่วไป”</li>
+        </ul>
+      </div>
+
+      <div class="obs">
+        <div class="obs-card">
+          <h4>สิ่งที่โปรเฟสชันนัลทำ</h4>
+          <ul>
+            <li>ตั้งชื่อโฟลเดอร์/คลาสให้สะท้อนความรับผิดชอบจริง</li>
+            <li>เขียน ADR สั้น ๆ เมื่อเลือก architecture สำคัญ</li>
+            <li>ยอมรับ hybrid — ไม่ศาสนา pattern เดียว</li>
+            <li>ประเมินความซับซ้อนของโดเมนก่อนเลือกของหนัก</li>
+          </ul>
+        </div>
+        <div class="obs-card">
+          <h4>สิ่งที่ควรเลี่ยง</h4>
+          <ul>
+            <li>ยก Clean Architecture ทั้งก้อนมาใส่ CRUD นับสิบตาราง</li>
+            <li>เรียกชื่อ pattern แต่โครงสร้างจริงไม่ตรง</li>
+            <li>แยก microservice เพราะ “ฟังดูเท่” โดยไม่มีขอบเขตชัด</li>
+            <li>ไม่มีกฎ import / boundary แล้วทะเลาะตอน review</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout ok">
+        <strong>สรุปหนึ่งประโยค:</strong>
+        เริ่มจาก <em>Modular + Layered ที่วินัยดี</em> →
+        เติม <em>DDD / Clean</em> ที่จุดที่ธุรกิจซับซ้อน →
+        ค่อยคิด <em>Microservices / Event-driven</em> เมื่อมีเหตุผลด้านสเกลและทีม
+      </div>
+    </section>
+
+    <footer>
+      เอกสารอ้างอิงภายในโปรเจกต์ IT Helpdesk · สำหรับการศึกษาและการสื่อสารในทีม
+      · ไม่ได้ล็อกว่าโปรเจกต์นี้ต้องใช้ pattern ใดแบบเต็มรูปแบบ
+    </footer>
+  </div>
+</body>
+</html>
