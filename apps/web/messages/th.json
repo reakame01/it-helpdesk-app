@@ -390,8 +390,12 @@
   },
   "footer": {
     "title": "ระบบศูนย์ช่วยเหลือและแจ้งปัญหาอุปกรณ์ไอที",
-    "staffLine": "ทีมงานประจำการ 3 ท่าน: ต่อ 101 (เครือข่าย), ต่อ 102 (ฮาร์ดแวร์), ต่อ 103 (โปรแกรมและสิทธิ์ใช้งาน)",
-    "copyright": "© 2024 แผนกปฏิบัติการไอทีเฮลพ์เดสก์ สงวนลิขสิทธิ์"
+    "staffLine": "ทีมงานประจำการ {count} ท่าน: {details}",
+    "staffItemWithExt": "โทร {ext} ({label})",
+    "staffItemNoExt": "{label}",
+    "staffLineLoading": "กำลังโหลดรายชื่อทีมงาน...",
+    "staffLineEmpty": "ทีมงานประจำการ — ยังไม่มีรายชื่อในระบบ",
+    "copyright": "© {year} แผนกปฏิบัติการไอทีเฮลพ์เดสก์ สงวนลิขสิทธิ์"
   },
   "login": {
     "title": "เข้าสู่ระบบ",
@@ -401,6 +405,8 @@
     "emailPlaceholder": "name@company.com",
     "password": "รหัสผ่าน",
     "passwordPlaceholder": "กรอกรหัสผ่าน",
+    "showPassword": "แสดงรหัสผ่าน",
+    "hidePassword": "ซ่อนรหัสผ่าน",
     "submit": "เข้าสู่ระบบ",
     "submitting": "กำลังเข้าสู่ระบบ...",
     "forgot": "ลืมรหัสผ่าน?",

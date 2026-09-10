@@ -391,8 +391,12 @@
   },
   "footer": {
     "title": "IT Helpdesk & equipment support center",
-    "staffLine": "On duty (3): Ext. 101 (Network), Ext. 102 (Hardware), Ext. 103 (Apps & access)",
-    "copyright": "© 2024 IT Helpdesk Operations Department. All rights reserved."
+    "staffLine": "On duty ({count}): {details}",
+    "staffItemWithExt": "Ext. {ext} ({label})",
+    "staffItemNoExt": "{label}",
+    "staffLineLoading": "Loading on-duty staff...",
+    "staffLineEmpty": "On-duty staff — no team members listed yet",
+    "copyright": "© {year} IT Helpdesk Operations Department. All rights reserved."
   },
   "login": {
     "title": "Sign in",
@@ -402,6 +406,8 @@
     "emailPlaceholder": "name@company.com",
     "password": "Password",
     "passwordPlaceholder": "Enter password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
     "submit": "Sign in",
     "submitting": "Signing in...",
     "forgot": "Forgot password?",

@@ -18,6 +18,7 @@ export function ItLoginForm({
   const { login } = useItAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -62,16 +63,29 @@ export function ItLoginForm({
         >
           {t("password")}
         </label>
-        <input
-          autoComplete="current-password"
-          className="h-target-min w-full rounded-xl bg-surface-container-low px-space-md font-body-md text-body-md text-on-surface outline-none ring-2 ring-transparent transition-colors placeholder:text-outline focus:bg-surface-container-lowest focus:ring-secondary"
-          id={`${idPrefix}-password`}
-          placeholder={t("passwordPlaceholder")}
-          required
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        <div className="relative">
+          <input
+            autoComplete="current-password"
+            className="h-target-min w-full rounded-xl bg-surface-container-low px-space-md pr-12 font-body-md text-body-md text-on-surface outline-none ring-2 ring-transparent transition-colors placeholder:text-outline focus:bg-surface-container-lowest focus:ring-secondary"
+            id={`${idPrefix}-password`}
+            placeholder={t("passwordPlaceholder")}
+            required
+            type={showPassword ? "text" : "password"}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <button
+            aria-label={showPassword ? t("hidePassword") : t("showPassword")}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-outline transition-colors hover:text-on-surface"
+            type="button"
+            onClick={() => setShowPassword((v) => !v)}
+          >
+            <MaterialIcon
+              className="text-[22px]"
+              name={showPassword ? "visibility_off" : "visibility"}
+            />
+          </button>
+        </div>
       </div>
 
       <div className="flex justify-end">
