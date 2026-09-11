@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import type { ReferenceItemDto } from "@helpdesk/types";
 import { MaterialIcon } from "@/components/shared/material-icon";
 import {
-  quickLogDepartments,
   quickLogIssuePresets,
   quickLogResolvePresets,
 } from "@/lib/mock/kanban";
@@ -12,28 +12,61 @@ import { cn } from "@/lib/utils";
 
 type QuickLogDialogProps = {
   open: boolean;
+  departments: ReferenceItemDto[];
+  busy?: boolean;
+  error?: string | null;
   onClose: () => void;
-  onSaved: () => void;
+  onSubmit: (input: {
+    departmentCode: string;
+    issue: string;
+    resolve: string;
+    requesterName?: string;
+  }) => Promise<void>;
 };
 
-export function QuickLogDialog({ open, onClose, onSaved }: QuickLogDialogProps) {
+export function QuickLogDialog({
+  open,
+  departments,
+  busy = false,
+  error = null,
+  onClose,
+  onSubmit,
+}: QuickLogDialogProps) {
   const t = useTranslations("kanban.quickLogDialog");
-  const tKanban = useTranslations("kanban");
-  const [department, setDepartment] = useState<(typeof quickLogDepartments)[number]>("account");
+  const locale = useLocale();
+  const [department, setDepartment] = useState("");
   const [issue, setIssue] = useState("");
   const [resolve, setResolve] = useState("");
   const [requester, setRequester] = useState("");
 
-  if (!open) return null;
-
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    onSaved();
-    onClose();
+  useEffect(() => {
+    if (!open) return;
     setIssue("");
     setResolve("");
     setRequester("");
-    setDepartment("account");
+    setDepartment((current) => {
+      if (current && departments.some((row) => row.code === current)) {
+        return current;
+      }
+      return departments[0]?.code ?? "";
+    });
+  }, [open, departments]);
+
+  if (!open) return null;
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (busy) return;
+    await onSubmit({
+      departmentCode: department,
+      issue,
+      resolve,
+      requesterName: requester.trim() || undefined,
+    });
+  }
+
+  function departmentLabel(item: ReferenceItemDto): string {
+    return locale.startsWith("th") ? item.labelTh : item.labelEn;
   }
 
   return (
@@ -62,6 +95,7 @@ export function QuickLogDialog({ open, onClose, onSaved }: QuickLogDialogProps) 
           <button
             type="button"
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-on-primary transition-colors hover:bg-on-primary/10"
+            disabled={busy}
             onClick={onClose}
           >
             <MaterialIcon className="text-[24px]" name="close" />
@@ -70,7 +104,9 @@ export function QuickLogDialog({ open, onClose, onSaved }: QuickLogDialogProps) 
 
         <form
           className="flex flex-col gap-space-md overflow-y-auto p-space-xl"
-          onSubmit={handleSubmit}
+          onSubmit={(event) => {
+            void handleSubmit(event);
+          }}
         >
           <div className="flex flex-col gap-space-2xs">
             <div className="flex items-center justify-between gap-2">
@@ -81,22 +117,26 @@ export function QuickLogDialog({ open, onClose, onSaved }: QuickLogDialogProps) 
                 {t("departmentHint")}
               </span>
             </div>
-            <div className="flex flex-wrap gap-space-xs">
-              {quickLogDepartments.map((dept) => (
-                <label key={dept} className="cursor-pointer">
-                  <input
-                    checked={department === dept}
-                    className="peer hidden"
-                    name="quick_dept"
-                    type="radio"
-                    onChange={() => setDepartment(dept)}
-                  />
-                  <span className="block rounded-lg bg-surface-container-low px-space-md py-1.5 font-label-sm text-label-sm text-on-surface shadow-sm transition-colors peer-checked:bg-primary peer-checked:font-semibold peer-checked:text-on-primary">
-                    {tKanban(`departments.${dept}`)}
-                  </span>
-                </label>
-              ))}
-            </div>
+            {departments.length === 0 ? (
+              <p className="font-body-sm text-body-sm text-error">{t("noDepartments")}</p>
+            ) : (
+              <div className="flex flex-wrap gap-space-xs">
+                {departments.map((dept) => (
+                  <label key={dept.code} className="cursor-pointer">
+                    <input
+                      checked={department === dept.code}
+                      className="peer hidden"
+                      name="quick_dept"
+                      type="radio"
+                      onChange={() => setDepartment(dept.code)}
+                    />
+                    <span className="block rounded-lg bg-surface-container-low px-space-md py-1.5 font-label-sm text-label-sm text-on-surface shadow-sm transition-colors peer-checked:bg-primary peer-checked:font-semibold peer-checked:text-on-primary">
+                      {departmentLabel(dept)}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="flex flex-col gap-space-2xs">
@@ -171,22 +211,30 @@ export function QuickLogDialog({ open, onClose, onSaved }: QuickLogDialogProps) 
             />
           </div>
 
+          {error ? (
+            <p className="rounded-lg bg-error-container/40 px-3 py-2 font-body-sm text-body-sm text-error">
+              {error}
+            </p>
+          ) : null}
+
           <div className="flex flex-col-reverse gap-space-sm pt-space-sm sm:flex-row sm:justify-end">
             <button
               type="button"
               className={cn(
                 "h-11 rounded-lg bg-surface-container px-space-lg font-label-md text-label-md font-semibold text-on-surface transition-colors hover:bg-surface-container-high",
               )}
+              disabled={busy}
               onClick={onClose}
             >
               {t("cancel")}
             </button>
             <button
               type="submit"
-              className="flex h-11 items-center justify-center gap-2 rounded-lg bg-secondary px-space-lg font-label-md text-label-md font-bold text-on-secondary shadow-md transition-colors hover:bg-on-secondary-container"
+              disabled={busy || departments.length === 0}
+              className="flex h-11 items-center justify-center gap-2 rounded-lg bg-secondary px-space-lg font-label-md text-label-md font-bold text-on-secondary shadow-md transition-colors hover:bg-on-secondary-container disabled:cursor-not-allowed disabled:opacity-60"
             >
               <MaterialIcon className="text-[20px]" name="bolt" />
-              {t("submit")}
+              {busy ? t("saving") : t("submit")}
             </button>
           </div>
         </form>

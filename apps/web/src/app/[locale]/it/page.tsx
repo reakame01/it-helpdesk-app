@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { PortalFooter } from "@/components/portal/portal-footer";
 import { PortalHeader } from "@/components/portal/portal-header";
 import { KanbanWorkspace } from "@/components/kanban/kanban-workspace";
@@ -10,7 +11,9 @@ export default function ItWorkspacePage() {
       <PortalHeader activeNav="itWorkspace" />
       <main className="w-full flex-1 pt-[8.5rem]">
         <section className="mx-auto w-full max-w-container-max px-gutter-desktop py-space-xl">
-          <KanbanWorkspace />
+          <Suspense>
+            <KanbanWorkspace />
+          </Suspense>
         </section>
       </main>
       <PortalFooter />

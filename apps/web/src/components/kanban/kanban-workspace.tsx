@@ -1,17 +1,37 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useCallback, useEffect, useId, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
+import { useLocale, useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
+import type { BoardTicketDto, ConfirmTokenPeekDto, ReferenceItemDto } from "@helpdesk/types";
+import { useItAuth } from "@/components/auth/it-auth-context";
 import { MaterialIcon } from "@/components/shared/material-icon";
-import {
-  kanbanAssignees,
-  mockKanbanTickets,
-  type KanbanColumnId,
-  type KanbanTicket,
-} from "@/lib/mock/kanban";
-import { cn } from "@/lib/utils";
 import { QuickLogDialog } from "@/components/kanban/quick-log-dialog";
 import { TicketDetailDrawer } from "@/components/kanban/ticket-detail-drawer";
+import {
+  claimBoardTicket,
+  createQuickLog,
+  fetchBoardTickets,
+  fetchReferenceItems,
+  getApiErrorMessage,
+  peekConfirmToken,
+  withdrawBoardTicket,
+} from "@/lib/api";
+import {
+  assigneeInitial,
+  assigneeSwatch,
+  boardPriority,
+  categoryFilterKey,
+  formatTicketAge,
+  isQuickTicket,
+  showsDevelopmentProgress,
+  uniqueAssignees,
+  type BoardCategoryFilter,
+} from "@/lib/kanban/board-view";
+import { cn } from "@/lib/utils";
+
+type KanbanColumnId = BoardTicketDto["column"];
 
 const COLUMNS: {
   id: KanbanColumnId;
@@ -40,19 +60,118 @@ const COLUMNS: {
   },
 ];
 
+const CATEGORY_FILTERS: BoardCategoryFilter[] = [
+  "hardware",
+  "software",
+  "network",
+  "access",
+  "feature",
+  "other",
+];
+
 export function KanbanWorkspace() {
   const t = useTranslations("kanban");
-  const [tickets, setTickets] = useState(mockKanbanTickets);
+  const locale = useLocale();
+  const searchParams = useSearchParams();
+  const { isAuthenticated, user } = useItAuth();
+  const [tickets, setTickets] = useState<BoardTicketDto[]>([]);
+  const [departments, setDepartments] = useState<ReferenceItemDto[]>([]);
   const [assigneeFilter, setAssigneeFilter] = useState<string>("all");
-  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [categoryFilter, setCategoryFilter] = useState<BoardCategoryFilter>("all");
   const [query, setQuery] = useState("");
   const [quickLogOpen, setQuickLogOpen] = useState(false);
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [confirmToken, setConfirmToken] = useState<string | null>(null);
+  const [tokenPeek, setTokenPeek] = useState<ConfirmTokenPeekDto | null>(null);
+  const [pendingClaim, setPendingClaim] = useState<BoardTicketDto | null>(null);
+  const [claimBusy, setClaimBusy] = useState(false);
+  const [pendingWithdrawId, setPendingWithdrawId] = useState<string | null>(null);
+  const [withdrawBusy, setWithdrawBusy] = useState(false);
+  const [quickLogBusy, setQuickLogBusy] = useState(false);
+  const [quickLogError, setQuickLogError] = useState<string | null>(null);
+
+  const loadBoard = useCallback(async () => {
+    try {
+      const [board, deptRows] = await Promise.all([
+        fetchBoardTickets(),
+        fetchReferenceItems("departments", { activeOnly: true }).catch(
+          () => [] as ReferenceItemDto[],
+        ),
+      ]);
+      setTickets(board);
+      setDepartments(deptRows);
+      setError(null);
+    } catch (err) {
+      setError(getApiErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadBoard();
+  }, [loadBoard]);
+
+  useEffect(() => {
+    function onFocus() {
+      void loadBoard();
+    }
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onFocus);
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onFocus);
+    };
+  }, [loadBoard]);
+
+  useEffect(() => {
+    const token = searchParams.get("token");
+    if (!token) {
+      setConfirmToken(null);
+      setTokenPeek(null);
+      return;
+    }
+    setConfirmToken(token);
+    void peekConfirmToken(token)
+      .then((peek) => {
+        setTokenPeek(peek);
+        setSelectedTicketId(peek.ticketId);
+        setDrawerOpen(true);
+      })
+      .catch(() => {
+        setTokenPeek(null);
+        setToast(t("tokenInvalid"));
+        window.setTimeout(() => setToast(null), 2500);
+      });
+  }, [searchParams, t]);
+
+  useEffect(() => {
+    if (searchParams.get("token")) return;
+    const deepLink = searchParams.get("ticket");
+    if (!deepLink || tickets.length === 0) return;
+    const match = tickets.find(
+      (ticket) => ticket.id === deepLink || ticket.ticketNo === deepLink,
+    );
+    if (!match) return;
+    setSelectedTicketId(match.id);
+    setDrawerOpen(true);
+  }, [searchParams, tickets]);
 
   const selectedTicket =
     tickets.find((ticket) => ticket.id === selectedTicketId) ?? null;
+  const pendingWithdraw =
+    tickets.find((ticket) => ticket.id === pendingWithdrawId) ?? null;
+  const assignees = useMemo(() => uniqueAssignees(tickets), [tickets]);
+
+  function departmentLabel(code: string): string {
+    const item = departments.find((row) => row.code === code);
+    if (!item) return code;
+    return locale.startsWith("th") ? item.labelTh : item.labelEn;
+  }
 
   function openTicketDetail(id: string) {
     setSelectedTicketId(id);
@@ -64,40 +183,30 @@ export function KanbanWorkspace() {
     window.setTimeout(() => setSelectedTicketId(null), 300);
   }
 
-  function resolveSelectedTicket() {
-    if (!selectedTicketId) return;
-    setTickets((prev) =>
-      prev.map((ticket) =>
-        ticket.id === selectedTicketId
-          ? {
-              ...ticket,
-              column: "resolved",
-              progress: undefined,
-              ageLabelKey: "ages.resolvedToday",
-            }
-          : ticket,
-      ),
-    );
-    showToast(t("detail.resolveSuccess"));
-    closeTicketDetail();
-  }
-
   const filtered = useMemo(() => {
     return tickets.filter((ticket) => {
-      if (assigneeFilter !== "all" && ticket.assigneeId !== assigneeFilter) {
-        return false;
+      if (assigneeFilter !== "all") {
+        const ids = [
+          ticket.lead?.userId,
+          ...ticket.collaborators.map((row) => row.userId),
+        ].filter(Boolean);
+        if (!ids.includes(assigneeFilter)) return false;
       }
-      if (categoryFilter !== "all" && ticket.categoryKey !== `categories.${categoryFilter}`) {
+      if (
+        categoryFilter !== "all" &&
+        categoryFilterKey(ticket.categoryCode) !== categoryFilter
+      ) {
         return false;
       }
       if (query.trim()) {
         const q = query.trim().toLowerCase();
-        const hay = `${ticket.id} ${t(ticket.titleKey)}`.toLowerCase();
+        const hay =
+          `${ticket.ticketNo} ${ticket.title} ${ticket.requesterName} ${ticket.requesterEmail}`.toLowerCase();
         if (!hay.includes(q)) return false;
       }
       return true;
     });
-  }, [tickets, assigneeFilter, categoryFilter, query, t]);
+  }, [tickets, assigneeFilter, categoryFilter, query]);
 
   const counts = useMemo(() => {
     const byColumn = Object.fromEntries(
@@ -112,19 +221,58 @@ export function KanbanWorkspace() {
     };
   }, [filtered]);
 
-  function claimTicket(id: string) {
-    setTickets((prev) =>
-      prev.map((ticket) =>
-        ticket.id === id
-          ? {
-              ...ticket,
-              column: "in_progress",
-              assigneeId: ticket.assigneeId ?? "golf",
-              progress: ticket.progress ?? 15,
-            }
-          : ticket,
-      ),
-    );
+  async function claimTicket(id: string) {
+    if (!isAuthenticated) return;
+    setClaimBusy(true);
+    try {
+      const updated = await claimBoardTicket(id);
+      setTickets((prev) =>
+        prev.map((ticket) => (ticket.id === id ? updated : ticket)),
+      );
+      setPendingClaim(null);
+      showToast(t("claimSuccess"));
+    } catch (err) {
+      showToast(getApiErrorMessage(err));
+    } finally {
+      setClaimBusy(false);
+    }
+  }
+
+  async function withdrawTicket(id: string) {
+    if (!isAuthenticated) return;
+    setWithdrawBusy(true);
+    try {
+      const updated = await withdrawBoardTicket(id);
+      setTickets((prev) =>
+        prev.map((ticket) => (ticket.id === id ? updated : ticket)),
+      );
+      setPendingWithdrawId(null);
+      showToast(t("withdrawSuccess"));
+    } catch (err) {
+      showToast(getApiErrorMessage(err));
+    } finally {
+      setWithdrawBusy(false);
+    }
+  }
+
+  async function submitQuickLog(input: {
+    departmentCode: string;
+    issue: string;
+    resolve: string;
+    requesterName?: string;
+  }) {
+    setQuickLogBusy(true);
+    setQuickLogError(null);
+    try {
+      const created = await createQuickLog(input);
+      setTickets((prev) => [created, ...prev.filter((row) => row.id !== created.id)]);
+      setQuickLogOpen(false);
+      showToast(t("quickLogDialog.success"));
+    } catch (err) {
+      setQuickLogError(getApiErrorMessage(err));
+    } finally {
+      setQuickLogBusy(false);
+    }
   }
 
   function showToast(message: string) {
@@ -141,9 +289,6 @@ export function KanbanWorkspace() {
               <MaterialIcon className="text-[16px]" name="hub" />
               {t("badge")}
             </span>
-            <span className="font-label-md text-label-md text-on-surface-variant">
-              {t("sprint")}
-            </span>
           </div>
           <h1 className="font-headline-lg text-headline-lg tracking-tight text-on-surface">
             {t("title")}
@@ -157,27 +302,35 @@ export function KanbanWorkspace() {
           <button
             type="button"
             className="flex items-center gap-1.5 rounded-lg bg-surface-container-low px-3 py-2 font-label-lg text-label-lg text-on-surface-variant shadow-sm transition-all hover:bg-surface-container hover:text-on-surface"
+            onClick={() => {
+              setLoading(true);
+              void loadBoard();
+            }}
           >
             <MaterialIcon className="text-[18px]" name="sync" />
             {t("refresh")}
           </button>
-          <button
-            type="button"
-            className="flex items-center gap-1.5 rounded-lg bg-surface-container-low px-3 py-2 font-label-lg text-label-lg text-on-surface-variant shadow-sm transition-all hover:bg-surface-container hover:text-on-surface"
-          >
-            <MaterialIcon className="text-[18px]" name="tune" />
-            {t("groupView")}
-          </button>
-          <button
-            type="button"
-            className="flex items-center gap-2 rounded-lg bg-secondary px-4 py-2.5 font-label-lg text-label-lg text-on-secondary shadow-md transition-all hover:bg-on-secondary-container active:scale-95"
-            onClick={() => setQuickLogOpen(true)}
-          >
-            <MaterialIcon className="text-[20px]" name="bolt" />
-            {t("quickLog")}
-          </button>
+          {isAuthenticated ? (
+            <button
+              type="button"
+              className="flex items-center gap-2 rounded-lg bg-secondary px-4 py-2.5 font-label-lg text-label-lg text-on-secondary shadow-md transition-all hover:bg-on-secondary-container active:scale-95"
+              onClick={() => {
+                setQuickLogError(null);
+                setQuickLogOpen(true);
+              }}
+            >
+              <MaterialIcon className="text-[20px]" name="bolt" />
+              {t("quickLog")}
+            </button>
+          ) : null}
         </div>
       </div>
+
+      {error ? (
+        <p className="rounded-lg bg-error-container/40 px-3 py-2 font-body-sm text-body-sm text-error">
+          {t("loadError")}: {error}
+        </p>
+      ) : null}
 
       <div className="grid grid-cols-2 gap-space-sm md:grid-cols-4">
         <MetricCard
@@ -223,32 +376,27 @@ export function KanbanWorkspace() {
             >
               {t("allAssignees")} ({tickets.length})
             </FilterChip>
-            {kanbanAssignees.map((person) => (
+            {assignees.map((person) => (
               <button
-                key={person.id}
+                key={person.userId}
                 type="button"
                 className={cn(
                   "flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 font-label-md text-label-md transition-all",
-                  assigneeFilter === person.id
+                  assigneeFilter === person.userId
                     ? "bg-primary text-on-primary shadow-sm"
                     : "bg-surface-container-low text-on-surface hover:bg-surface-container",
                 )}
-                onClick={() => setAssigneeFilter(person.id)}
+                onClick={() => setAssigneeFilter(person.userId)}
               >
                 <span
                   className={cn(
                     "flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold",
-                    person.colorClass,
+                    assigneeSwatch(person.userId),
                   )}
                 >
-                  {person.initial}
+                  {assigneeInitial(person.name)}
                 </span>
-                <span>
-                  {t(person.nameKey)}: {t(person.specialtyKey)}
-                </span>
-                <span className="rounded-full bg-surface-container px-1.5 text-[11px] text-on-surface-variant">
-                  {person.count}
-                </span>
+                <span>{person.name}</span>
               </button>
             ))}
           </div>
@@ -266,13 +414,6 @@ export function KanbanWorkspace() {
                 onChange={(e) => setQuery(e.target.value)}
               />
             </div>
-            <button
-              type="button"
-              className="flex h-9 items-center gap-1 rounded-lg bg-surface-container-low px-2.5 font-label-md text-label-md text-on-surface-variant hover:bg-surface-container"
-            >
-              <MaterialIcon className="text-[18px]" name="filter_list" />
-              {t("filters")}
-            </button>
           </div>
         </div>
 
@@ -286,19 +427,23 @@ export function KanbanWorkspace() {
           >
             {t("categoryAll")}
           </FilterChip>
-          {(["hardware", "software", "network", "access", "feature"] as const).map(
-            (key) => (
-              <FilterChip
-                key={key}
-                active={categoryFilter === key}
-                onClick={() => setCategoryFilter(key)}
-              >
-                {t(`categories.${key}`)}
-              </FilterChip>
-            ),
-          )}
+          {CATEGORY_FILTERS.map((key) => (
+            <FilterChip
+              key={key}
+              active={categoryFilter === key}
+              onClick={() => setCategoryFilter(key)}
+            >
+              {t(`categories.${key}`)}
+            </FilterChip>
+          ))}
         </div>
       </div>
+
+      {loading && tickets.length === 0 ? (
+        <p className="font-body-sm text-body-sm text-on-surface-variant">
+          {t("loading")}
+        </p>
+      ) : null}
 
       <div className="grid grid-cols-1 gap-space-sm xl:grid-cols-4">
         {COLUMNS.map((column) => {
@@ -325,14 +470,23 @@ export function KanbanWorkspace() {
                 </span>
               </div>
               <div className="flex flex-col gap-space-sm">
-                {columnTickets.map((ticket) => (
-                  <KanbanCard
-                    key={ticket.id}
-                    ticket={ticket}
-                    onOpen={() => openTicketDetail(ticket.id)}
-                    onClaim={() => claimTicket(ticket.id)}
-                  />
-                ))}
+                {columnTickets.length === 0 ? (
+                  <p className="px-2 py-4 font-body-sm text-body-sm text-on-surface-variant">
+                    {t("emptyColumn")}
+                  </p>
+                ) : (
+                  columnTickets.map((ticket) => (
+                    <KanbanCard
+                      key={ticket.id}
+                      ticket={ticket}
+                      departmentLabel={departmentLabel(ticket.departmentCode)}
+                      canClaim={isAuthenticated}
+                      locale={locale}
+                      onOpen={() => openTicketDetail(ticket.id)}
+                      onClaim={() => setPendingClaim(ticket)}
+                    />
+                  ))
+                )}
               </div>
             </section>
           );
@@ -341,15 +495,68 @@ export function KanbanWorkspace() {
 
       <QuickLogDialog
         open={quickLogOpen}
-        onClose={() => setQuickLogOpen(false)}
-        onSaved={() => showToast(t("quickLogDialog.success"))}
+        departments={departments}
+        busy={quickLogBusy}
+        error={quickLogError}
+        onClose={() => {
+          if (quickLogBusy) return;
+          setQuickLogOpen(false);
+          setQuickLogError(null);
+        }}
+        onSubmit={submitQuickLog}
+      />
+
+      <ClaimConfirmDialog
+        ticket={pendingClaim}
+        busy={claimBusy}
+        onClose={() => {
+          if (!claimBusy) setPendingClaim(null);
+        }}
+        onConfirm={() => {
+          if (!pendingClaim) return;
+          void claimTicket(pendingClaim.id);
+        }}
+      />
+
+      <WithdrawConfirmDialog
+        ticket={pendingWithdraw}
+        currentUserId={user?.id ?? null}
+        busy={withdrawBusy}
+        onClose={() => {
+          if (!withdrawBusy) setPendingWithdrawId(null);
+        }}
+        onConfirm={() => {
+          if (!pendingWithdraw) return;
+          void withdrawTicket(pendingWithdraw.id);
+        }}
       />
 
       <TicketDetailDrawer
         ticket={selectedTicket}
+        departmentLabel={
+          selectedTicket ? departmentLabel(selectedTicket.departmentCode) : ""
+        }
         open={drawerOpen}
+        currentUserId={user?.id ?? null}
+        confirmToken={confirmToken}
+        tokenPeek={tokenPeek}
         onClose={closeTicketDetail}
-        onResolve={resolveSelectedTicket}
+        onTicketUpdated={(updated) => {
+          setTickets((prev) =>
+            prev.map((ticket) => (ticket.id === updated.id ? updated : ticket)),
+          );
+        }}
+        onToast={showToast}
+        onTicketDeleted={(ticketId) => {
+          setTickets((prev) => prev.filter((ticket) => ticket.id !== ticketId));
+          closeTicketDetail();
+        }}
+        onRequestClaim={() => {
+          if (selectedTicket) setPendingClaim(selectedTicket);
+        }}
+        onRequestWithdraw={() => {
+          if (selectedTicket) setPendingWithdrawId(selectedTicket.id);
+        }}
       />
 
       {toast ? (
@@ -433,15 +640,23 @@ function FilterChip({
 
 function KanbanCard({
   ticket,
+  departmentLabel,
+  canClaim,
+  locale,
   onOpen,
   onClaim,
 }: {
-  ticket: KanbanTicket;
+  ticket: BoardTicketDto;
+  departmentLabel: string;
+  canClaim: boolean;
+  locale: string;
   onOpen: () => void;
   onClaim: () => void;
 }) {
   const t = useTranslations("kanban");
-  const assignee = kanbanAssignees.find((a) => a.id === ticket.assigneeId);
+  const lead = ticket.lead;
+  const categoryKey = categoryFilterKey(ticket.categoryCode);
+  const urgent = boardPriority(ticket.priority) === "urgent";
 
   return (
     <article
@@ -449,7 +664,7 @@ function KanbanCard({
       tabIndex={0}
       className={cn(
         "flex cursor-pointer flex-col gap-space-xs rounded-lg bg-surface-container-lowest p-space-md shadow-sm transition-shadow hover:shadow-md",
-        ticket.priority === "urgent" && "border-l-4 border-l-error",
+        urgent && "border-l-4 border-l-error",
         ticket.column === "in_progress" && "border-l-4 border-l-secondary",
       )}
       onClick={onOpen}
@@ -461,57 +676,67 @@ function KanbanCard({
       }}
     >
       <div className="flex flex-wrap items-center justify-between gap-1">
-        <span className="font-label-md text-label-md font-bold text-primary">
-          #{ticket.id}
+        <span className="flex flex-wrap items-center gap-1.5 font-label-md text-label-md font-bold text-primary">
+          {ticket.ticketNo}
+          {isQuickTicket(ticket) ? (
+            <span className="inline-flex items-center gap-0.5 rounded-full bg-secondary-container px-2 py-0.5 font-label-sm text-label-sm font-semibold text-on-secondary-container">
+              <MaterialIcon className="text-[14px]" name="bolt" />
+              {t("quickLogBadge")}
+            </span>
+          ) : null}
         </span>
         <span className="rounded-full bg-surface-container-high px-2.5 py-0.5 font-label-sm text-label-sm font-semibold text-primary ring-1 ring-primary/20">
-          {t(ticket.categoryKey)}
+          {t(`categories.${categoryKey}`)}
         </span>
       </div>
       <h3 className="font-headline-sm text-headline-sm leading-snug text-on-surface">
-        {t(ticket.titleKey)}
+        {ticket.title}
       </h3>
       <div className="flex items-center gap-space-xs font-body-sm text-body-sm text-on-surface-variant">
         <MaterialIcon className="text-[18px]" name="apartment" />
-        <span>{t(ticket.departmentKey)}</span>
+        <span>{departmentLabel}</span>
       </div>
+      <p className="font-body-sm text-body-sm text-on-surface-variant">
+        {ticket.requesterName === "Walk-up"
+          ? t("quickLogUnnamed")
+          : ticket.requesterName}
+        {ticket.extension && ticket.extension !== "-" ? ` · ${ticket.extension}` : ""}
+      </p>
 
-      {typeof ticket.progress === "number" ? (
-        <div className="mt-space-2xs flex flex-col gap-1 rounded bg-surface-container-low p-space-xs">
-          <div className="flex items-center justify-between text-body-sm">
-            <span className="font-label-sm text-label-sm font-semibold text-secondary">
-              {t("progress")}
-            </span>
-            <span className="font-label-sm text-label-sm font-bold text-primary">
-              {ticket.progress}%
+      {showsDevelopmentProgress(ticket) ? (
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center justify-between font-label-sm text-label-sm text-on-surface-variant">
+            <span>{t("progress")}</span>
+            <span className="font-semibold text-on-surface">
+              {ticket.progress ?? 0}%
             </span>
           </div>
-          <div className="h-2 w-full overflow-hidden rounded-full bg-surface-container-highest">
+          <div className="h-2 overflow-hidden rounded-full bg-surface-container-high">
             <div
-              className="h-2 rounded-full bg-secondary"
-              style={{ width: `${ticket.progress}%` }}
+              className="h-full rounded-full bg-secondary"
+              style={{ width: `${Math.min(100, Math.max(0, ticket.progress ?? 0))}%` }}
             />
           </div>
         </div>
       ) : null}
 
       <div className="mt-space-xs flex items-center justify-between rounded bg-surface-container p-space-xs">
-        {assignee ? (
+        {lead ? (
           <div className="flex items-center gap-space-xs">
             <span
               className={cn(
                 "flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold",
-                assignee.colorClass,
+                assigneeSwatch(lead.userId),
               )}
             >
-              {assignee.initial}
+              {assigneeInitial(lead.name)}
             </span>
             <div className="flex flex-col">
               <span className="font-label-sm text-label-sm font-semibold leading-tight text-on-surface">
-                {t(assignee.nameKey)}
+                {lead.name}
               </span>
               <span className="text-xs leading-none text-on-surface-variant">
-                {t(assignee.specialtyKey)}
+                {lead.jobTitle || t("detail.role.lead")}
               </span>
             </div>
           </div>
@@ -522,23 +747,204 @@ function KanbanCard({
         )}
         <span className="flex items-center gap-1 font-body-sm text-body-sm text-on-surface-variant">
           <MaterialIcon className="text-[16px]" name="timelapse" />
-          {t(ticket.ageLabelKey)}
+          {formatTicketAge(ticket.createdAt, locale)}
         </span>
       </div>
 
       {ticket.column === "backlog" ? (
         <button
           type="button"
-          className="mt-space-xs flex h-11 w-full items-center justify-center gap-space-xs rounded-lg bg-secondary font-label-md text-label-md font-semibold text-on-secondary shadow-sm transition-transform hover:bg-on-secondary-container active:scale-[0.98]"
+          disabled={!canClaim}
+          className="mt-space-xs flex h-11 w-full items-center justify-center gap-space-xs rounded-lg bg-secondary font-label-md text-label-md font-semibold text-on-secondary shadow-sm transition-transform hover:bg-on-secondary-container active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
           onClick={(e) => {
             e.stopPropagation();
             onClaim();
           }}
         >
           <MaterialIcon className="text-[18px]" name="handshake" />
-          {t("claim")}
+          {canClaim ? t("claim") : t("claimGuestDisabled")}
         </button>
       ) : null}
     </article>
+  );
+}
+
+function ClaimConfirmDialog({
+  ticket,
+  busy,
+  onClose,
+  onConfirm,
+}: {
+  ticket: BoardTicketDto | null;
+  busy: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+}) {
+  const t = useTranslations("kanban");
+  const titleId = useId();
+
+  useEffect(() => {
+    if (!ticket) return;
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape" && !busy) onClose();
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [ticket, busy, onClose]);
+
+  if (!ticket || typeof document === "undefined") return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-[70] overflow-y-auto bg-inverse-surface/50 backdrop-blur-sm">
+      <div
+        className="flex min-h-full items-center justify-center p-space-md"
+        onMouseDown={(event) => {
+          if (event.target === event.currentTarget && !busy) onClose();
+        }}
+      >
+        <div
+          aria-labelledby={titleId}
+          aria-modal="true"
+          className="w-full max-w-md rounded-2xl bg-surface-container-lowest p-space-xl shadow-2xl"
+          role="dialog"
+        >
+          <div className="mb-space-md flex h-12 w-12 items-center justify-center rounded-xl bg-secondary-container text-on-secondary-container">
+            <MaterialIcon className="text-[26px]" name="handshake" />
+          </div>
+          <h2
+            className="font-headline-sm text-headline-sm font-semibold text-on-surface"
+            id={titleId}
+          >
+            {t("claimConfirmTitle")}
+          </h2>
+          <p className="mt-space-xs font-body-sm text-body-sm text-on-surface-variant">
+            {t("claimConfirmBody")}
+          </p>
+          <p className="mt-space-sm rounded-lg bg-surface-container-low p-space-md">
+            <span className="font-label-md text-label-md font-bold text-on-surface">
+              {ticket.ticketNo}
+            </span>
+            <span className="mt-1 block font-body-sm text-body-sm text-on-surface">
+              {ticket.title}
+            </span>
+          </p>
+          <div className="mt-space-lg flex flex-col-reverse gap-space-sm sm:flex-row sm:justify-end">
+            <button
+              className="h-11 rounded-lg px-space-md font-label-md text-label-md text-on-surface-variant hover:bg-surface-container disabled:opacity-50"
+              disabled={busy}
+              type="button"
+              onClick={onClose}
+            >
+              {t("claimConfirmCancel")}
+            </button>
+            <button
+              className="flex h-11 items-center justify-center gap-space-xs rounded-lg bg-secondary px-space-md font-label-md text-label-md font-bold text-on-secondary hover:bg-on-secondary-container disabled:opacity-60"
+              disabled={busy}
+              type="button"
+              onClick={onConfirm}
+            >
+              <MaterialIcon className="text-[18px]" name="handshake" />
+              {busy ? t("actionBusy") : t("claimConfirmAction")}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>,
+    document.body,
+  );
+}
+
+function WithdrawConfirmDialog({
+  ticket,
+  currentUserId,
+  busy,
+  onClose,
+  onConfirm,
+}: {
+  ticket: BoardTicketDto | null;
+  currentUserId: string | null;
+  busy: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+}) {
+  const t = useTranslations("kanban");
+  const titleId = useId();
+
+  useEffect(() => {
+    if (!ticket) return;
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape" && !busy) onClose();
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [ticket, busy, onClose]);
+
+  if (!ticket || typeof document === "undefined") return null;
+
+  const isLead = Boolean(currentUserId && ticket.lead?.userId === currentUserId);
+  const successor = ticket.collaborators[0] ?? null;
+  const body = isLead && !successor
+    ? t("withdrawConfirmBodyLast")
+    : isLead && successor
+      ? t("withdrawConfirmBodyLead", { name: successor.name })
+      : t("withdrawConfirmBodyCollab");
+
+  return createPortal(
+    <div className="fixed inset-0 z-[70] overflow-y-auto bg-inverse-surface/50 backdrop-blur-sm">
+      <div
+        className="flex min-h-full items-center justify-center p-space-md"
+        onMouseDown={(event) => {
+          if (event.target === event.currentTarget && !busy) onClose();
+        }}
+      >
+        <div
+          aria-labelledby={titleId}
+          aria-modal="true"
+          className="w-full max-w-md rounded-2xl bg-surface-container-lowest p-space-xl shadow-2xl"
+          role="dialog"
+        >
+          <div className="mb-space-md flex h-12 w-12 items-center justify-center rounded-xl bg-tertiary text-on-tertiary">
+            <MaterialIcon className="text-[26px]" name="logout" />
+          </div>
+          <h2
+            className="font-headline-sm text-headline-sm font-semibold text-on-surface"
+            id={titleId}
+          >
+            {t("withdrawConfirmTitle")}
+          </h2>
+          <p className="mt-space-xs font-body-sm text-body-sm text-on-surface-variant">
+            {body}
+          </p>
+          <p className="mt-space-sm rounded-lg bg-surface-container-low p-space-md">
+            <span className="font-label-md text-label-md font-bold text-on-surface">
+              {ticket.ticketNo}
+            </span>
+            <span className="mt-1 block font-body-sm text-body-sm text-on-surface">
+              {ticket.title}
+            </span>
+          </p>
+          <div className="mt-space-lg flex flex-col-reverse gap-space-sm sm:flex-row sm:justify-end">
+            <button
+              className="h-11 rounded-lg px-space-md font-label-md text-label-md text-on-surface-variant hover:bg-surface-container disabled:opacity-50"
+              disabled={busy}
+              type="button"
+              onClick={onClose}
+            >
+              {t("withdrawConfirmCancel")}
+            </button>
+            <button
+              className="flex h-11 items-center justify-center gap-space-xs rounded-lg bg-tertiary px-space-md font-label-md text-label-md font-bold text-on-tertiary hover:opacity-90 disabled:opacity-60"
+              disabled={busy}
+              type="button"
+              onClick={onConfirm}
+            >
+              <MaterialIcon className="text-[18px]" name="logout" />
+              {busy ? t("actionBusy") : t("withdrawConfirmAction")}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>,
+    document.body,
   );
 }

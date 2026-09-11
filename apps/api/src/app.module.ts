@@ -7,6 +7,7 @@ import { TicketsModule } from "./tickets/tickets.module";
 import { HealthModule } from "./health/health.module";
 import { ReferencesModule } from "./references/references.module";
 import { StorageModule } from "./storage/storage.module";
+import { MailModule } from "./mail/mail.module";
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { StorageModule } from "./storage/storage.module";
       envFilePath: [".env", "../../.env"],
     }),
     PrismaModule,
+    MailModule,
     StorageModule,
     AuthModule,
     UsersModule,

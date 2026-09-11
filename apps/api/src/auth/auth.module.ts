@@ -68,6 +68,6 @@ import {
       inject: [USER_REPOSITORY, OBJECT_STORAGE],
     },
   ],
-  exports: [AuthService, JwtModule, PassportModule],
+  exports: [AuthService, JwtModule, PassportModule, JwtStrategy],
 })
 export class AuthModule {}

@@ -1,4 +1,8 @@
 import type {
+  AssigneeRole,
+  BoardColumnId,
+  ConfirmTokenAction,
+  ConfirmTokenStage,
   TicketCategory,
   TicketPriority,
   TicketStatus,
@@ -77,8 +81,67 @@ export interface TicketAssigneeDto {
   id: string;
   ticketId: string;
   userId: string;
-  user?: Pick<UserDto, "id" | "name" | "email" | "role">;
+  role: AssigneeRole;
+  user?: Pick<UserDto, "id" | "name" | "email" | "role" | "jobTitle">;
   assignedAt: string;
+}
+
+export interface BoardAssigneeDto {
+  userId: string;
+  name: string;
+  email: string;
+  role: AssigneeRole;
+  jobTitle?: string | null;
+  assignedAt?: string;
+}
+
+export interface BoardTicketDto {
+  id: string;
+  ticketNo: string;
+  title: string;
+  description: string;
+  column: BoardColumnId;
+  status: TicketStatus;
+  category: TicketCategory;
+  categoryCode: string;
+  priority: TicketPriority;
+  departmentCode: string;
+  requesterName: string;
+  requesterEmail: string;
+  extension: string;
+  lead: BoardAssigneeDto | null;
+  collaborators: BoardAssigneeDto[];
+  attachments: TicketAttachmentDto[];
+  progress?: number | null;
+  type: TicketType;
+  createdAt: string;
+  updatedAt: string;
+  resolvedAt?: string | null;
+}
+
+export interface ConfirmTokenPeekDto {
+  ticketId: string;
+  stage: ConfirmTokenStage;
+  allowedActions: ConfirmTokenAction[];
+  expiresAt: string;
+}
+
+export interface UpdateTicketProgressDto {
+  percent: number;
+  note: string;
+}
+
+export interface TicketReasonActionDto {
+  reason: string;
+}
+
+export interface TicketTokenActionDto {
+  token: string;
+  reason?: string;
+}
+
+export interface AddTicketCollaboratorDto {
+  userId: string;
 }
 
 export interface TicketAttachmentDto {
@@ -167,6 +230,22 @@ export interface ReportTicketDto {
   description: string;
   /** UI values: normal | urgent */
   priority: "normal" | "urgent";
+}
+
+export interface CreateQuickLogDto {
+  departmentCode: string;
+  issue: string;
+  resolve: string;
+  requesterName?: string;
+}
+
+export interface HardDeleteTicketDto {
+  confirmation: string;
+}
+
+export interface HardDeleteTicketResultDto {
+  ok: true;
+  ticketNo: string;
 }
 
 export interface ReportTicketResultDto {

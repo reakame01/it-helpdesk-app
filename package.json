@@ -2,7 +2,7 @@
   "name": "it-helpdesk-app",
   "private": true,
   "scripts": {
-    "dev": "pnpm --filter @helpdesk/types build && concurrently -n api,web -c cyan,green \"pnpm --filter api dev\" \"pnpm --filter web dev\"",
+    "dev": "node ./node_modules/typescript/bin/tsc -p packages/types/tsconfig.json && concurrently -n api,web -c cyan,green \"pnpm --filter api dev\" \"pnpm --filter web dev\"",
     "dev:turbo": "turbo run build --filter=@helpdesk/types && turbo run dev --filter=api --filter=web",
     "build": "turbo run build",
     "lint": "turbo run lint",

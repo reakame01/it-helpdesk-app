@@ -27,8 +27,14 @@ enum TicketStatus {
   OPEN
   IN_PROGRESS
   PENDING_APPROVAL
+  AWAITING_USER_TEST
   RESOLVED
   CLOSED
+}
+
+enum AssigneeRole {
+  LEAD
+  COLLABORATOR
 }
 
 enum TicketPriority {
@@ -47,6 +53,11 @@ enum ApprovalStatus {
   PENDING
   APPROVED
   REJECTED
+}
+
+enum ConfirmTokenStage {
+  AWAITING_USER_TEST
+  RESOLVED
 }
 
 model User {
@@ -95,15 +106,18 @@ model Ticket {
   requesterEmail String
   departmentCode String
   extension      String
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-  resolvedAt     DateTime?
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+  resolvedAt            DateTime?
+  progress              Int?
+  reopenBrokenSuccess   Boolean         @default(false)
 
-  requester   User?              @relation("TicketRequester", fields: [requesterId], references: [id])
-  assignees   TicketAssignee[]
-  worklogs    Worklog[]
-  approval    QuickTicketApproval?
-  attachments TicketAttachment[]
+  requester     User?                 @relation("TicketRequester", fields: [requesterId], references: [id])
+  assignees     TicketAssignee[]
+  worklogs      Worklog[]
+  approval      QuickTicketApproval?
+  attachments   TicketAttachment[]
+  confirmTokens UserConfirmToken[]
 
   @@index([status])
   @@index([priority])
@@ -131,16 +145,35 @@ model TicketAttachment {
 }
 
 model TicketAssignee {
-  id         String   @id @default(cuid())
+  id         String       @id @default(cuid())
   ticketId   String
   userId     String
-  assignedAt DateTime @default(now())
+  role       AssigneeRole @default(COLLABORATOR)
+  assignedAt DateTime     @default(now())
 
   ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([ticketId, userId])
+  @@index([ticketId, role])
   @@map("ticket_assignees")
+}
+
+model UserConfirmToken {
+  id             String            @id @default(cuid())
+  ticketId       String
+  tokenHash      String            @unique
+  stage          ConfirmTokenStage
+  expiresAt      DateTime
+  consumedAt     DateTime?
+  invalidatedAt  DateTime?
+  createdAt      DateTime          @default(now())
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId, stage])
+  @@index([expiresAt])
+  @@map("user_confirm_tokens")
 }
 
 model Worklog {
