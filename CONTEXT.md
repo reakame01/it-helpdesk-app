@@ -4,7 +4,7 @@ Internal IT support workspace: staff report issues, IT works tickets on a shared
 
 ## Access model
 
-**Guest (no login)** — anyone on the corporate intranet can report cases, **view** the IT board (read-only), and use IT Overview (including exports). No self-registration.
+**Guest (no login)** — anyone on the corporate intranet can report cases, **view** the IT board (including requester identity on cards/drawers), and use IT Overview (including exports). Guests cannot perform board write actions in the app. Close / Report Issue / Reopen from email use a **User Confirm Token** deep link instead. No self-registration.
 
 **IT session** — only IT staff sign in (accounts created in User Management). Required for board write actions, User Management, and Data References. Header: **IT Sign in** dialog when signed out; avatar menu (**Edit profile** / **Log out**) when signed in.
 
@@ -26,11 +26,34 @@ _Avoid_: Sprint (unless speaking casually), month, period
 An **automatic** end-of-cycle cutoff (cron) when completed cards leave the active board and incomplete cards move into the next Work Cycle.
 
 **Board Card** (การ์ดบนกระดาน):
-A ticket shown on the active Work Cycle kanban. Only open / in-flight work stays here after close.
+A ticket shown on the kanban. Until Work Cycle exists in product, the live board shows every ticket that is not yet out of active operations per current rules; later, only the active Work Cycle’s in-flight work remains after close.
+
+**Awaiting User Test** (รอผู้ใช้ทดสอบ / คอลัมน์ `pending_user`):
+IT believes the fix is ready and is waiting for the requester to verify. This is **not** a Closed Ticket. From here the requester may **Approve and Close** (advance to Resolved) or **Report Issue**; they do **not** “Reopen” in this stage.
+_Avoid_: Calling this Resolved; calling Report Issue “Reopen”
+
+**Resolved**:
+A post-approval cooling state: the case was approved out of Awaiting User Test but is **not yet** a Closed Ticket. While the Resolved-stage token is valid, **Reopen** is allowed. If that token expires with no Reopen, the ticket becomes a **Closed Ticket** automatically.
+_Avoid_: Treating Resolved as final success forever; using “Reopen” as the label on Awaiting User Test actions
 
 **Closed Ticket** (ปิดเคสเสร็จ):
-A ticket finished only after IT marks done **and the user confirms via email token**. This is a **terminal** state for the requester: they cannot reopen; further issues need a **new ticket**.
-_Avoid_: “Resolved” without user confirm; IT-only done; reopen after user close
+A **terminal** ticket state for the requester: no further Reopen on that ticket; further problems need a **new ticket**. It is reached when the Resolved-stage reopen window ends without Reopen (token expiry), not merely when IT finishes hands-on work.
+_Avoid_: “Resolved” as the final word; IT-only done without the Resolved window rules
+
+**Approve and Close**:
+The action that moves a ticket from **Awaiting User Test** to **Resolved**. Either the requester (via token link) or an **Assignee** on the ticket may perform it. Who did it must be auditable.
+_Avoid_: Using this action outside Awaiting User Test
+
+**Report Issue** (แจ้งเพิ่ม):
+Requester feedback during **Awaiting User Test** that the problem remains or needs more work. Returns the live card to active IT work. Requires a reason; may include evidence. Distinct from **Reopen**.
+_Avoid_: Reopen (Resolved-only term)
+
+**Reopen**:
+Requester or an **Assignee** marks a **Resolved** ticket as still unresolved before it becomes a **Closed Ticket**. Requires a reason; may include evidence. Unlimited until Closed. Affects success metrics (a Resolved ticket that is Reopened does not count as a successful close). The live card belongs to the **Work Cycle in which reopen happened** once cycles exist.
+_Avoid_: Using “Reopen” during Awaiting User Test; reopen after Closed Ticket
+
+**User Confirm Token** (โทเคนยืนยันทางอีเมล):
+A temporary deep-link credential emailed to the requester’s corporate email. The email itself has **no action buttons**—the link opens the IT board with that ticket’s drawer. Allowed in-drawer actions depend on stage (Awaiting User Test vs Resolved). Assignees may **resend**, which invalidates the previous token. See `docs/adr/0003-email-token-close-and-reopen.md` and `docs/adr/0004-two-stage-user-verify-and-resolved-window.md`.
 
 **Ticket History** (ประวัติเคส):
 Closed Tickets removed from the board at Work Cycle Close, kept for dashboard metrics and later review. Also retains which Work Cycle(s) the ticket belonged to over time.
@@ -47,13 +70,6 @@ The first Work Cycle in which the card entered the board. Used for the single Ca
 A single label on a Carryover card naming only the **Origin Cycle** (e.g. “ยกมาจากรอบงานที่ 5”). Tags are **not stacked** per carryover; age is implied by comparing Origin Cycle to the current cycle.
 _Avoid_: Accumulating “from cycle 5, 6, 7…” badges
 
-**User Confirm Token** (โทเคนยืนยันทางอีเมล):
-One-time link emailed to the requester’s **required corporate email**. Valid for **1 hour** or until used once. Actions while valid: confirm close, or reopen with reason (+ optional screenshot). See `docs/adr/0003-email-token-close-and-reopen.md`.
-
-**Reopen**:
-Requester marks the case still unresolved **before** it becomes a Closed Ticket (via email token). Unlimited while open; requires reason and may attach evidence. The live card belongs to the **Work Cycle in which reopen happened**. After user close → no reopen; open a new ticket instead.
-_Avoid_: Treating reopen as silent continue of the old closed cycle on the board; allowing reopen after Closed Ticket
-
 ### Roles (login accounts)
 
 Hierarchy (highest → lowest): **IT Manager** → **Supervisor** → **IT Staff**.
@@ -69,25 +85,52 @@ Accounts are provisioned in User Management. Guests (no login) are not assigned 
 ### Roles (board)
 
 **Assignee**:
-An IT staff member responsible for a ticket; multiple assignees may share one card.
+An IT staff member on a ticket. One assignee is the **Lead**; others are **Collaborators**.
+
+**Lead**:
+The primary assignee. The first successful **Claim** from backlog becomes Lead. Claim cannot steal a card that already has a Lead; add Collaborator or transfer instead.
+
+**Collaborator**:
+An additional assignee helping on the same card without replacing the Lead.
+
+**Claim**:
+An IT session action that takes an unassigned backlog card into active work and becomes its Lead.
+
+**Send for User Test**:
+An Assignee action from active work that moves a ticket into **Awaiting User Test** and emails the first **User Confirm Token** deep link.
+
+**Development Progress** (ความคืบหน้างานพัฒนา):
+A 0–100% completion indicator used only for **Feature Request / new development** tickets while in active work. Assignees update it together with a short note of what changed so others can see movement on the card and in the drawer.
+_Avoid_: Progress bars on hardware/network/break-fix style tickets; treating progress as a substitute for Awaiting User Test / Resolved / Closed
 
 ## Example dialogue
 
 > **Dev:** When do we cut the cycle?
 > **Domain:** Automatically via cron at the end of each **Work Cycle**.
 >
-> **Dev:** What counts as finished enough to leave the board?
-> **Domain:** Only a **Closed Ticket** — user confirmed by email token. If they **Reopen** before that, the card is work of the reopen’s cycle, but **Ticket History** still shows which cycles it came from.
+> **Dev:** What counts as finished enough to leave the board after cycle close?
+> **Domain:** **Closed Ticket**. **Resolved** still has a reopen window and is not terminal yet.
 >
-> **Dev:** Can they reopen after they already closed?
-> **Domain:** No. Closed is final for that ticket; file a new one.
+> **Dev:** User says it’s fixed while we’re in Awaiting User Test — who clicks Approve and Close?
+> **Domain:** Either the user via the email link, or an Assignee. Log which actor closed the stage.
+>
+> **Dev:** Can they reopen after Closed?
+> **Domain:** No. File a new ticket.
+>
+> **Dev:** Token expired in Awaiting User Test and nobody clicked — is it Closed?
+> **Domain:** No. It stays Awaiting User Test. IT can still Approve and Close, or Resend the link. Optionally nudge the user offline.
+>
+> **Dev:** Do all in-progress cards show a progress bar?
+> **Domain:** No. Only **Feature Request / new development** cards. Break-fix style tickets skip it.
 >
 > **Dev:** If something carries five times, do we stack five tags?
-> **Domain:** No. One **Carryover Tag** for the **Origin Cycle**. If origin is cycle 5 and we’re in cycle 10, everyone already sees it’s five cycles old.
+> **Domain:** No. One **Carryover Tag** for the **Origin Cycle**.
 
 ## Flagged ambiguities
 
 - **“History”** here means Ticket History for reporting / cycle lineage — not only the per-ticket audit timeline inside the detail drawer.
-- **Carryover** ≠ **Reopen**.
-- Completion on the board path “pending user” is not Closed until the user confirms via token.
-- Guest board access is view-only until IT write guards are fully enforced in the kanban UI.
+- **Carryover** ≠ **Reopen** ≠ **Report Issue**.
+- Board UI may keep **Resolved** and **Closed** in one rightmost column for now; domain meanings stay distinct.
+- Success metrics may count Resolved and Closed together until a Resolved ticket is **Reopened** (then it is not a successful close).
+- Work Cycle membership is deferred relative to first live-board wiring, but definitions above still apply.
+- Token lifetime starts at **1 hour** per stage; revisit if field use says otherwise.

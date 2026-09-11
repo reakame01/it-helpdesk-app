@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>IT Workspace (กระดาน IT) — Implementation Proposal</title>
+  <script type="module">
+    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: "neutral",
+      securityLevel: "loose",
+      flowchart: { curve: "basis" },
+      sequence: { actorMargin: 28, mirrorActors: false },
+    });
+  </script>
+  <style>
+    :root {
+      --bg: #f4f6f8;
+      --card: #ffffff;
+      --ink: #14213d;
+      --muted: #5c6b7a;
+      --line: #d7dee7;
+      --primary: #1d4f91;
+      --accent: #0f766e;
+      --warn: #9a3412;
+      --danger: #b91c1c;
+      --ok: #166534;
+      --chip: #e8eef7;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Sarabun", system-ui, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      line-height: 1.55;
+    }
+    header.hero {
+      background: linear-gradient(135deg, #0f2a4a, #1d4f91 55%, #0f766e);
+      color: #fff;
+      padding: 2.5rem 1.25rem 2rem;
+    }
+    header.hero .wrap, main.wrap, footer.wrap {
+      max-width: 1080px;
+      margin: 0 auto;
+    }
+    header.hero h1 { margin: 0 0 0.4rem; font-size: 1.85rem; }
+    header.hero p { margin: 0.25rem 0; opacity: 0.95; }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    .chip {
+      display: inline-block;
+      background: rgba(255,255,255,0.16);
+      border: 1px solid rgba(255,255,255,0.28);
+      border-radius: 999px;
+      padding: 0.25rem 0.75rem;
+      font-size: 0.85rem;
+    }
+    nav.toc {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 1rem 1.25rem;
+      margin: 1.25rem auto;
+      max-width: 1080px;
+    }
+    nav.toc h2 { margin: 0 0 0.6rem; font-size: 1.05rem; }
+    nav.toc ol { margin: 0; padding-left: 1.2rem; }
+    nav.toc a { color: var(--primary); text-decoration: none; }
+    nav.toc a:hover { text-decoration: underline; }
+    main.wrap { padding: 0 1.25rem 3rem; }
+    section.card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 1.25rem 1.4rem 1.5rem;
+      margin: 1rem 0;
+      box-shadow: 0 1px 2px rgba(20,33,61,0.04);
+    }
+    section.card h2 {
+      margin: 0 0 0.75rem;
+      padding-bottom: 0.55rem;
+      border-bottom: 1px solid var(--line);
+      color: var(--primary);
+      font-size: 1.35rem;
+    }
+    section.card h3 { margin: 1.25rem 0 0.5rem; font-size: 1.08rem; }
+    section.card h4 { margin: 1rem 0 0.4rem; font-size: 0.98rem; color: #334155; }
+    p, li { color: var(--ink); }
+    .muted { color: var(--muted); }
+    .note, .warn, .ok, .danger {
+      border-radius: 10px;
+      padding: 0.75rem 0.9rem;
+      margin: 0.75rem 0;
+      font-size: 0.95rem;
+    }
+    .note { background: #eef6ff; border-left: 4px solid var(--primary); }
+    .warn { background: #fff7ed; border-left: 4px solid var(--warn); }
+    .ok { background: #f0fdf4; border-left: 4px solid var(--ok); }
+    .danger { background: #fef2f2; border-left: 4px solid var(--danger); }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+      margin: 0.6rem 0 0.9rem;
+    }
+    th, td {
+      border: 1px solid var(--line);
+      padding: 0.55rem 0.65rem;
+      vertical-align: top;
+      text-align: left;
+    }
+    th { background: var(--chip); }
+    code, .mono {
+      font-family: ui-monospace, Consolas, monospace;
+      font-size: 0.88em;
+      background: #f1f5f9;
+      padding: 0.05rem 0.3rem;
+      border-radius: 4px;
+    }
+    .mermaid {
+      background: #fbfcfe;
+      border: 1px dashed var(--line);
+      border-radius: 12px;
+      padding: 0.75rem;
+      margin: 0.75rem 0 1rem;
+      overflow-x: auto;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 0.75rem;
+    }
+    .mini {
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 0.75rem 0.85rem;
+    }
+    .mini strong { display: block; margin-bottom: 0.25rem; }
+    .badge {
+      display: inline-block;
+      border-radius: 6px;
+      padding: 0.1rem 0.45rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      margin-right: 0.25rem;
+    }
+    .b-mock { background: #fee2e2; color: #991b1b; }
+    .b-api { background: #dcfce7; color: #166534; }
+    .b-partial { background: #ffedd5; color: #9a3412; }
+    .b-planned { background: #e0e7ff; color: #3730a3; }
+    footer.doc-foot {
+      border-top: 1px solid var(--line);
+      padding: 1.25rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+      text-align: center;
+    }
+    .q-list > li { margin: 0.65rem 0; }
+    .q-list .q-id {
+      font-weight: 700;
+      color: var(--primary);
+      margin-right: 0.35rem;
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="wrap">
+      <h1>IT Workspace / กระดาน IT — เอกสารออกแบบก่อนลงมือ implement</h1>
+      <p>เป้าหมาย: เสนอแนวทางเชื่อม UI Kanban (ที่ตอนนี้ส่วนใหญ่ยังเป็น mock) กับฐานข้อมูลจริง และจัด workflow ให้สอดคล้อง ADR / CONTEXT ของโปรเจกต์</p>
+      <p class="muted" style="color:#dbeafe">สถานะเอกสาร: Proposal เท่านั้น — <strong>ยังไม่ลงโค้ด</strong></p>
+      <div class="meta">
+        <span class="chip">Route: /[locale]/it</span>
+        <span class="chip">Audience: Product owner + Dev</span>
+        <span class="chip">Updated: 2026-09-10</span>
+        <span class="chip">Refs: CONTEXT.md · ADR 0001–0003</span>
+      </div>
+    </div>
+  </header>
+
+  <nav class="toc">
+    <h2>สารบัญ</h2>
+    <ol>
+      <li><a href="#s1">บทสรุปและปัญหาปัจจุบัน</a></li>
+      <li><a href="#s2">ขอบเขตหน้า IT Workspace (ฟีเจอร์ทั้งหมดใน UI)</a></li>
+      <li><a href="#s3">สิ่งที่มีอยู่แล้วใน Backend / Schema</a></li>
+      <li><a href="#s4">ช่องว่าง UI ↔ Backend (Gap matrix)</a></li>
+      <li><a href="#s5">Solution ที่เสนอ (แนวทางหลัก + ทางเลือก)</a></li>
+      <li><a href="#s6">การแมปสถานะคอลัมน์กระดาน</a></li>
+      <li><a href="#s7">ER Diagram (ปัจจุบัน + ที่เสนอขยาย)</a></li>
+      <li><a href="#s8">Workflow หลักของระบบ</a></li>
+      <li><a href="#s9">Sequence Diagrams</a></li>
+      <li><a href="#s10">API / Permission ที่ควรมี</a></li>
+      <li><a href="#s11">แผนงานแบ่งเฟส (แนะนำ)</a></li>
+      <li><a href="#s12">ความเสี่ยงและข้อควรระวัง</a></li>
+      <li><a href="#s13">คำถามที่ยังไม่เคลียร์ — ขอคำตอบก่อนเริ่มลงมือ</a></li>
+    </ol>
+  </nav>
+
+  <main class="wrap">
+    <!-- 1 -->
+    <section class="card" id="s1">
+      <h2>1. บทสรุปและปัญหาปัจจุบัน</h2>
+      <p>
+        หน้า <code>/[locale]/it</code> คือ <strong>กระดานติดตามงาน IT (Kanban)</strong>
+        ปัจจุบัน UI ค่อนข้างครบตามดีไซน์ แต่ข้อมูลและแอ็กชันส่วนใหญ่ยังเป็น
+        <strong>mock ใน browser</strong> — ไม่ได้อ่าน/เขียน Ticket จาก PostgreSQL
+      </p>
+      <div class="grid-2">
+        <div class="mini">
+          <strong>สิ่งที่ทำได้จริงแล้ว (นอกกระดาน)</strong>
+          Guest แจ้งปัญหาผ่าน portal → <code>POST /tickets/report</code> บันทึก Ticket + รูปแนบลง DB แล้ว
+        </div>
+        <div class="mini">
+          <strong>สิ่งที่กระดานยังไม่ทำ</strong>
+          รายการการ์ด, Claim, Resolve, Quick Log, Timeline, โน้ต, โอนงาน, ผู้ร่วมเคส — ยังไม่ผูก API
+        </div>
+      </div>
+      <div class="warn">
+        <strong>ผลกระทบตอนนี้:</strong> หลังส่งแจ้งปัญหาแล้วกดไปหน้ากระดาน IT จะไม่เห็นเคสจริง เพราะกระดานยังอ่านจาก <code>mockKanbanTickets</code>
+      </div>
+      <p>
+        เอกสารนี้เสนอ <strong>แนวทาง implement</strong> ที่ยึด UI ปัจจุบันเป็น contract ของฟีเจอร์
+        และยึดกฎโดเมนจาก <code>CONTEXT.md</code> + ADR 0001 (Work Cycle), 0002 (Guest/IT), 0003 (Email close/reopen)
+      </p>
+    </section>
+
+    <!-- 2 -->
+    <section class="card" id="s2">
+      <h2>2. ขอบเขตหน้า IT Workspace — ฟีเจอร์ทั้งหมดใน UI</h2>
+      <p class="muted">แหล่งอ้างอิง UI: <code>kanban-workspace.tsx</code>, <code>ticket-detail-drawer.tsx</code>, <code>quick-log-dialog.tsx</code>, i18n <code>kanban.*</code></p>
+
+      <h3>2.1 โครงหน้า (Chrome)</h3>
+      <table>
+        <thead><tr><th>องค์ประกอบ</th><th>พฤติกรรมปัจจุบัน</th><th>สถานะ</th></tr></thead>
+        <tbody>
+          <tr><td>หัวข้อ / badge / ป้ายรอบงาน (sprint)</td><td>ข้อความจาก i18n (รอบงาน hardcode)</td><td><span class="badge b-mock">Mock</span></td></tr>
+          <tr><td>ปุ่ม Refresh</td><td>มีปุ่ม ไม่มี handler</td><td><span class="badge b-mock">UI only</span></td></tr>
+          <tr><td>ปุ่ม Group view</td><td>มีปุ่ม ไม่มี handler</td><td><span class="badge b-mock">UI only</span></td></tr>
+          <tr><td>ปุ่ม Quick log</td><td>เปิด dialog บันทึกงานหน้างานเร็ว</td><td><span class="badge b-partial">Dialog mock</span></td></tr>
+        </tbody>
+      </table>
+
+      <h3>2.2 Metric cards</h3>
+      <ul>
+        <li>จำนวนเคสทั้งหมด (หลังกรอง)</li>
+        <li>Backlog</li>
+        <li>กำลังดำเนินการ (In progress)</li>
+        <li>รอผู้ใช้ทดสอบ (Pending user)</li>
+      </ul>
+
+      <h3>2.3 ตัวกรอง (Filters)</h3>
+      <ul>
+        <li>กรองตามผู้รับผิดชอบ (assignee chips + “ทั้งหมด”)</li>
+        <li>ค้นหาข้อความ (เลขเคส / หัวข้อ)</li>
+        <li>กรองหมวดหมู่ (hardware / software / network / access / feature)</li>
+        <li>ปุ่ม “Filters” เพิ่มเติม — ยังไม่ทำงาน</li>
+      </ul>
+
+      <h3>2.4 คอลัมน์ Kanban (4 คอลัมน์)</h3>
+      <table>
+        <thead><tr><th>Column UI</th><th>ความหมายในดีไซน์</th><th>แอ็กชันบนการ์ด</th></tr></thead>
+        <tbody>
+          <tr><td><code>backlog</code></td><td>รอดำเนินการ / ใหม่</td><td>ปุ่ม <strong>รับงานนี้ (Claim)</strong></td></tr>
+          <tr><td><code>in_progress</code></td><td>กำลังทำ</td><td>แสดง progress %, คลิกเปิดรายละเอียด</td></tr>
+          <tr><td><code>pending_user</code></td><td>รอผู้ใช้ทดสอบ / ยืนยัน</td><td>เปิดรายละเอียด</td></tr>
+          <tr><td><code>resolved</code></td><td>เสร็จ / ปิดแล้ว</td><td>เปิดรายละเอียด</td></tr>
+        </tbody>
+      </table>
+
+      <h3>2.5 การ์ดเคส (Board Card)</h3>
+      <ul>
+        <li>เลขเคส, หัวข้อ, แผนก, หมวด, อายุเคส, ความเร่งด่วน (normal/urgent)</li>
+        <li>ผู้รับผิดชอบ (หรือสถานะยังไม่มอบหมาย)</li>
+        <li>Progress bar (บางสถานะ)</li>
+      </ul>
+
+      <h3>2.6 Ticket Detail Drawer</h3>
+      <ul>
+        <li>หัวเรื่อง + badge reopen (ถ้ามี)</li>
+        <li>ผู้แจ้ง / เบอร์ภายใน / สถานะปัจจุบัน</li>
+        <li>รายละเอียดอาการ</li>
+        <li>ทีมผู้รับผิดชอบ (lead / collaborator) + ปุ่มเพิ่มผู้ร่วม (ยัง inert)</li>
+        <li>Timeline / ประวัติเหตุการณ์</li>
+        <li>ช่องโน้ตงาน + แนบ log / commit / ส่งโน้ต (ยัง inert)</li>
+        <li>ปุ่ม โอนงาน / เพิ่มผู้ร่วม / <strong>Approve and close (Resolve)</strong></li>
+      </ul>
+
+      <h3>2.7 Quick Log Dialog</h3>
+      <ul>
+        <li>เลือกแผนก, อาการ (preset), วิธีแก้ (preset), ชื่อผู้แจ้ง (optional)</li>
+        <li>Submit แล้ว toast สำเร็จ — <strong>ยังไม่สร้าง Ticket ใน DB</strong></li>
+      </ul>
+
+      <h3>2.8 สิทธิ์เข้าถึงหน้า (ปัจจุบัน)</h3>
+      <div class="danger">
+        หน้า <code>/it</code> <strong>ไม่ได้ล็อกอินบังคับ</strong> และแอ็กชันบนกระดาน (Claim/Resolve) ก็ไม่เช็ค IT session
+        ทั้งที่ CONTEXT/ADR 0002 ระบุว่า Guest ดูได้อย่างเดียว เขียนต้องเป็น IT
+      </div>
+    </section>
+
+    <!-- 3 -->
+    <section class="card" id="s3">
+      <h2>3. สิ่งที่มีอยู่แล้วใน Backend / Schema</h2>
+      <h3>3.1 Ticket API ที่มีแล้ว</h3>
+      <table>
+        <thead><tr><th>Method</th><th>Path</th><th>หมายเหตุ</th></tr></thead>
+        <tbody>
+          <tr><td>GET</td><td><code>/tickets</code></td><td>ลิสต์ + filter status — <strong>กระดานยังไม่เรียก</strong></td></tr>
+          <tr><td>GET</td><td><code>/tickets/:id</code></td><td>รายละเอียด</td></tr>
+          <tr><td>POST</td><td><code>/tickets</code></td><td>สร้างแบบมี requesterId</td></tr>
+          <tr><td>POST</td><td><code>/tickets/report</code></td><td>Guest report + attachments (ใช้งานจริงแล้ว)</td></tr>
+          <tr><td>PATCH</td><td><code>/tickets/:id</code></td><td>อัปเดตสถานะ/ผู้รับผิดชอบได้ระดับหนึ่ง</td></tr>
+        </tbody>
+      </table>
+      <div class="warn">Controller ชุดนี้ยังไม่มี JwtAuthGuard ครอบทั้งก้อน — ต้องออกแบบสิทธิ์ใหม่เมื่อเปิด write จากกระดาน</div>
+
+      <h3>3.2 โมเดลใน Prisma ที่เกี่ยวข้อง</h3>
+      <ul>
+        <li><code>Ticket</code> + enums status/priority/type/category</li>
+        <li><code>TicketAssignee</code> (ยังไม่มีบทบาท lead/collaborator)</li>
+        <li><code>TicketAttachment</code></li>
+        <li><code>Worklog</code> (มีใน schema แต่ยังไม่มี API)</li>
+        <li><code>QuickTicketApproval</code> (มีใน schema แต่ยังไม่มี API)</li>
+        <li><code>AuditLog</code> (มีใน schema แต่ยังไม่ถูกใช้กับ ticket flow)</li>
+        <li><strong>ยังไม่มี</strong> ตาราง Work Cycle / Carryover / Email Confirm Token</li>
+      </ul>
+    </section>
+
+    <!-- 4 -->
+    <section class="card" id="s4">
+      <h2>4. Gap matrix — UI ↔ Backend</h2>
+      <table>
+        <thead><tr><th>ฟีเจอร์ UI / โดเมน</th><th>Backend วันนี้</th><th>ต้องทำอะไร</th></tr></thead>
+        <tbody>
+          <tr><td>โหลดการ์ดบนกระดาน</td><td>GET /tickets มีแล้ว แต่ไม่ได้ map คอลัมน์ UI</td><td>Wire + mapping สถานะ</td></tr>
+          <tr><td>คอลัมน์ pending_user</td><td>Enum มี <code>PENDING_APPROVAL</code> ไม่ใช่ “รอ user ทดสอบ”</td><td>ตกลง mapping หรือเพิ่มสถานะ</td></tr>
+          <tr><td>Claim</td><td>PATCH assignee/status ได้บางส่วน</td><td>Endpoint/use-case ชัดเจน + auth</td></tr>
+          <tr><td>Resolve / Approve and close</td><td>PATCH status; แต่ ADR 0003 ต้อง email token ก่อน Closed</td><td>แยก “IT done” กับ “User closed”</td></tr>
+          <tr><td>Progress %</td><td>ไม่มีฟิลด์</td><td>เพิ่มฟิลด์ / คำนวณ / หรือตัดออกชั่วคราว</td></tr>
+          <tr><td>Lead / Collaborator</td><td>Assignee ไม่มี role</td><td>ขยาย schema หรือ convention</td></tr>
+          <tr><td>Timeline</td><td>Worklog/AuditLog ยังไม่ถูกใช้</td><td>API ประวัติเหตุการณ์</td></tr>
+          <tr><td>Work notes / attach log</td><td>Worklog มี model</td><td>CRUD worklog + แนบไฟล์?</td></tr>
+          <tr><td>Quick Log</td><td>มี <code>QUICK_TICKET</code> + Approval model</td><td>สร้างเคส + flow อนุมัติ</td></tr>
+          <tr><td>Work Cycle / Carryover</td><td>ไม่มีตาราง</td><td>ตาม ADR 0001 (เฟสถัดไปได้)</td></tr>
+          <tr><td>Guest read-only</td><td>ยังไม่ enforce บน UI</td><td>Guard ฝั่ง web + API</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 5 -->
+    <section class="card" id="s5">
+      <h2>5. Solution ที่เสนอ</h2>
+
+      <h3>5.1 หลักการออกแบบ</h3>
+      <ol>
+        <li><strong>Board = projection ของ Ticket ในรอบงานปัจจุบัน</strong> ไม่ใช่ state คนละชุดกับ DB</li>
+        <li><strong>Guest อ่านได้อย่างเดียว</strong>; ทุก write ต้องมี IT JWT</li>
+        <li><strong>แยกสถานะปฏิบัติการของ IT</strong> กับ <strong>Closed Ticket หลัง user ยืนยัน</strong> (ADR 0003)</li>
+        <li><strong>ทำทีละเฟส</strong>: ให้เคสจาก portal โผล่บนกระดานและ claim/resolve ได้ก่อน แล้วค่อยครบ timeline / quick log / work cycle</li>
+        <li>คงเลย์เอาต์ UI เดิมให้มากที่สุด — เปลี่ยนแหล่งข้อมูลและทำให้ปุ่มมีผลจริง</li>
+      </ol>
+
+      <h3>5.2 ทางเลือกสถาปัตยกรรม (ขอเลือกทิศ)</h3>
+      <table>
+        <thead><tr><th>ทางเลือก</th><th>รายละเอียด</th><th>ข้อดี</th><th>ข้อเสีย</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>A — Lean board first (แนะนำ)</strong></td>
+            <td>เฟส 1 ใช้ Ticket + Assignee + Attachment ที่มีอยู่; map คอลัมน์แบบ pragmatic; Worklog ใช้เป็น timeline พื้นฐาน</td>
+            <td>เร็ว, เห็นเคสจริงเร็ว, เสี่ยงต่ำ</td>
+            <td>ยังไม่ครบ ADR work cycle / email close ในเฟสแรก</td>
+          </tr>
+          <tr>
+            <td><strong>B — Domain-complete first</strong></td>
+            <td>สร้าง WorkCycle + ConfirmToken + status ใหม่ทั้งหมดก่อนค่อย wire UI</td>
+            <td>ตรงโดเมนระยะยาว</td>
+            <td>ช้า, อั้นมูลค่าจากเคส portal ที่ค้างใน DB</td>
+          </tr>
+          <tr>
+            <td><strong>C — Hybrid</strong></td>
+            <td>Lean board + ออกแบบ schema ให้รองรับเฟสถัดไป (nullable workCycleId, event log)</td>
+            <td>สมดุล</td>
+            <td>ต้องวินัยไม่ทำ half-feature</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="ok"><strong>คำแนะนำของผู้เขียนเอกสาร:</strong> เลือก <strong>C (Hybrid)</strong> — ส่งมอบกระดานใช้งานได้เร็ว แต่ไม่บล็อก ADR ในภายหลัง</div>
+
+      <h3>5.3 ภาพรวมโซลูชันที่แนะนำ (Hybrid)</h3>
+      <div class="mermaid">
+flowchart LR
+  Portal[Portal Report] -->|POST /tickets/report| DB[(PostgreSQL Ticket)]
+  Board[IT Workspace UI] -->|GET board tickets| API[Tickets / Board API]
+  API --> DB
+  IT[IT Staff JWT] -->|Claim / Note / Status| API
+  Guest[Guest] -->|Read only| Board
+  IT -->|Write| Board
+  Later[Phase 2+] -.->|Email token close| Mail[Mailer]
+  Later -.->|Work Cycle Close cron| Cron[Scheduler]
+      </div>
+    </section>
+
+    <!-- 6 -->
+    <section class="card" id="s6">
+      <h2>6. การแมปสถานะคอลัมน์ (จุดที่ต้องตัดสินใจ)</h2>
+      <p>UI มี 4 คอลัมน์ แต่ Prisma มีสถานะ: <code>OPEN</code>, <code>IN_PROGRESS</code>, <code>PENDING_APPROVAL</code>, <code>RESOLVED</code>, <code>CLOSED</code></p>
+
+      <h3>6.1 ข้อเสนอ Mapping ชั่วคราว (เฟส 1)</h3>
+      <table>
+        <thead><tr><th>คอลัมน์ UI</th><th>สถานะ DB ที่เสนอ</th><th>เงื่อนไขเพิ่ม</th></tr></thead>
+        <tbody>
+          <tr><td>backlog</td><td><code>OPEN</code></td><td>ยังไม่มี assignee หรือเพิ่งเข้าคิว</td></tr>
+          <tr><td>in_progress</td><td><code>IN_PROGRESS</code></td><td>มี assignee อย่างน้อย 1 คน</td></tr>
+          <tr><td>pending_user</td><td><code>PENDING_APPROVAL</code> <em>หรือ</em> <code>RESOLVED</code></td><td>ต้องตกลงความหมาย — ดูคำถาม Q3</td></tr>
+          <tr><td>resolved</td><td><code>CLOSED</code> (ระยะยาว) / ชั่วคราวอาจโชว์ <code>RESOLVED</code></td><td>ADR: CLOSED หลัง user confirm</td></tr>
+        </tbody>
+      </table>
+
+      <div class="note">
+        <strong>ศัพท์ที่สับสน:</strong> ใน UI คอลัมน์ชื่อ “resolved” แต่ในโดเมน “Closed Ticket” หมายถึงปิดถาวรหลัง user ยืนยันอีเมล
+        แนะนำให้แยกป้ายในผลิตภัณฑ์ชัด เช่น IT กด “ส่งให้ผู้ใช้ยืนยัน” ≠ “ปิดเคสถาวร”
+      </div>
+    </section>
+
+    <!-- 7 -->
+    <section class="card" id="s7">
+      <h2>7. ER Diagram</h2>
+
+      <h3>7.1 ปัจจุบัน (ที่ implement ใน Prisma แล้ว)</h3>
+      <div class="mermaid">
+erDiagram
+  USER ||--o{ TICKET : requests
+  USER ||--o{ TICKET_ASSIGNEE : assigned
+  TICKET ||--o{ TICKET_ASSIGNEE : has
+  TICKET ||--o{ TICKET_ATTACHMENT : has
+  TICKET ||--o{ WORKLOG : has
+  USER ||--o{ WORKLOG : authors
+  TICKET ||--o| QUICK_TICKET_APPROVAL : may_have
+  USER ||--o{ QUICK_TICKET_APPROVAL : requests
+  USER ||--o{ QUICK_TICKET_APPROVAL : decides
+  USER ||--o{ AUDIT_LOG : acts
+
+  USER {
+    string id PK
+    string email
+    string role
+    boolean isActive
+  }
+  TICKET {
+    string id PK
+    string ticketNo UK
+    string title
+    string status
+    string priority
+    string type
+    string categoryCode
+    string requesterName
+    string requesterEmail
+    string departmentCode
+    string extension
+    datetime resolvedAt
+  }
+  TICKET_ASSIGNEE {
+    string id PK
+    string ticketId FK
+    string userId FK
+    datetime assignedAt
+  }
+  TICKET_ATTACHMENT {
+    string id PK
+    string ticketId FK
+    string publicPath
+    string contentType
+    int size
+  }
+  WORKLOG {
+    string id PK
+    string ticketId FK
+    string authorId FK
+    string note
+    int minutesSpent
+  }
+  QUICK_TICKET_APPROVAL {
+    string id PK
+    string ticketId FK
+    string status
+  }
+  AUDIT_LOG {
+    string id PK
+    string action
+    string entityType
+    string entityId
+  }
+      </div>
+
+      <h3>7.2 ที่เสนอขยายในเฟสถัดไป (ยังไม่ลงมือ จนกว่าจะตอบคำถามท้ายเอกสาร)</h3>
+      <div class="mermaid">
+erDiagram
+  WORK_CYCLE ||--o{ TICKET_CYCLE_MEMBERSHIP : contains
+  TICKET ||--o{ TICKET_CYCLE_MEMBERSHIP : belongs
+  TICKET ||--o{ TICKET_EVENT : timeline
+  USER ||--o{ TICKET_EVENT : actor
+  TICKET ||--o{ CONFIRM_TOKEN : tokens
+  TICKET_ASSIGNEE {
+    string role "LEAD|COLLABORATOR proposed"
+  }
+  WORK_CYCLE {
+    string id PK
+    int number
+    date startAt
+    date endAt
+    string status "OPEN|CLOSED"
+  }
+  TICKET_CYCLE_MEMBERSHIP {
+    string ticketId FK
+    string workCycleId FK
+    boolean isOrigin
+    boolean carryover
+  }
+  TICKET_EVENT {
+    string id PK
+    string ticketId FK
+    string type
+    json payload
+    datetime createdAt
+  }
+  CONFIRM_TOKEN {
+    string id PK
+    string ticketId FK
+    string tokenHash
+    datetime expiresAt
+    datetime usedAt
+  }
+      </div>
+      <p class="muted">ตารางขยายด้านบนเป็นข้อเสนอเพื่อรองรับ ADR — ไม่ได้หมายความว่าต้องสร้างทั้งหมดในเฟสแรก</p>
+    </section>
+
+    <!-- 8 -->
+    <section class="card" id="s8">
+      <h2>8. Workflow หลัก</h2>
+
+      <h3>8.1 Standard ticket (จาก Portal → กระดาน)</h3>
+      <div class="mermaid">
+flowchart TD
+  A[Guest กรอกฟอร์มแจ้งปัญหา] --> B[สร้าง Ticket type STANDARD\nstatus OPEN]
+  B --> C[โผล่คอลัมน์ Backlog]
+  C --> D{IT Claim?}
+  D -->|ใช่| E[status IN_PROGRESS\nเพิ่ม Assignee]
+  E --> F[ทำงาน / เขียน Worklog]
+  F --> G{พร้อมให้ user ตรวจ?}
+  G -->|ใช่| H[ย้ายไป Pending User\nส่งอีเมลยืนยัน - เฟสถัดไป]
+  G -->|ยัง| F
+  H --> I{User ยืนยัน?}
+  I -->|Close| J[CLOSED = Closed Ticket]
+  I -->|Reopen| K[กลับ IN_PROGRESS\nอยู่รอบที่ reopen]
+  J --> L[รอ Work Cycle Close\nเข้า Ticket History]
+      </div>
+
+      <h3>8.2 Claim / เปลี่ยนผู้รับผิดชอบ</h3>
+      <ul>
+        <li>Claim จาก backlog: ผู้ล็อกอินกลายเป็น assignee (lead ถ้าเป็นคนแรก)</li>
+        <li>เพิ่ม collaborator: IT คนอื่นถูกเพิ่มใน TicketAssignee</li>
+        <li>Transfer: เปลี่ยน lead / ย้ายความรับผิดชอบ (ต้องนิยามสิทธิ์)</li>
+      </ul>
+
+      <h3>8.3 Quick Log (งานหน้างานจบเร็ว)</h3>
+      <div class="mermaid">
+flowchart TD
+  Q1[IT เปิด Quick Log] --> Q2[กรอกแผนก/อาการ/วิธีแก้]
+  Q2 --> Q3[สร้าง Ticket type QUICK_TICKET]
+  Q3 --> Q4{นโยบายอนุมัติ?}
+  Q4 -->|ต้อง Supervisor/Manager อนุมัติ| Q5[QuickTicketApproval PENDING]
+  Q4 -->|อนุญาตปิดเองได้| Q6[เข้าสถานะตามที่ตกลง]
+  Q5 --> Q7[ผู้อนุมัติ Approve/Reject]
+      </div>
+      <div class="warn">Quick Log ใน UI ตอนนี้ไม่สร้างอะไรเลย — ต้องตัดสินใจว่าเคสเหล่านี้ขึ้นกระดานชั่วคราวหรือเข้าประวัติทันที</div>
+
+      <h3>8.4 Work Cycle Close (ADR 0001 — เฟสหลังกระดานใช้ได้)</h3>
+      <ul>
+        <li>ตัดรอบอัตโนมัติทุก 2 สัปดาห์</li>
+        <li>เฉพาะ Closed Ticket ออกจากกระดานเข้า Ticket History</li>
+        <li>งานไม่จบ = Carryover ไปรอบใหม่ พร้อมแท็ก Origin Cycle</li>
+      </ul>
+    </section>
+
+    <!-- 9 -->
+    <section class="card" id="s9">
+      <h2>9. Sequence Diagrams</h2>
+
+      <h3>9.1 โหลดกระดาน</h3>
+      <div class="mermaid">
+sequenceDiagram
+  actor User as Guest/IT
+  participant Web as Next.js Board
+  participant API as Nest API
+  participant DB as PostgreSQL
+
+  User->>Web: เปิด /it
+  Web->>API: GET /tickets/board (proposed)
+  API->>DB: query tickets + assignees + attachments
+  DB-->>API: rows
+  API-->>Web: board DTO (mapped columns)
+  Web-->>User: แสดง 4 คอลัมน์
+      </div>
+
+      <h3>9.2 Claim การ์ด</h3>
+      <div class="mermaid">
+sequenceDiagram
+  actor IT as IT Staff
+  participant Web as Board UI
+  participant API as Nest API
+  participant DB as PostgreSQL
+
+  IT->>Web: กด Claim
+  Web->>API: POST /tickets/{id}/claim (JWT)
+  API->>API: ตรวจ role + ticket OPEN
+  API->>DB: assign user + status IN_PROGRESS
+  API->>DB: write AuditLog / TicketEvent
+  DB-->>API: ok
+  API-->>Web: ticket updated
+  Web-->>IT: การ์ดเลื่อนไป In progress
+      </div>
+
+      <h3>9.3 IT ทำเสร็จ → รอ user ยืนยัน (เป้าหมายตาม ADR 0003)</h3>
+      <div class="mermaid">
+sequenceDiagram
+  actor IT as IT Staff
+  actor Req as Requester
+  participant Web as Board UI
+  participant API as Nest API
+  participant Mail as Email
+  participant DB as PostgreSQL
+
+  IT->>Web: กดส่งให้ผู้ใช้ยืนยัน
+  Web->>API: POST /tickets/{id}/request-confirm (JWT)
+  API->>DB: status PENDING_USER/RESOLVED + create token
+  API->>Mail: ส่งลิงก์ (หมดอายุ 1 ชม.)
+  Mail-->>Req: อีเมล
+  Req->>API: เปิดลิงก์ Close หรือ Reopen
+  alt Close
+    API->>DB: status CLOSED, consume token
+  else Reopen
+    API->>DB: status IN_PROGRESS + reason/attachments
+  end
+  API-->>Web: board refresh เห็นสถานะใหม่
+      </div>
+
+      <h3>9.4 Quick Log</h3>
+      <div class="mermaid">
+sequenceDiagram
+  actor IT as IT Staff
+  participant Web as Quick Log Dialog
+  participant API as Nest API
+  participant DB as PostgreSQL
+
+  IT->>Web: Submit quick log
+  Web->>API: POST /tickets/quick-log (JWT)
+  API->>DB: create QUICK_TICKET (+ approval if required)
+  API-->>Web: ticketNo
+  Web-->>IT: toast สำเร็จ / โผล่บนกระดานตามนโยบาย
+      </div>
+    </section>
+
+    <!-- 10 -->
+    <section class="card" id="s10">
+      <h2>10. API / Permission ที่ควรมี (ร่าง)</h2>
+
+      <h3>10.1 Endpoint เสนอเพิ่ม/ปรับ</h3>
+      <table>
+        <thead><tr><th>Endpoint</th><th>Auth</th><th>หน้าที่</th></tr></thead>
+        <tbody>
+          <tr><td><code>GET /tickets/board</code></td><td>Public read</td><td>ลิสต์เคสสำหรับคอลัมน์ + metrics</td></tr>
+          <tr><td><code>GET /tickets/:id/detail</code></td><td>Public read</td><td>รายละเอียด + timeline + team</td></tr>
+          <tr><td><code>POST /tickets/:id/claim</code></td><td>IT JWT</td><td>รับงาน</td></tr>
+          <tr><td><code>POST /tickets/:id/assignees</code></td><td>IT JWT</td><td>เพิ่ม collaborator</td></tr>
+          <tr><td><code>POST /tickets/:id/transfer</code></td><td>IT JWT</td><td>โอนงาน</td></tr>
+          <tr><td><code>POST /tickets/:id/worklogs</code></td><td>IT JWT</td><td>โน้ต/บันทึกงาน</td></tr>
+          <tr><td><code>POST /tickets/:id/request-confirm</code></td><td>IT JWT</td><td>เข้าขั้นรอ user + ส่งเมล (เฟส 2)</td></tr>
+          <tr><td><code>POST /tickets/quick-log</code></td><td>IT JWT</td><td>สร้างเคสหน้างานเร็ว</td></tr>
+          <tr><td><code>PATCH /tickets/:id/status</code></td><td>IT JWT</td><td>ย้ายคอลัมน์อย่างมีกฎ</td></tr>
+        </tbody>
+      </table>
+
+      <h3>10.2 Permission matrix (ร่างตาม CONTEXT)</h3>
+      <table>
+        <thead>
+          <tr><th>แอ็กชัน</th><th>Guest</th><th>IT Staff</th><th>Supervisor</th><th>IT Manager</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>ดูกระดาน / รายละเอียด</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+          <tr><td>Claim / โน้ต / ย้ายสถานะปฏิบัติการ</td><td>❌</td><td>✅</td><td>✅</td><td>✅</td></tr>
+          <tr><td>Quick Log</td><td>❌</td><td>✅</td><td>✅</td><td>✅</td></tr>
+          <tr><td>อนุมัติ Quick Ticket</td><td>❌</td><td>❌?</td><td>✅?</td><td>✅?</td></tr>
+          <tr><td>บังคับปิด / override</td><td>❌</td><td>❌?</td><td>✅?</td><td>✅?</td></tr>
+        </tbody>
+      </table>
+      <p class="muted">ช่องที่มีเครื่องหมายคำถาม = ต้องยืนยันในตอนท้ายเอกสาร</p>
+    </section>
+
+    <!-- 11 -->
+    <section class="card" id="s11">
+      <h2>11. แผนงานแบ่งเฟส (แนะนำ)</h2>
+      <table>
+        <thead><tr><th>เฟส</th><th>ส่งมอบ</th><th>คำนิยาม Done</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Phase 1 — Live Board</strong></td>
+            <td>อ่าน Ticket จริง, map คอลัมน์, filter พื้นฐาน, Claim, เปิด drawer ข้อมูลจริง, รูปแนบ, guest read-only / IT write guard</td>
+            <td>เคสจาก portal โผล่บนกระดานและ claim ได้</td>
+          </tr>
+          <tr>
+            <td><strong>Phase 2 — Collaboration</strong></td>
+            <td>Worklogs = timeline/notes, multi-assignee + role, transfer, refresh จริง</td>
+            <td>ทีมทำงานบนเคสเดียวกันได้โดยมีประวัติ</td>
+          </tr>
+          <tr>
+            <td><strong>Phase 3 — Confirm Close</strong></td>
+            <td>Email token close/reopen ตาม ADR 0003, คอลัมน์ pending_user มีความหมายจริง</td>
+            <td>Closed Ticket เกิดจาก user confirm</td>
+          </tr>
+          <tr>
+            <td><strong>Phase 4 — Quick Log</strong></td>
+            <td>สร้าง QUICK_TICKET + approval policy</td>
+            <td>บันทึกงานหน้างานไม่หาย</td>
+          </tr>
+          <tr>
+            <td><strong>Phase 5 — Work Cycle</strong></td>
+            <td>ตารางรอบงาน, carryover tag, cron close, เชื่อม IT Overview</td>
+            <td>ตัดรอบอัตโนมัติตาม ADR 0001</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="note">Group view / Filters ขั้นสูง / Progress % อัตโนมัติ — จัดเป็น nice-to-have หลังเฟส 1–2</div>
+    </section>
+
+    <!-- 12 -->
+    <section class="card" id="s12">
+      <h2>12. ความเสี่ยงและข้อควรระวัง</h2>
+      <ul>
+        <li><strong>Semantic mismatch:</strong> คำว่า Resolved ใน UI ≠ Closed Ticket ในโดเมน — ถ้าไม่เคลียร์จะทำสถิติพัง</li>
+        <li><strong>Security:</strong> ตอนนี้ ticket write API เปิดกว้าง; พอเปิดกระดานจริงต้องใส่ auth ให้ครบ</li>
+        <li><strong>Realtime:</strong> หลายคนเคลมพร้อมกัน — ควรมี optimistic concurrency หรือ unique claim rule</li>
+        <li><strong>Email dependency:</strong> เฟส confirm close พึ่งเมลองค์กร; ต้องมี resent token / เคสเมลเด้ง</li>
+        <li><strong>Scope creep:</strong> พยายามทำ work cycle + email + quick log พร้อมกันจะช้ามาก</li>
+      </ul>
+    </section>
+
+    <!-- 13 -->
+    <section class="card" id="s13">
+      <h2>13. คำถามที่ยังไม่เคลียร์ — รบกวนตอบทีละข้อ</h2>
+      <p class="muted">ตอบเป็น Q1, Q2, … ได้เลย แล้วค่อยเริ่มลงมือตามคำตอบ</p>
+      <ol class="q-list">
+        <li>
+          <span class="q-id">Q1.</span>
+          ยอมรับแผนเฟสแบบ <strong>Hybrid (เฟส 1 Live Board ก่อน)</strong> หรือต้องการทำให้ครบ ADR (Work Cycle + Email close) ก่อนเปิดใช้กระดานจริง?
+        </li>
+        <li>
+          <span class="q-id">Q2.</span>
+          เมื่อ IT กดปุ่มแบบ “Approve and close / Resolve” ใน drawer วันนี้ ควรถือว่าเป็นการ
+          <strong>(ก)</strong> ย้ายไปรอผู้ใช้ยืนยัน, <strong>(ข)</strong> ปิดเคสทันทีในระบบ, หรือ <strong>(ค)</strong> อื่น ๆ?
+        </li>
+        <li>
+          <span class="q-id">Q3.</span>
+          คอลัมน์ <strong>pending_user</strong> หมายถึงอะไรแน่?
+          รอ user ทดสอบหลัง IT แก้ / รอ approve Quick Ticket / รอ email confirm / อย่างอื่น?
+        </li>
+        <li>
+          <span class="q-id">Q4.</span>
+          ควรเพิ่มสถานะใน DB ใหม่ (เช่น <code>PENDING_USER</code>) หรือ map ทับ <code>PENDING_APPROVAL</code> / <code>RESOLVED</code> ที่มีอยู่?
+        </li>
+        <li>
+          <span class="q-id">Q5.</span>
+          กระดานเฟส 1 ควรโชว์เฉพาะเคส <code>OPEN/IN_PROGRESS/…</code> ที่ยังไม่ <code>CLOSED</code> ทั้งระบบ หรือต้องผูก “รอบงานปัจจุบัน” ทันที?
+        </li>
+        <li>
+          <span class="q-id">Q6.</span>
+          Progress % บนการ์ด: เก็บใน DB ให้ IT กรอก / คำนวณอัตโนมัติ / เอาออกจาก UI ชั่วคราว?
+        </li>
+        <li>
+          <span class="q-id">Q7.</span>
+          ต้องการบทบาท <strong>Lead / Collaborator</strong> จริงใน schema หรือพอเป็นรายชื่อผู้รับผิดชอบเท่ากันไปก่อน?
+        </li>
+        <li>
+          <span class="q-id">Q8.</span>
+          ใครกด Claim ได้บ้าง? IT Staff ทุกคน / เฉพาะที่ว่าง / มีกฎไม่ให้แย่งเคสที่มี lead แล้ว?
+        </li>
+        <li>
+          <span class="q-id">Q9.</span>
+          Quick Log ควร <strong>(ก)</strong> สร้างเคสขึ้นกระดาน, <strong>(ข)</strong> บันทึกแล้วปิดทันทีโดยไม่โชว์คอลัมน์, หรือ <strong>(ค)</strong> ต้องให้ Supervisor อนุมัติก่อนนับ?
+        </li>
+        <li>
+          <span class="q-id">Q10.</span>
+          Guest ที่เปิด <code>/it</code> ควรมองเห็นข้อมูลผู้แจ้ง (ชื่อ/อีเมล/เบอร์ต่อ) เต็ม ๆ ได้ไหม หรือต้องปกปิดบางส่วน?
+        </li>
+        <li>
+          <span class="q-id">Q11.</span>
+          ปุ่ม Group view และ Filters ขั้นสูงใน UI: ทำในเฟส 1 หรือเลื่อนได้?
+        </li>
+        <li>
+          <span class="q-id">Q12.</span>
+          Timeline ควรมาจากอะไรเป็นหลัก: Worklog อย่างเดียว / AuditLog / Event log แยก / รวมหลายแหล่ง?
+        </li>
+        <li>
+          <span class="q-id">Q13.</span>
+          การย้ายการ์ดข้ามคอลัมน์ด้วยการลาก (drag-and-drop) ต้องมีในเฟสแรกไหม หรือคลิก + ปุ่มสถานะพอ?
+        </li>
+        <li>
+          <span class="q-id">Q14.</span>
+          เคสที่สร้างจาก portal ก่อนหน้านี้ใน DB (ที่มีอยู่แล้ว) ต้องโผล่บนกระดานทั้งหมดทันทีเมื่อ wire เสร็จ ใช่หรือไม่?
+        </li>
+        <li>
+          <span class="q-id">Q15.</span>
+          มี SLA / กำหนดเวลาตอบแรก ที่ต้องคำนวณบนกระดานในรอบนี้ไหม หรือยังไม่ต้อง?
+        </li>
+        <li>
+          <span class="q-id">Q16.</span>
+          ภาษาบนกระดาน: ชื่อผู้รับผิดชอบใช้ <code>nameTh/nameEn</code> ตาม locale เหมือนหน้า portal ใช่ไหม?
+        </li>
+        <li>
+          <span class="q-id">Q17.</span>
+          ถ้า token อีเมลหมดอายุ ใครมีสิทธิ์กดส่งใหม่ได้ — เฉพาะ IT ที่รับผิดชอบ / IT ทุกคน / Supervisor ขึ้นไป?
+        </li>
+        <li>
+          <span class="q-id">Q18.</span>
+          ต้องการ realtime (websocket/polling) ในเฟสแรกไหม หรือ refresh มือ / refresh ตอนโฟกัสหน้าต่างพอ?
+        </li>
+      </ol>
+
+      <div class="ok" style="margin-top:1rem">
+        <strong>วิธีตอบที่สะดวก:</strong> พิมพ์ เช่น <code>Q1: C</code>, <code>Q2: ก</code>, <code>Q3: รอ user ทดสอบหลัง IT แก้</code> …
+        เมื่อครบ (หรือครบเฉพาะเฟส 1) จะสรุปเป็น implementation plan แล้วค่อยลงโค้ดตามที่คุณยืนยัน
+      </div>
+    </section>
+  </main>
+
+  <footer class="doc-foot wrap">
+    IT Helpdesk — IT Workspace Implementation Proposal · ไม่ใช่โค้ด production · อ้างอิงโค้ด/ADR ใน repo ณ วันที่จัดทำเอกสาร
+  </footer>
+</body>
+</html>
