@@ -12,8 +12,12 @@
 - [x] Guest can view full requester identity; metrics/filters work on real data
 - [x] API seam tests cover list mapping for representative statuses
 
+## Comments
+
+Previous `resolved` / Answer described a ship that was reverted. Re-implemented in the current tree.
+
 ## Answer
 
-Shipped public `GET /tickets/board` with pure `mapTicketToBoardColumn` / `toBoardTicketDto` (ADR 0004 columns; legacy `PENDING_APPROVAL` → `pending_user`). Prisma + `@helpdesk/types` gained `AWAITING_USER_TEST`, optional `Ticket.progress`, and `TicketAssignee.role` (`LEAD`|`COLLABORATOR`). Kanban loads from the API on mount/refresh/focus, shows requester identity, gates Claim/write UI on IT session, and keeps Quick Log for signed-in IT only.
+Public `GET /api/tickets/board` maps tickets with `mapTicketToBoardColumn` (OPEN+no Lead → backlog; IN_PROGRESS or Lead → in_progress; `AWAITING_USER_TEST` and legacy `PENDING_APPROVAL` → pending_user; Resolved+Closed share the rightmost column). Prisma adds `AWAITING_USER_TEST` and `TicketAssignee.role`. Kanban loads from the API on mount/refresh/focus, shows requester name/email/extension/attachments, and no longer uses `mockKanbanTickets` for the board. Mapping tests live in `apps/api/src/tickets/board-column.mapping.test.ts`.
 
-**Verify:** `pnpm --filter api exec prisma migrate deploy` (or `db:migrate`), `pnpm --filter api exec prisma generate`, `pnpm --filter @helpdesk/types build`, `pnpm --filter api run test:board-mapping`.
+**Verify:** `pnpm --filter @helpdesk/types build`, `pnpm --filter api exec prisma migrate deploy`, `pnpm --filter api exec prisma generate`, `pnpm --filter api run test:board`.

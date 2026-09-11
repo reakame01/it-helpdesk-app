@@ -12,6 +12,12 @@
 - [x] Only Assignees can send; Guest cannot
 - [x] API seam tests cover transition + token + mail request
 
+## Comments
+
+Previous `resolved` / Answer described a ship that was reverted. Re-implemented in the current tree.
+
 ## Answer
 
-`POST /tickets/:id/send-for-user-test` rotates a hashed confirm token (1h), sets `AWAITING_USER_TEST`, and sends mail via `MAILER` port (`ConsoleMailer` default) with `/{locale}/it?ticket=&token=` deep link. Web peeks token and opens the drawer.
+`POST /api/tickets/:id/send-for-user-test` (JWT Assignee) sets `AWAITING_USER_TEST`, rotates a hashed 1-hour User Confirm Token, and sends mail through the `MAILER` port (`ConsoleMailer` default). The email body is a `/{locale}/it?ticket=&token=` deep link only. Web peeks `GET /tickets/confirm-token` and opens the drawer. Guests cannot send. Token hashing and lifecycle rules are covered by `pnpm --filter api run test:board`.
+
+**Verify:** Claim a card, Send for User Test, confirm the card moves to Awaiting User Test and the API log prints a deep link; open that URL as a Guest and see the drawer.

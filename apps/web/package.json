@@ -3,10 +3,10 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "dev": "next dev --port 3000",
-    "build": "next build",
-    "start": "next start --port 3000",
-    "lint": "next lint",
+    "dev": "node ./node_modules/next/dist/bin/next dev --port 3000",
+    "build": "node ./node_modules/next/dist/bin/next build",
+    "start": "node ./node_modules/next/dist/bin/next start --port 3000",
+    "lint": "node ./node_modules/next/dist/bin/next lint",
     "clean": "rimraf .next"
   },
   "dependencies": {

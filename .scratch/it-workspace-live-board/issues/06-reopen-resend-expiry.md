@@ -12,6 +12,12 @@
 - [x] Resend invalidates old token and issues a new 1-hour token
 - [x] API seam tests cover reopen, both expiry behaviours, and resend rotation
 
+## Comments
+
+Previous `resolved` / Answer described a ship that was reverted. Re-implemented in the current tree.
+
 ## Answer
 
-Reopen sets `reopenBrokenSuccess` and `IN_PROGRESS`. `POST /tickets/process-token-expiry` applies ADR expiry (notify vs auto-close). `resend-confirm` rotates tokens for Assignees.
+JWT `POST /tickets/:id/reopen` and public `POST /tickets/:id/reopen-token` require Resolved + reason, set `reopenBrokenSuccess`, and return to `IN_PROGRESS`. `POST /tickets/:id/resend-confirm` invalidates unused tokens and mails a new 1-hour link. `POST /tickets/process-token-expiry` (also run from `GET /tickets/board`) notifies Assignees on unused Awaiting User Test expiry and auto-closes unused Resolved expiry to Closed Ticket.
+
+**Verify:** Reopen a Resolved card with a reason. Let a Resolved token expire (or backdate `expiresAt`) then Refresh — it should become Closed. Awaiting User Test expiry should stay in place and log a notify mail.

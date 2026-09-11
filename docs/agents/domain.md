@@ -20,7 +20,9 @@ This repo is treated as **single-context** (one glossary), even though the codeb
 │   ├── 0001-work-cycle-close-and-carryover.md
 │   ├── 0002-intranet-guest-and-it-signin.md
 │   ├── 0003-email-token-close-and-reopen.md   ← superseded
-│   └── 0004-two-stage-user-verify-and-resolved-window.md
+│   ├── 0004-two-stage-user-verify-and-resolved-window.md
+│   ├── 0005-quick-log-closes-immediately.md
+│   └── 0006-hard-delete-wrong-entry.md
 ├── apps/
 │   ├── api/
 │   └── web/

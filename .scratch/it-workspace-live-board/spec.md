@@ -87,7 +87,7 @@ Wire the IT Workspace to real tickets. Guests may view the board (including requ
 
 ## Out of Scope
 
-- Quick Log / `QUICK_TICKET` approval UX
+- Quick Log / `QUICK_TICKET` (moved to `.scratch/it-workspace-quick-log/`)
 - Work Cycle Close cron, Carryover tags, Origin Cycle membership
 - Drag-and-drop column moves
 - Group view and advanced filter panel

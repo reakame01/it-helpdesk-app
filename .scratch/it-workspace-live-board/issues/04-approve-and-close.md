@@ -12,6 +12,12 @@
 - [x] UI shows Approve and Close only in Awaiting User Test; Guest without token cannot use it
 - [x] API seam tests cover both actor types and stage guard
 
+## Comments
+
+Previous `resolved` / Answer described a ship that was reverted. Re-implemented in the current tree.
+
 ## Answer
 
-Authed `POST .../approve-and-close` and public `.../approve-and-close-token`. Audits `actorKind`, moves to `RESOLVED`, always issues Resolved-stage token + email.
+JWT `POST /tickets/:id/approve-and-close` and public `POST /tickets/:id/approve-and-close-token` both require Awaiting User Test. Audit metadata stores `actorKind` (`ASSIGNEE` | `REQUESTER_TOKEN`). Status becomes `RESOLVED` and a Resolved-stage 1-hour token email is always sent. Drawer shows Approve and Close only in that stage.
+
+**Verify:** Approve as Assignee and via the email token; both should land in Resolved and print a reopen deep link. Guest without token must not see the action.

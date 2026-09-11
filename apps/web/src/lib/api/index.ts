@@ -28,5 +28,26 @@ export {
   resetManagedUserPassword,
   updateManagedUser,
 } from "./users";
-export { reportTicket } from "./tickets";
+export {
+  addTicketCollaborator,
+  approveAndClose,
+  approveAndCloseWithToken,
+  claimBoardTicket,
+  createQuickLog,
+  deleteTicketProgressWorklog,
+  editTicketProgressWorklog,
+  fetchBoardTickets,
+  fetchTicketWorklogs,
+  hardDeleteTicket,
+  peekConfirmToken,
+  reopenTicket,
+  reopenTicketWithToken,
+  reportIssueWithToken,
+  reportTicket,
+  resendConfirm,
+  removeTicketCollaborator,
+  sendForUserTest,
+  updateTicketProgress,
+  withdrawBoardTicket,
+} from "./tickets";
 export type { ReportTicketInput } from "./tickets";

@@ -88,13 +88,17 @@ Accounts are provisioned in User Management. Guests (no login) are not assigned 
 An IT staff member on a ticket. One assignee is the **Lead**; others are **Collaborators**.
 
 **Lead**:
-The primary assignee. The first successful **Claim** from backlog becomes Lead. Claim cannot steal a card that already has a Lead; add Collaborator or transfer instead.
+The primary assignee. The first successful **Claim** from backlog becomes Lead. Claim cannot steal a card that already has a Lead; add Collaborator or transfer instead. If the Lead **Withdraws** while Collaborators remain, the Collaborator invited earliest becomes Lead.
 
 **Collaborator**:
-An additional assignee helping on the same card without replacing the Lead.
+An additional assignee helping on the same card without replacing the Lead. A Collaborator may **Withdraw** without affecting the Lead.
 
 **Claim**:
 An IT session action that takes an unassigned backlog card into active work and becomes its Lead.
+
+**Withdraw** (ถอนตัว):
+An Assignee leaves a card that is in active work. If anyone remains, work stays in progress (and a departing Lead is succeeded as above). If nobody remains, the card returns to the waiting column (backlog) so someone else can Claim it.
+_Avoid_: Treating Claim as irreversible; withdrawing during Awaiting User Test / Resolved / Closed
 
 **Send for User Test**:
 An Assignee action from active work that moves a ticket into **Awaiting User Test** and emails the first **User Confirm Token** deep link.
@@ -102,6 +106,14 @@ An Assignee action from active work that moves a ticket into **Awaiting User Tes
 **Development Progress** (ความคืบหน้างานพัฒนา):
 A 0–100% completion indicator used only for **Feature Request / new development** tickets while in active work. Assignees update it together with a short note of what changed so others can see movement on the card and in the drawer.
 _Avoid_: Progress bars on hardware/network/break-fix style tickets; treating progress as a substitute for Awaiting User Test / Resolved / Closed
+
+**Quick Log** (บันทึกงานด่วน):
+An **IT session** record of a walk-up fix already finished on the floor. It becomes a **Closed Ticket** immediately (`QUICK_TICKET`); it does not enter **Awaiting User Test** or **Resolved**. The actor is the **Lead**. Optional requester name; department is required for later reporting.
+_Avoid_: Sending a User Confirm Token for these cases; treating Quick Log as a Supervisor approval queue; calling this Claim
+
+**Hard Delete** (ลบ Ticket):
+An **IT session** purge of a ticket entered in error. It removes the Board Card and related records (worklogs, attachments, confirm tokens, assignees, ticket audit). Confirmation must match the ticket number. This is not a **Closed Ticket**.
+_Avoid_: Closed Ticket; requester-facing close; Guest delete
 
 ## Example dialogue
 
@@ -125,6 +137,12 @@ _Avoid_: Progress bars on hardware/network/break-fix style tickets; treating pro
 >
 > **Dev:** If something carries five times, do we stack five tags?
 > **Domain:** No. One **Carryover Tag** for the **Origin Cycle**.
+>
+> **Dev:** Walk-up printer jam already fixed — do we still email the user to Approve and Close?
+> **Domain:** No. That is a **Quick Log**: Closed Ticket immediately, no confirm token.
+>
+> **Dev:** Someone reported the wrong department — do we close it or wipe it?
+> **Domain:** **Hard Delete** from an IT session, after typing the ticket number. Closed Ticket keeps the record.
 
 ## Flagged ambiguities
 
@@ -134,3 +152,4 @@ _Avoid_: Progress bars on hardware/network/break-fix style tickets; treating pro
 - Success metrics may count Resolved and Closed together until a Resolved ticket is **Reopened** (then it is not a successful close).
 - Work Cycle membership is deferred relative to first live-board wiring, but definitions above still apply.
 - Token lifetime starts at **1 hour** per stage; revisit if field use says otherwise.
+- **Quick Log** skips ADR 0004’s two-stage verify (see ADR 0005). Supervisor `QuickTicketApproval` is deferred.

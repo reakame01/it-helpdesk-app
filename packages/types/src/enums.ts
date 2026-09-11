@@ -18,9 +18,31 @@ export enum TicketStatus {
   OPEN = "OPEN",
   IN_PROGRESS = "IN_PROGRESS",
   PENDING_APPROVAL = "PENDING_APPROVAL",
+  AWAITING_USER_TEST = "AWAITING_USER_TEST",
   RESOLVED = "RESOLVED",
   CLOSED = "CLOSED",
 }
+
+export enum AssigneeRole {
+  LEAD = "LEAD",
+  COLLABORATOR = "COLLABORATOR",
+}
+
+export type BoardColumnId =
+  | "backlog"
+  | "in_progress"
+  | "pending_user"
+  | "resolved";
+
+export enum ConfirmTokenStage {
+  AWAITING_USER_TEST = "AWAITING_USER_TEST",
+  RESOLVED = "RESOLVED",
+}
+
+export type ConfirmTokenAction =
+  | "approve-and-close"
+  | "report-issue"
+  | "reopen";
 
 export enum TicketPriority {
   LOW = "LOW",

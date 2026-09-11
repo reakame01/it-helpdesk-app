@@ -13,6 +13,12 @@
 - [x] Manual refresh reloads board data
 - [x] API seam tests cover category guard for progress
 
+## Comments
+
+Previous `resolved` / Answer described a ship that was reverted. Re-implemented in the current tree.
+
 ## Answer
 
-`PATCH /tickets/:id/progress` guarded to Feature Request + assignee. Board mapping/UI hide progress elsewhere. Refresh button + focus reload remain; Guests only get token-driven stage actions.
+`PATCH /tickets/:id/progress` `{ percent, note }` is Assignee + `FEATURE_REQUEST` only. In-progress Feature Request cards show `progress ?? 0`. Refresh and focus reload remain. Guests stay read-only except token stage actions in the drawer.
+
+**Verify:** On a Feature Request in progress, set progress with a note and see the bar update. Hardware cards have no bar. Guest Claim stays disabled.
